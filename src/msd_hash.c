@@ -7,15 +7,15 @@
  *
  *    Filename :  Msd_hash.c 
  * 
- * Description :  Msd_hash, a simple hash library. Derived from verben.
+ * Description :  Msd_hash, a simple hash library. 
  *                Maybe it's not complex than redis's dict, but is enough.
  * 
- *     Created :  Mar 18, 2014 
+ *     Created :  Mar 29, 2014 
  *     Version :  0.0.1 
  *      
  *      Author :  HQ 
  *     Company :  Qh 
- **
+ *
  **/
 
 //#include "msd_hash.h"
@@ -560,7 +560,7 @@ int msd_hash_iter_reset(msd_hash_iter_t *iter)
     msd_hash_iter_destroy(iter);
     return msd_hash_iter_init(iter, tmp);
 }
-
+ 
 /**
  * 功能: free a hash iterator
  **/
