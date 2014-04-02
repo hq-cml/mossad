@@ -7,7 +7,7 @@
  *
  *    Filename :  Msd_hash.h 
  * 
- * Description :  Msd_hash, a simple hash library. Derived from verben.
+ * Description :  Msd_hash, a simple hash library. 
  *                Maybe it's not complex than redis's dict, but is enough.
  * 
  *     Created :  Mar 29, 2014 
