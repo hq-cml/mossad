@@ -8,7 +8,6 @@
  *    Filename :  Msd_conf.h 
  * 
  * Description :  Msd_conf, a configure library. Support include and block.
- *                Derived from verben.
  * 
  *     Created :  Mar 31, 2014 
  *     Version :  0.0.1 
