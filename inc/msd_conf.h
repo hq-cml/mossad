@@ -16,11 +16,6 @@
  *     Company :  Qh 
  *
  **/
-
-
-/*
- *  一个配置文件读取的库，能够支持include和block。如果出现相同的key,则会存在一个链表里面
- */
 #ifndef __MSD_CONF_H_INCLUDED__
 #define __MSD_CONF_H_INCLUDED__
 

@@ -279,6 +279,8 @@ static int msd_conf_parse_include(msd_conf_t *conf, char *cur_file, char *inc_fi
  *      2. 如果对应的key不存在，则会新增key/val对，val可能是block或者entry两类之一
  *      3. 如果对应的key存在，则会判断该key的类型，和当前类型是否一致
  *         如果一致，则会将当前值插入链表头部，如果不一致，则报错
+ *      4. 通常只会读取第链表的第一个node，所以后读取的会"覆盖"先读取的
+ *                
  * 注意： 
  *         配置文件格式要求，如果是block，则一定要:" block_name { "
  *         'block name' 和 '{' 必须要在同一行，并空格隔开
