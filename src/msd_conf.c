@@ -506,11 +506,6 @@ void msd_conf_free(msd_conf_t *conf)
  *       the msd_conf_t' struct with zero. such as msd_conf_t conf = {};
  * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-1
  **/
-
-/* before calling this function first time,please
- * initialize the msd_conf_t' struct with zero.
- * such as msd_conf_t conf = {};
- */
 int msd_conf_init(msd_conf_t *conf, const char *filename)
 {
     FILE *fp;
