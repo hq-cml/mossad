@@ -17,9 +17,8 @@
  *
  **/
 
-#include "msd_conf.h"
-//#include "msd_core.h"
-#include "msd_hash.h"
+#include "msd_core.h"
+
 /**
  * 功能: str2int
  * 参数: @strval
@@ -584,7 +583,7 @@ static int msd_conf_entry_foreach(msd_conf_t *conf, char *key,
  *       @userptr
  * 返回: 成功，0 失败，-x
  **/
-int msd_conf_block_foreach(msd_conf_t *conf, char *key,
+static int msd_conf_block_foreach(msd_conf_t *conf, char *key,
         int (*foreach)(void *key, msd_conf_block_t* block, void *userptr),
         void *userptr)
 {
@@ -615,31 +614,110 @@ int msd_conf_block_foreach(msd_conf_t *conf, char *key,
 }
 
 /**
- * 功能: 
- * 参数: @
+ * 功能: get value in integer
+ * 参数: @conf conf结构体
+ *       @key key
+ *       @def 默认值
  * 描述:
- *      1. 
- * 返回: 成功，  失败，
+ *      1. when key not found in conf, default value was returned
+ *      2. 同一个key对应的值，可能是一个链表，只取得第一个
+ * 返回: 成功，val  失败，def
  **/
- 
+int msd_conf_get_int_value(msd_conf_t *conf, const char *key, int def)
+{
+    msd_conf_entry_t *ce;
+    msd_conf_value_t *cv = (msd_conf_value_t*)msd_hash_get_val(conf->ht, key);
+
+    if(!cv)
+    {
+        return def;
+    }
+
+    if(cv->type == MSD_CONF_TYPE_BLOCK)
+    {
+        return def;
+    }
+    else if(cv->type == MSD_CONF_TYPE_ENTRY)
+    {
+        ce = (msd_conf_entry_t *)cv->value; /*cv->value 是一个链表，只取第一个*/
+    }
+    else
+    {
+        return def;
+    }
+
+    if(ce)
+    {
+        return msd_str2int(ce->value, def);
+    }
+
+    return def;
+}
  
  /**
- * 功能: 
- * 参数: @
+ * 功能: get value in string
+ * 参数: @conf conf结构体
+ *       @key key
+ *       @def 默认值
  * 描述:
- *      1. 
+ *      1. when key not found in conf, default value was returned
+ *      2. 同一个key对应的值，可能是一个链表，只取得第一个
  * 返回: 成功，  失败，
  **/
+char * msd_conf_get_str_value(msd_conf_t *conf, const char *key, char *def)
+{
+    msd_conf_entry_t *ce;
+    msd_conf_value_t *cv = (msd_conf_value_t*)msd_hash_get_val(conf->ht, key);
+
+    if(!cv)
+    {
+        return def;
+    }
+
+    if(cv->type == MSD_CONF_TYPE_BLOCK)
+    {
+        return def;
+    }
+    else if(cv->type == MSD_CONF_TYPE_ENTRY)
+    {
+        ce = (msd_conf_entry_t *)cv->value;
+    }
+    else
+    {
+        return def;
+    }
+
+    if(ce)
+    {
+        return ce->value;
+    }
+
+    return def;
+}
  
- 
- /**
- * 功能: 
+/**
+ * 功能: get value in block
  * 参数: @
  * 描述:
- *      1. 
- * 返回: 成功，  失败，
+ *      1. 同一个key对应的值，可能是一个链表，只取得第一个
+ * 返回: 成功，block_t  失败，NULL
  **/
-#ifdef __MSD_CONF_TEST_MAIN__
+msd_conf_block_t *msd_conf_get_block(msd_conf_t *conf, char *key)
+{
+    msd_conf_value_t *cv = (msd_conf_value_t *)msd_hash_get_val(conf->ht, key);
+
+    if(!cv)
+    {
+        return NULL;
+    }
+
+    if(cv->type != MSD_CONF_TYPE_BLOCK)
+    {
+        return NULL;
+    }
+
+    return (msd_conf_block_t *)(cv->value);
+}
 
 static int msd_print_conf(void *key, void *value, void *userptr)
 {
@@ -654,6 +732,7 @@ static int msd_print_block_conf(void *key, msd_conf_block_t *cb, void *userptr)
     printf("}\n");
     return 0;
 }
+
 
 static int msd_conf_print_foreach(const msd_hash_entry_t *he, void *userptr)
 {
@@ -679,6 +758,8 @@ void msd_conf_dump(msd_conf_t *conf)
     msd_hash_foreach(conf->ht, msd_conf_print_foreach, (void*)conf);
 }
 
+#ifdef __MSD_CONF_TEST_MAIN__
+
 int main(int argc, char *argv[])
 {   
     /*
@@ -701,12 +782,14 @@ int main(int argc, char *argv[])
     }
 
     msd_conf_dump(&conf);
-    /*
-    printf("PORT: %d\n", msd_conf_get_int_value(&conf, "porta", 7777));
-    printf("PORT: %d\n", msd_conf_get_int_value(&conf, "log_multi", 7777));
-    printf("LOG_NAME: %s\n", msd_conf_get_str_value(&conf, "log_name", "NULL"));
-    printf("LOG_NAME: %s\n", msd_conf_get_str_value(&conf, "log_namexx", "NULL"));
-    */
+    printf("PORT: %d\n", msd_conf_get_int_value(&conf, "port", 7777));
+    printf("ADDR: %s\n", msd_conf_get_str_value(&conf, "addr", "localhost"));
+    msd_conf_block_t *block = msd_conf_get_block(&conf, "test_block");
+    if(block)
+        printf("BLOCK: %s\n", msd_conf_get_str_value(&block->block, "b", "NULL"));
+    else
+        printf("NULL\n");
+
     msd_conf_free(&conf);
     
     return 0;

@@ -24,7 +24,7 @@
 #ifndef __MSD_CONF_H_INCLUDED__
 #define __MSD_CONF_H_INCLUDED__
 
-
+/*
 #include <stdio.h>
 #include <stdlib.h> 
 #include <ctype.h>
@@ -33,7 +33,6 @@
 #include <assert.h>
 #include <libgen.h>
 #include <limits.h>
-//#include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fnmatch.h>
@@ -41,14 +40,10 @@
 #include "msd_string.h"
 #include "msd_hash.h"
 
-
 #define MSD_OK       0
 #define MSD_ERR     -1
 #define MSD_FAILED  -2
-
-
-
-
+*/
 
 #define MSD_CONF_TYPE_ENTRY    1
 #define MSD_CONF_TYPE_BLOCK    2
@@ -80,24 +75,10 @@ typedef struct msd_conf_block
     struct msd_conf_block  *next; /* ตÝน้ */
 }msd_conf_block_t;
 
-static int msd_conf_entry_foreach(msd_conf_t *conf, char *key,
-        int (*foreach)(void *key, void *value, void *userptr),
-        void *userptr);
-
-static int msd_conf_block_foreach(msd_conf_t *conf, char *key,
-        int (*foreach)(void *key, msd_conf_block_t *block, void *userptr),
-        void *userptr);
-
 int msd_conf_init(msd_conf_t *conf, const char *filename);
-
-void msd_conf_free(msd_conf_t *conf);
-
 int msd_conf_get_int_value(msd_conf_t *conf, const char *key, int def);
-
 char *msd_conf_get_str_value(msd_conf_t *conf, const char *key, char *def);
-
 msd_conf_block_t *msd_conf_get_block(msd_conf_t *conf, char *key);
-static int msd_conf_print_foreach(const msd_hash_entry_t *he, void *userptr);
+void msd_conf_free(msd_conf_t *conf);
 void msd_conf_dump(msd_conf_t *conf);
-
 #endif /* __MSD_CONF_H_INCLUDED__ */

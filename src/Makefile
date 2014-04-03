@@ -18,6 +18,7 @@ $(OBJECT): %.o:%.c $(INC_DIR)%.h
 
 $(TARGET):$(OBJECT)
 	$(CC) $(CFLAGS) $(INC) $(OBJECT) -o $@
+	rm -f *.o
 
 #deps
 msd_conf.o: msd_string.c msd_hash.c

@@ -697,6 +697,7 @@ int main()
         buf2[len] = '\0';
         msd_hash_insert(ht, buf1, buf2);
     }
+    msd_hash_insert(ht, "test", "aaa");
     printf("\nhash_dump:\n");
     hash_dump(ht);
     //printf("Get a val:%s=>%s\n", buf1, msd_hash_get_val(ht, buf1));
@@ -706,7 +707,8 @@ int main()
     htcopy = msd_hash_duplicate(ht);
     //hash_dump(htcopy);
     //msd_hash_destroy(ht);
-    
+    printf("The test key:%s\n", msd_hash_get_val(ht, "test"));    
+    printf("The test key:%s\n", msd_hash_get_val(ht, "test1"));    
 
     iter = msd_hash_iter_new(htcopy);
     assert(iter);    
