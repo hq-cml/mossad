@@ -22,7 +22,25 @@
  *
  **/
 #include "msd_core.h"
- 
+
+typedef struct s_msd_log
+{
+    int  fd;
+    char path[MSD_LOG_PATH_MAX];
+}s_msd_log_t;
+
+typedef struct msd_log
+{
+    //char      *msd_log_buffer = MAP_FAILED; /* -1 */
+    int          msd_log_has_init;           /* 是否已经初始化 */
+    int          msd_log_level;              /* 日志最高纪录的等级 */
+    int          msd_log_size;               /* 每个日志文件的大小 */
+    int          msd_log_num;                /* 日志的个数 */
+    int          msd_log_multi;              /* 是否将不同等级的日志，写入不同的文件 */
+    msd_lock_t  *msd_log_rotate_lock;        /* 日志roate锁 */
+    s_msd_log_t  g_msd_log_files[MSD_LOG_LEVEL_DEBUG +1]; /* 各个日志文件句柄 */
+}msd_log_t;
+
 static char *msd_log_level_name[] = { /* char **msd_log_level_name */
     "FATAL",
     "ERROR",
@@ -31,15 +49,7 @@ static char *msd_log_level_name[] = { /* char **msd_log_level_name */
     "DEBUG"
 };
 
-//static char        *msd_log_buffer = MAP_FAILED; /* -1 */
-static int          msd_log_has_init;
-static int          msd_log_level;
-static int          msd_log_size;
-static int          msd_log_num;
-static int          msd_log_multi;              /* 是否将不同等级的日志，写入不同的文件 */
-static msd_lock_t  *msd_log_rotate_lock;        /* 日志roate锁 */
-
-msd_log_t g_msd_log_files[MSD_LOG_LEVEL_DEBUG +1];
+static msd_log_t g_log;
 
 /**
  * 功能: 开辟一块共享内存(废弃!)
@@ -102,24 +112,24 @@ void msd_boot_notify(int ok, const char *fmt, ...)
 static int msd_log_reset_fd(int index)
 {
     int status;
-    if(g_msd_log_files[index].fd != -1)
+    if(g_log.g_msd_log_files[index].fd != -1)
     {
-        close(g_msd_log_files[index].fd);
+        close(g_log.g_msd_log_files[index].fd);
     }
-    g_msd_log_files[index].fd = open(g_msd_log_files[index].path,
+    g_log.g_msd_log_files[index].fd = open(g_log.g_msd_log_files[index].path,
             O_WRONLY|O_CREAT|O_APPEND, 0644);
-    if(g_msd_log_files[index].fd < 0)
+    if(g_log.g_msd_log_files[index].fd < 0)
     {
         fprintf(stderr, "open log file %s failed: %s\n",
-               g_msd_log_files[index].path, strerror(errno));
+               g_log.g_msd_log_files[index].path, strerror(errno));
         return MSD_FAILED;
     }
 
     /* in case exec.. */
     /*如果子进程被exec族函数替换，则他是无法操作该文件了*/
-    status = fcntl(g_msd_log_files[index].fd, F_GETFD, 0);
+    status = fcntl(g_log.g_msd_log_files[index].fd, F_GETFD, 0);
     status |= FD_CLOEXEC;
-    fcntl(g_msd_log_files[index].fd, F_SETFD, status);  
+    fcntl(g_log.g_msd_log_files[index].fd, F_SETFD, status);  
     return MSD_OK;
 }
 
@@ -149,7 +159,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
     assert(size >= 0 && size <= MSD_LOG_FILE_SIZE);
     assert(lognum > 0 && lognum <= MSD_LOG_MAX_NUMBER);
 
-    if(msd_log_has_init)
+    if(g_log.msd_log_has_init)
     {
         return MSD_ERR;
     }
@@ -161,32 +171,32 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
         return MSD_ERR;
     }
 
-    msd_log_level = level;
-    msd_log_size  = size;
-    msd_log_num   = lognum;
-    msd_log_multi = multi; /* !!multi */
+    g_log.msd_log_level = level;
+    g_log.msd_log_size  = size;
+    g_log.msd_log_num   = lognum;
+    g_log.msd_log_multi = multi; /* !!multi */
 
     /* 初始化roate锁 */
-    if (MSD_LOCK_INIT(msd_log_rotate_lock) != 0) 
+    if (MSD_LOCK_INIT(g_log.msd_log_rotate_lock) != 0) 
     {
         return MSD_ERR;
     }
     
-    if(msd_log_multi)/* multi log mode */
+    if(g_log.msd_log_multi)/* multi log mode */
     {
         int i;
         for(i=0; i<=MSD_LOG_LEVEL_DEBUG; i++)
         {
-            g_msd_log_files[i].fd = -1;
-            memset(g_msd_log_files[i].path, 0, MSD_LOG_PATH_MAX);
-            strcpy(g_msd_log_files[i].path, dir);
-            if(g_msd_log_files[i].path[strlen(dir)] != '/')
+            g_log.g_msd_log_files[i].fd = -1;
+            memset(g_log.g_msd_log_files[i].path, 0, MSD_LOG_PATH_MAX);
+            strcpy(g_log.g_msd_log_files[i].path, dir);
+            if(g_log.g_msd_log_files[i].path[strlen(dir)] != '/')
             {
-                strcat(g_msd_log_files[i].path,  "/");
+                strcat(g_log.g_msd_log_files[i].path,  "/");
             }
-            strcat(g_msd_log_files[i].path, filename);
-            strcat(g_msd_log_files[i].path, "_");
-            strcat(g_msd_log_files[i].path, msd_log_level_name[i]);
+            strcat(g_log.g_msd_log_files[i].path, filename);
+            strcat(g_log.g_msd_log_files[i].path, "_");
+            strcat(g_log.g_msd_log_files[i].path, msd_log_level_name[i]);
 
             /*初始化fd*/
             if(MSD_OK != msd_log_reset_fd(i))
@@ -197,14 +207,14 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
     }
     else
     {
-        g_msd_log_files[0].fd = -1;
-        memset(g_msd_log_files[0].path, 0, MSD_LOG_PATH_MAX);
-        strcpy(g_msd_log_files[0].path, dir);
-        if(g_msd_log_files[0].path[strlen(dir)] != '/')
+        g_log.g_msd_log_files[0].fd = -1;
+        memset(g_log.g_msd_log_files[0].path, 0, MSD_LOG_PATH_MAX);
+        strcpy(g_log.g_msd_log_files[0].path, dir);
+        if(g_log.g_msd_log_files[0].path[strlen(dir)] != '/')
         {
-            strcat(g_msd_log_files[0].path, "/");
+            strcat(g_log.g_msd_log_files[0].path, "/");
         }
-        strcat(g_msd_log_files[0].path, filename);
+        strcat(g_log.g_msd_log_files[0].path, filename);
 
         /*初始化fd*/
         if(MSD_OK != msd_log_reset_fd(0))
@@ -219,8 +229,8 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
         return MSD_ERR;
     }
     */
-    /* msd_log_has_init = 0; */
-    msd_log_has_init = 1;
+
+    g_log.msd_log_has_init = 1;
     return MSD_OK;
 }
 
@@ -230,27 +240,27 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
 void msd_log_close()
 {
     int i;
-    if(msd_log_multi)
+    if(g_log.msd_log_multi)
     {
         for(i=0; i<=MSD_LOG_LEVEL_DEBUG; i++)
         {
-            if(g_msd_log_files[i].fd != -1)
+            if(g_log.g_msd_log_files[i].fd != -1)
             {
-                close(g_msd_log_files[i].fd);
-                g_msd_log_files[i].fd = -1;
+                close(g_log.g_msd_log_files[i].fd);
+                g_log.g_msd_log_files[i].fd = -1;
             }
         }
     }
     else
     {
-        if(g_msd_log_files[0].fd != -1)
+        if(g_log.g_msd_log_files[0].fd != -1)
         {
-            close(g_msd_log_files[0].fd);
-            g_msd_log_files[0].fd = -1;
+            close(g_log.g_msd_log_files[0].fd);
+            g_log.g_msd_log_files[0].fd = -1;
         }
     }
     
-    MSD_LOCK_DESTROY(msd_log_rotate_lock); /* 消除锁 */
+    MSD_LOCK_DESTROY(g_log.msd_log_rotate_lock); /* 消除锁 */
 }
 
 #ifdef MSD_LOG_MODE_PROCESS
@@ -270,7 +280,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
     struct stat st;
     int index;
     
-    index = msd_log_multi? level:0;
+    index = g_log.msd_log_multi? level:0;
 
     /*
      * 注意!
@@ -284,16 +294,16 @@ static int msd_log_rotate(int fd, const char* path, int level)
     if(MSD_OK != fstat(fd, &st))
     {
         /*若出现异常，则尝试重置fd，无论是否成功，返回FAILED*/
-        //MSD_LOCK_LOCK(msd_log_rotate_lock);
+        //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         msd_log_reset_fd(index);
-        //MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+        //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
         return MSD_FAILED;
     }
 
-    if(st.st_size >= msd_log_size)
+    if(st.st_size >= g_log.msd_log_size)
     {
         //加锁
-        MSD_LOCK_LOCK(msd_log_rotate_lock);
+        MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         printf("process %d get the lock\n", getpid());
         //sleep(5);
         /*
@@ -309,7 +319,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             printf("process %d relase the lock, stat error\n", getpid());
             perror("the reason of the error:");
             msd_log_reset_fd(index);
-            MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+            MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
             return MSD_FAILED;
         }
         
@@ -317,14 +327,14 @@ static int msd_log_rotate(int fd, const char* path, int level)
          * 如果此刻发现，日志文件已经不符合roate的条件了，说明了已经有其他进程rotate了，
          * 则此刻应该返回OK或者NONEED并解锁，然后重置自己的fd
          **/        
-        if(st.st_size < msd_log_size)
+        if(st.st_size < g_log.msd_log_size)
         {
-            close(g_msd_log_files[index].fd);
-            g_msd_log_files[index].fd = -1;
+            close(g_log.g_msd_log_files[index].fd);
+            g_log.g_msd_log_files[index].fd = -1;
 
             if(MSD_OK != msd_log_reset_fd(index))
             {
-                MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+                MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
                 return MSD_FAILED;               
             }
             
@@ -335,14 +345,14 @@ static int msd_log_rotate(int fd, const char* path, int level)
              * 2.直接解锁，返回NONEED，然后由write函数写入  
              */
             /*交由wirte函数写入完毕后再释放*/
-            //MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+            //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
             //return MSD_NONEED;
             return MSD_OK;
         }
         
         /* 仍然超标，说明其他进程没有进行rotate，则由本进程完成 */
         /* find the first not exist file name */
-        for(i = 0; i < msd_log_num; i++)
+        for(i = 0; i < g_log.msd_log_num; i++)
         {
             snprintf(tmppath1, MSD_LOG_PATH_MAX, "%s.%d", path, i);
        
@@ -353,17 +363,17 @@ static int msd_log_rotate(int fd, const char* path, int level)
                 rename(path, tmppath1);/*rename(from, to)*/
                 printf("process %d find the unexist file\n", getpid());
 
-                close(g_msd_log_files[index].fd);
-                g_msd_log_files[index].fd = -1;
+                close(g_log.g_msd_log_files[index].fd);
+                g_log.g_msd_log_files[index].fd = -1;
 
                 if(MSD_OK != msd_log_reset_fd(index))
                 {
-                    MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+                    MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
                     return MSD_FAILED;               
                 }
                 
                 /* 我实施了rotate，则不应该解锁，应该等待我写完了，才解锁 */
-                //MSD_LOCK_UNLOCK(&msd_log_rotate_lock);
+                //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
                 //sleep(5);
                 return MSD_OK;
             }
@@ -371,7 +381,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
         
         /* all path.n exist, then ,rotate */
         /* 如果日志数已经达到上限，则会将所有的带后缀的日志整体前移，并将当前日志，以最大后缀命名 */
-        for(i=1; i<msd_log_num; i++)
+        for(i=1; i<g_log.msd_log_num; i++)
         {
             snprintf(tmppath1, MSD_LOG_PATH_MAX, "%s.%d", path, i);
             snprintf(tmppath2, MSD_LOG_PATH_MAX, "%s.%d", path, i-1);
@@ -380,21 +390,21 @@ static int msd_log_rotate(int fd, const char* path, int level)
         }
 
         /*将当前日志，以最大后缀命名*/
-        snprintf(tmppath2, MSD_LOG_PATH_MAX, "%s.%d", path, msd_log_num-1);
+        snprintf(tmppath2, MSD_LOG_PATH_MAX, "%s.%d", path, g_log.msd_log_num-1);
         rename(path, tmppath2);
 
-        close(g_msd_log_files[index].fd);
-        g_msd_log_files[index].fd = -1;
+        close(g_log.g_msd_log_files[index].fd);
+        g_log.g_msd_log_files[index].fd = -1;
         
         if(MSD_OK != msd_log_reset_fd(index))
         {
-            MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+            MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
             return MSD_FAILED;               
         }
         
         printf("process %d roate the file\n", getpid());
         /*我实施了rotate，则不应该解锁，应该等待我写完了，才解锁*/
-        //MSD_LOCK_UNLOCK(&msd_log_rotate_lock);
+        //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
         //sleep(2);
         return MSD_OK;
 
@@ -421,13 +431,13 @@ int msd_log_write(int level, const char *fmt, ...)
     int         rotate_result;
     char        log_buffer[MSD_LOG_BUFFER_SIZE] = {0};
     
-    if(!msd_log_has_init)
+    if(!g_log.msd_log_has_init)
     {
         return MSD_ERR;
     }
 
     /* only write the log whose levle low than system initial log level */
-    if(level > msd_log_level)
+    if(level > g_log.msd_log_level)
     {
         return MSD_NONEED;
     }
@@ -452,39 +462,39 @@ int msd_log_write(int level, const char *fmt, ...)
     va_end(ap);
     log_buffer[pos+end] = '\n';
 
-    index = msd_log_multi? level:0;
+    index = g_log.msd_log_multi? level:0;
 
     /*异常处理*/
-    if(g_msd_log_files[index].fd == -1)
+    if(g_log.g_msd_log_files[index].fd == -1)
     {
-        //MSD_LOCK_LOCK(msd_log_rotate_lock);
+        //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         if(MSD_OK == msd_log_reset_fd(index))
         {
             return MSD_FAILED;
         }
-        //MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+        //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
     }
 
 
-    if(MSD_NONEED == (rotate_result = msd_log_rotate(g_msd_log_files[index].fd, (const char*)g_msd_log_files[index].path, level)))
+    if(MSD_NONEED == (rotate_result = msd_log_rotate(g_log.g_msd_log_files[index].fd, (const char*)g_log.g_msd_log_files[index].path, level)))
     {
-        if(write(g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 是为了'\n' */            
+        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 是为了'\n' */            
         {
-            fprintf(stderr,"write log to file %s failed: %s\n", g_msd_log_files[index].path, strerror(errno));
+            fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
             return MSD_FAILED;
         }
     }
     else if(MSD_OK == rotate_result)
     {
         /* 返回MSD_OK 说明是由本进程执行了roate，或者在处于锁定状态中的时候，别的进程完成了roate，则应该在完成了写入操作之后再解锁 */
-        if(write(g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))       
+        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))       
         {
-            fprintf(stderr,"write log to file %s failed: %s\n", g_msd_log_files[index].path, strerror(errno));
+            fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
             return MSD_FAILED;
         }
         /*解锁*/
         printf("process %d relase the lock\n", getpid());
-        MSD_LOCK_UNLOCK(msd_log_rotate_lock);        
+        MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);        
     }
     else
     {
@@ -512,7 +522,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
     struct stat st;
     int index;
     
-    index = msd_log_multi? level:0;
+    index = g_log.msd_log_multi? level:0;
 
     /* get the file satus, store in st */
     if(MSD_OK != fstat(fd, &st))
@@ -520,16 +530,16 @@ static int msd_log_rotate(int fd, const char* path, int level)
         /* 若出现异常，则尝试重置fd，无论是否成功，返回FAILED
          * 不加锁，测试中发现，会发生自己把自己锁住
          */
-        //MSD_LOCK_LOCK(msd_log_rotate_lock);
+        //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         msd_log_reset_fd(index);
-        //MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+        //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
         return MSD_FAILED;
     }
 
-    if(st.st_size >= msd_log_size)
+    if(st.st_size >= g_log.msd_log_size)
     {
         //加锁
-        MSD_LOCK_LOCK(msd_log_rotate_lock);
+        MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         printf("thread %ul get the lock\n", (unsigned long)pthread_self());
         //sleep(5);
         /*
@@ -543,22 +553,22 @@ static int msd_log_rotate(int fd, const char* path, int level)
             printf("thread %ul relase the lock, stat error\n", (unsigned long)pthread_self());
             perror("the reason of the error:");
             msd_log_reset_fd(index);
-            MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+            MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
             return MSD_FAILED;
         }
         
         /* 说明其他线程已经完成了roate，fd已经更新，则直接退出 */        
-        if(st.st_size < msd_log_size)
+        if(st.st_size < g_log.msd_log_size)
         {
         
             printf("thread %ul relase the lock,ohter thread roate\n", (unsigned long)pthread_self());
-            MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+            MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
             return MSD_NONEED;
         }
         
         /* 仍然超标，说明其他线程没有进行rotate，则由本进程完成 */
         /* find the first not exist file name */
-        for(i = 0; i < msd_log_num; i++)
+        for(i = 0; i < g_log.msd_log_num; i++)
         {
             snprintf(tmppath1, MSD_LOG_PATH_MAX, "%s.%d", path, i);
        
@@ -569,16 +579,16 @@ static int msd_log_rotate(int fd, const char* path, int level)
                 rename(path, tmppath1);/*rename(from, to)*/
                 printf("thread %ul find the unexist file\n", (unsigned long)pthread_self());
 
-                close(g_msd_log_files[index].fd);
-                g_msd_log_files[index].fd = -1;
+                close(g_log.g_msd_log_files[index].fd);
+                g_log.g_msd_log_files[index].fd = -1;
 
                 if(MSD_OK != msd_log_reset_fd(index))
                 {
-                    MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+                    MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
                     return MSD_FAILED;               
                 }
 
-                MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+                MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
                 //sleep(5);
                 return MSD_OK;
             }
@@ -586,7 +596,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
         
         /* all path.n exist, then ,rotate */
         /* 如果日志数已经达到上限，则会将所有的带后缀的日志整体前移，并将当前日志，以最大后缀命名 */
-        for(i=1; i<msd_log_num; i++)
+        for(i=1; i<g_log.msd_log_num; i++)
         {
             snprintf(tmppath1, MSD_LOG_PATH_MAX, "%s.%d", path, i);
             snprintf(tmppath2, MSD_LOG_PATH_MAX, "%s.%d", path, i-1);
@@ -595,20 +605,20 @@ static int msd_log_rotate(int fd, const char* path, int level)
         }
 
         /*将当前日志，以最大后缀命名*/
-        snprintf(tmppath2, MSD_LOG_PATH_MAX, "%s.%d", path, msd_log_num-1);
+        snprintf(tmppath2, MSD_LOG_PATH_MAX, "%s.%d", path, g_log.msd_log_num-1);
         rename(path, tmppath2);
 
-        close(g_msd_log_files[index].fd);
-        g_msd_log_files[index].fd = -1;
+        close(g_log.g_msd_log_files[index].fd);
+        g_log.g_msd_log_files[index].fd = -1;
         
         if(MSD_OK != msd_log_reset_fd(index))
         {
-            MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+            MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
             return MSD_FAILED;               
         }
         
         printf("thread %ul roate the file\n", (unsigned long)pthread_self());
-        MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+        MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
         //sleep(2);
         return MSD_OK;
 
@@ -635,13 +645,13 @@ int msd_log_write(int level, const char *fmt, ...)
     int         rotate_result;
     char        log_buffer[MSD_LOG_BUFFER_SIZE] = {0};
     
-    if(!msd_log_has_init)
+    if(!g_log.msd_log_has_init)
     {
         return MSD_ERR;
     }
 
     /* only write the log whose level low than system initial log level */
-    if(level > msd_log_level)
+    if(level > g_log.msd_log_level)
     {
         return MSD_NONEED;
     }
@@ -666,34 +676,34 @@ int msd_log_write(int level, const char *fmt, ...)
     va_end(ap);
     log_buffer[pos+end] = '\n';
 
-    index = msd_log_multi? level:0;
+    index = g_log.msd_log_multi? level:0;
 
     /*异常处理*/
-    if(g_msd_log_files[index].fd == -1)
+    if(g_log.g_msd_log_files[index].fd == -1)
     {
-        //MSD_LOCK_LOCK(msd_log_rotate_lock);
+        //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         if(MSD_OK == msd_log_reset_fd(index))
         {
             return MSD_FAILED;
         }
-        //MSD_LOCK_UNLOCK(msd_log_rotate_lock);
+        //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
     }
 
 
-    if(MSD_NONEED == (rotate_result = msd_log_rotate(g_msd_log_files[index].fd, (const char*)g_msd_log_files[index].path, level)))
+    if(MSD_NONEED == (rotate_result = msd_log_rotate(g_log.g_msd_log_files[index].fd, (const char*)g_log.g_msd_log_files[index].path, level)))
     {
-        if(write(g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 是为了'\n' */            
+        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 是为了'\n' */            
         {
-            fprintf(stderr,"write log to file %s failed: %s\n", g_msd_log_files[index].path, strerror(errno));
+            fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
             return MSD_FAILED;
         }
     }
     else if(MSD_OK == rotate_result)
     {
         /* 返回MSD_OK 说明是由本进程执行了roate，则写入操作 */
-        if(write(g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))       
+        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))       
         {
-            fprintf(stderr,"write log to file %s failed: %s\n", g_msd_log_files[index].path, strerror(errno));
+            fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
             return MSD_FAILED;
         }      
     }

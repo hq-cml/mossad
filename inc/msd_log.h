@@ -72,13 +72,6 @@
 #define MSD_LOG_MAX_NUMBER      100
 #define MSD_LOG_PATH_MAX        1024
 
-
-typedef struct msd_log_struct
-{
-    int  fd;
-    char path[MSD_LOG_PATH_MAX];
-}msd_log_t;
-
 /*
  * isatty - test whether a file descriptor refers to a terminal, returns 1 if 
  * fd is an open file descriptor referring to a terminal; otherwise  0 is returned,
