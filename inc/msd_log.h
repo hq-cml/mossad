@@ -14,7 +14,7 @@
  *                #define MSD_LOG_MODE_THREAD(默认)
  *                #define MSD_LOG_MODE_PROCESS
  *
- *     Created :  May 6, 2014 
+ *     Created :  Apr 6, 2014 
  *     Version :  0.0.1 
  * 
  *      Author :  HQ 

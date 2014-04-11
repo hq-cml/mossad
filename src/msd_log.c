@@ -14,7 +14,7 @@
  *                #define MSD_LOG_MODE_THREAD(默认)
  *                #define MSD_LOG_MODE_PROCESS
  *
- *     Created :  May 6, 2014 
+ *     Created :  Mar 6, 2012 
  *     Version :  0.0.1 
  * 
  *      Author :  HQ 
@@ -540,7 +540,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
     {
         //加锁
         MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
-        printf("thread %ul get the lock\n", (unsigned long)pthread_self());
+        printf("thread %lu get the lock\n", (unsigned long)pthread_self());
         //sleep(5);
         /*
          * 注意!
@@ -550,7 +550,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
          **/
         if(MSD_OK != fstat(fd, &st))
         {
-            printf("thread %ul relase the lock, stat error\n", (unsigned long)pthread_self());
+            printf("thread %lu relase the lock, stat error\n", (unsigned long)pthread_self());
             perror("the reason of the error:");
             msd_log_reset_fd(index);
             MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
@@ -561,7 +561,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
         if(st.st_size < g_log.msd_log_size)
         {
         
-            printf("thread %ul relase the lock,ohter thread roate\n", (unsigned long)pthread_self());
+            printf("thread %lu relase the lock,ohter thread roate\n", (unsigned long)pthread_self());
             MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
             return MSD_NONEED;
         }
@@ -577,7 +577,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             {
                 /* the file tmppath1 not exist */
                 rename(path, tmppath1);/*rename(from, to)*/
-                printf("thread %ul find the unexist file\n", (unsigned long)pthread_self());
+                printf("thread %lu find the unexist file\n", (unsigned long)pthread_self());
 
                 close(g_log.g_msd_log_files[index].fd);
                 g_log.g_msd_log_files[index].fd = -1;
@@ -617,7 +617,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             return MSD_FAILED;               
         }
         
-        printf("thread %ul roate the file\n", (unsigned long)pthread_self());
+        printf("thread %lu roate the file\n", (unsigned long)pthread_self());
         MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
         //sleep(2);
         return MSD_OK;

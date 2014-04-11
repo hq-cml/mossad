@@ -10,7 +10,7 @@
  * Description :  Msd_vector, a vector based on array. Support any type.
  *                在一整片(size*slots)连续的内存中，模拟出数组的行为。
  * 
- *     Created :  May 4, 2014 
+ *     Created :  Apr 4, 2012 
  *     Version :  0.0.1 
  * 
  *      Author :  HQ 

@@ -10,7 +10,7 @@
  * Description :  Msd_string, a C dynamic strings library.
  *                Derived from redis.
  * 
- *     Created :  Mar 18, 2014 
+ *     Created :  Mar 18, 2012
  *     Version :  0.0.1 
  *      
  *      Author :  HQ 

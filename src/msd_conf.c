@@ -9,7 +9,7 @@
  * 
  * Description :  Msd_conf, a configure library. Support include and block.
  * 
- *     Created :  Mar 31, 2014 
+ *     Created :  Mar 31, 2012 
  *     Version :  0.0.1 
  * 
  *      Author :  HQ 

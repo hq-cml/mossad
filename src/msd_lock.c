@@ -21,7 +21,7 @@
  *                进程：MSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE/MSD_FCNTL_LOCK_MODE
  *                线程：MSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE
  *
- *     Created :  May 5, 2014 
+ *     Created :  Apr 5, 2012
  *     Version :  0.0.1 
  * 
  *      Author :  HQ 
