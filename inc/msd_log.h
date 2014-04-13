@@ -53,7 +53,7 @@
 #define MSD_LOG_LEVEL_FATAL     0    
 #define MSD_LOG_LEVEL_ERROR     1    
 #define MSD_LOG_LEVEL_WARNING   2    
-#define MSD_LOG_LEVEL_NOTICE    3    
+#define MSD_LOG_LEVEL_INFO      3    
 #define MSD_LOG_LEVEL_DEBUG     4    
 #define MSD_LOG_LEVEL_ALL       MSD_LOG_LEVEL_DEBUG
 
@@ -72,6 +72,24 @@
 #define MSD_LOG_MAX_NUMBER      100
 #define MSD_LOG_PATH_MAX        1024
 
+typedef struct s_msd_log
+{
+    int  fd;
+    char path[MSD_LOG_PATH_MAX];
+}s_msd_log_t;
+
+typedef struct msd_log
+{
+    //char      *msd_log_buffer = MAP_FAILED; /* -1 */
+    int          msd_log_has_init;           /* 是否已经初始化 */
+    int          msd_log_level;              /* 日志最高纪录的等级 */
+    int          msd_log_size;               /* 每个日志文件的大小 */
+    int          msd_log_num;                /* 日志的个数 */
+    int          msd_log_multi;              /* 是否将不同等级的日志，写入不同的文件 */
+    msd_lock_t  *msd_log_rotate_lock;        /* 日志roate锁 */
+    s_msd_log_t  g_msd_log_files[MSD_LOG_LEVEL_DEBUG +1]; /* 各个日志文件句柄 */
+}msd_log_t;
+
 /*
  * isatty - test whether a file descriptor refers to a terminal, returns 1 if 
  * fd is an open file descriptor referring to a terminal; otherwise  0 is returned,
@@ -87,7 +105,6 @@
 #define MSD_FAILED_STATUS \
     (isatty(STDOUT_FILENO)? \
      ("\033[1m[\033[31m FAILED \033[37m]\033[m") :("[ FAILED ]"))
-
 
 /*
  * C的宏中:
@@ -108,7 +125,7 @@
  * 这时，##这个连接符号充当的作用就是当__VAR_ARGS__为空的时候，消除前面的那个逗号。那么此时的翻译过程如下：
  * myprintf(templt); ==> myprintf(stderr,templt);
  */
-#define MSD_BOOT_OK(fmt, args...) msd_boot_notify(0, fmt, ##args)
+#define MSD_BOOT_SUCCESS(fmt, args...) msd_boot_notify(0, fmt, ##args)
 #define MSD_BOOT_FAILED(fmt, args...) do {\
     msd_boot_notify(-1, fmt, ##args); \
     exit(1);\
@@ -117,11 +134,11 @@
 #define MSD_DETAIL(level, fmt, args...) \
     msd_log_write(level, "[%s:%d:%s]" fmt, __FILE__, __LINE__, __FUNCTION__, ##args) /* whether add #?? */
 
-#define MSD_FATAL_LOG(fmt, args...) MSD_DETAIL(MSD_LOG_LEVEL_FATAL, fmt, ##args)
-#define MSD_ERROR_LOG(fmt, args...) MSD_DETAIL(MSD_LOG_LEVEL_ERROR, fmt, ##args)
+#define MSD_FATAL_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_FATAL, fmt, ##args)
+#define MSD_ERROR_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_ERROR, fmt, ##args)
 #define MSD_WARNING_LOG(fmt, args...) MSD_DETAIL(MSD_LOG_LEVEL_WARNING, fmt, ##args)
-#define MSD_NOTICE_LOG(fmt, args...) MSD_DETAIL(MSD_LOG_LEVEL_NOTICE, fmt, ##args)
-#define MSD_DEBUG_LOG(fmt, args...) MSD_DETAIL(MSD_LOG_LEVEL_DEBUG, fmt, ##args)
+#define MSD_INFO_LOG(fmt, args...)    MSD_DETAIL(MSD_LOG_LEVEL_INFO, fmt, ##args)
+#define MSD_DEBUG_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_DEBUG, fmt, ##args)
 
 void msd_boot_notify(int ok, const char *fmt, ...);
 int msd_log_init(const char *dir, const char *filename, int level, int size, int lognum, int multi);

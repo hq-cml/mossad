@@ -9,6 +9,11 @@
  * 
  * Description :  Msd_string, a C dynamic strings library.
  *                Derived from redis.
+ *
+ *        注意 :  所有内部调用msd_str_expand_room的函数，返回的msd_str_t *可能
+ *                是一个新地址，所以需要用链式表达，如下：
+ *                g_instance->conf_path = msd_str_cpy(g_instance->conf_path,
+ *                                                    "./mossad.conf");
  * 
  *     Created :  Mar 18, 2012 
  *     Version :  0.0.1 

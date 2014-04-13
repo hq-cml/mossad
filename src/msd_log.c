@@ -23,24 +23,6 @@
  **/
 #include "msd_core.h"
 
-typedef struct s_msd_log
-{
-    int  fd;
-    char path[MSD_LOG_PATH_MAX];
-}s_msd_log_t;
-
-typedef struct msd_log
-{
-    //char      *msd_log_buffer = MAP_FAILED; /* -1 */
-    int          msd_log_has_init;           /* 是否已经初始化 */
-    int          msd_log_level;              /* 日志最高纪录的等级 */
-    int          msd_log_size;               /* 每个日志文件的大小 */
-    int          msd_log_num;                /* 日志的个数 */
-    int          msd_log_multi;              /* 是否将不同等级的日志，写入不同的文件 */
-    msd_lock_t  *msd_log_rotate_lock;        /* 日志roate锁 */
-    s_msd_log_t  g_msd_log_files[MSD_LOG_LEVEL_DEBUG +1]; /* 各个日志文件句柄 */
-}msd_log_t;
-
 static char *msd_log_level_name[] = { /* char **msd_log_level_name */
     "FATAL",
     "ERROR",
@@ -49,7 +31,7 @@ static char *msd_log_level_name[] = { /* char **msd_log_level_name */
     "DEBUG"
 };
 
-static msd_log_t g_log;
+static msd_log_t g_log; /* 全局Log句柄 */
 
 /**
  * 功能: 开辟一块共享内存(废弃!)
@@ -740,8 +722,8 @@ int main()
     msd_boot_notify(1,"hello world hello world hello world hello world hello world hello world hello world hello world");
     
  
-    MSD_BOOT_OK("This is ok:%s", "we'll continue");
-    MSD_BOOT_OK("This is ok:%s", "This is a very long message which will extended the limit of the screen");
+    MSD_BOOT_SUCCESS("This is ok:%s", "we'll continue");
+    MSD_BOOT_SUCCESS("This is ok:%s", "This is a very long message which will extended the limit of the screen");
     */
     
     /* 
@@ -793,7 +775,7 @@ int main()
      *       结论第一种概率上较好
      */
     /*
-    MSD_BOOT_OK("the programe start");
+    MSD_BOOT_SUCCESS("the programe start");
     msd_log_init("./logs","test.log", MSD_LOG_LEVEL_ALL, 6000, 9, 0);
 
     int i = 0;
@@ -846,7 +828,7 @@ int main()
      * 结论：在极端情况下面，也不能完全保证每份日志大小，但是基本能够稳定。日志数量大小
      *       可以稳定保证
      */
-    MSD_BOOT_OK("the programe start");
+    MSD_BOOT_SUCCESS("the programe start");
     msd_log_init("./logs","test.log", MSD_LOG_LEVEL_ALL, 1<<30, 9, 0);    
     int i;
     int child_cnt = 1000;

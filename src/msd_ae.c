@@ -174,6 +174,7 @@ static int msd_ae_api_add_event(msd_ae_event_loop *el, int fd, int mask)
         EPOLL_CTL_ADD : EPOLL_CTL_MOD;
     ee.events = 0;
     mask |= el->events[fd].mask; /* Merge old events. */
+    /* Ë®Æ½´¥·¢ */
     if (mask & MSD_AE_READABLE)
     {
         ee.events |= EPOLLIN;
