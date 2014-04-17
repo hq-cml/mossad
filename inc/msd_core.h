@@ -45,6 +45,10 @@
 #include <sys/time.h>
 #include <getopt.h>
 #include <dlfcn.h>
+#include <sys/prctl.h>
+#include <signal.h>
+#include <sys/resource.h> 
+
 
 /* ---------CONFIG--------- */
 #define MSD_PTHREAD_LOCK_MODE       /* Lock mode */
@@ -68,6 +72,8 @@
 #include "msd_dlist.h"
 #include "msd_ae.h"
 #include "msd_so.h"
+#include "msd_daemon.h"
+
 
 /* -------PUBLIC MACRO------- */
 #define MSD_OK       0
