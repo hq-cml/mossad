@@ -48,7 +48,12 @@
 #include <sys/prctl.h>
 #include <signal.h>
 #include <sys/resource.h> 
-
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <netinet/tcp.h>
 
 /* ---------CONFIG--------- */
 #define MSD_PTHREAD_LOCK_MODE       /* Lock mode */
@@ -73,7 +78,7 @@
 #include "msd_ae.h"
 #include "msd_so.h"
 #include "msd_daemon.h"
-
+#include "msd_anet.h"
 
 /* -------PUBLIC MACRO------- */
 #define MSD_OK       0
