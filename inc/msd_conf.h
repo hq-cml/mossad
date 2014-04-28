@@ -44,7 +44,7 @@
 #define MSD_CONF_TYPE_BLOCK    2
 
 #define MAX_LINE               1023
-
+ 
 typedef struct msd_conf_value
 {
     void          *value;
@@ -56,18 +56,18 @@ typedef struct msd_conf_t
     msd_hash_t  *ht;
 }msd_conf_t;
 
-/* æ™®é€šé…ç½®æ¡ç›® */
+/* ÆÕÍ¨ÅäÖÃÌõÄ¿ */
 typedef struct msd_conf_entry
 {
     char                  *value;
     struct msd_conf_entry *next;
 }msd_conf_entry_t;
 
-/* block:{}å†…éƒ¨çš„å†…å®¹ */
+/* block:{}ÄÚ²¿µÄÄÚÈİ */
 typedef struct msd_conf_block
 {
     msd_conf_t             block;
-    struct msd_conf_block  *next; /* é€’å½’ */
+    struct msd_conf_block  *next; /* µİ¹é */
 }msd_conf_block_t;
 
 int msd_conf_init(msd_conf_t *conf, const char *filename);

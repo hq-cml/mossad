@@ -8,18 +8,18 @@
  *    Filename :  Msd_lock.c
  * 
  * Description :  Msd_lock, a generic lock implementation.
- *                æä¾›ä¸‰ç§é”ç±»å‹ï¼špthread_mutex, semaphore, fcntlï¼Œä¸‰ç§é”å‹
- *                çš„å¯¹å¤–æ¥å£éƒ½æ˜¯ç»Ÿä¸€çš„ï¼Œç”¨æˆ·åªéœ€è¦åœ¨msd_core.hä¸­å®šä¹‰éœ€è¦ç±»å‹çš„å®
- *                #define   MSD_PTHREAD_LOCK_MODE(æ¨è)
+ *                Ìá¹©ÈıÖÖËøÀàĞÍ£ºpthread_mutex, semaphore, fcntl£¬ÈıÖÖËøĞÍ
+ *                µÄ¶ÔÍâ½Ó¿Ú¶¼ÊÇÍ³Ò»µÄ£¬ÓÃ»§Ö»ĞèÒªÔÚmsd_core.hÖĞ¶¨ÒåĞèÒªÀàĞÍµÄºê
+ *                #define   MSD_PTHREAD_LOCK_MODE(ÍÆ¼ö)
  *                #define   MSD_SYSVSEM_LOCK_MODE
- *                #define   MSD_FCNTL_LOCK_MODE(ä»…é€‚ç”¨äºè¿›ç¨‹)
+ *                #define   MSD_FCNTL_LOCK_MODE(½öÊÊÓÃÓÚ½ø³Ì)
  *
- *                å…¶ä¸­pthread_mutexæ¨¡å‹åœ¨åœ¨å¤šè¿›ç¨‹çš„æƒ…å†µä¸‹ï¼Œéœ€è¦å°†æ‰€å»ºç«‹åœ¨å…±äº«å†…å­˜
- *                æ‰èƒ½ç”Ÿæ•ˆ
+ *                ÆäÖĞpthread_mutexÄ£ĞÍÔÚÔÚ¶à½ø³ÌµÄÇé¿öÏÂ£¬ĞèÒª½«Ëù½¨Á¢ÔÚ¹²ÏíÄÚ´æ
+ *                ²ÅÄÜÉúĞ§
  *
- *                é€‚ç”¨èŒƒå›´ï¼š
- *                è¿›ç¨‹ï¼šMSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE/MSD_FCNTL_LOCK_MODE
- *                çº¿ç¨‹ï¼šMSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE
+ *                ÊÊÓÃ·¶Î§£º
+ *                ½ø³Ì£ºMSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE/MSD_FCNTL_LOCK_MODE
+ *                Ïß³Ì£ºMSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE
  *
  *     Created :  Apr 5, 2012
  *     Version :  0.0.1 
@@ -33,20 +33,20 @@
 #if defined(MSD_PTHREAD_LOCK_MODE)
 
 /**
- * åŠŸèƒ½: Lock implementation based on pthread mutex.
- * å‚æ•°: @ppl
- * æè¿°:
- *      1. å…±äº«å†…å­˜ä¹‹ä¸Šï¼Œç”Ÿæˆlockï¼Œçˆ¶å­å…±äº«ä¹‹ï¼Œå¤šè¿›ç¨‹çš„æ—¶å€™å¿…é¡»æ˜¯çˆ¶å­å…±äº«é”ï¼Œå¦åˆ™æ— æ³•å®ç°é”åŠŸèƒ½
- *      2. è®¾ç½®äº’æ–¥é”ç”Ÿæ•ˆèŒƒå›´:äº’æ–¥é”å˜é‡å¯ä»¥æ˜¯è¿›ç¨‹ä¸“ç”¨çš„ï¼ˆè¿›ç¨‹å†…ï¼‰å˜é‡ï¼Œä¹Ÿå¯ä»¥æ˜¯ç³»ç»ŸèŒƒå›´å†…çš„
- *         ï¼ˆè¿›ç¨‹é—´ï¼‰å˜é‡ã€‚è¦åœ¨å¤šä¸ªè¿›ç¨‹ä¸­çš„çº¿ç¨‹ä¹‹é—´å…±äº«äº’æ–¥é”ï¼Œå¯ä»¥åœ¨å…±äº«å†…å­˜ä¸­åˆ›å»ºäº’æ–¥é”ï¼Œå¹¶å°† 
- *         pshared å±æ€§è®¾ç½®ä¸º PTHREAD_PROCESS_SHAREDã€‚ 
- * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
+ * ¹¦ÄÜ: Lock implementation based on pthread mutex.
+ * ²ÎÊı: @ppl
+ * ÃèÊö:
+ *      1. ¹²ÏíÄÚ´æÖ®ÉÏ£¬Éú³Élock£¬¸¸×Ó¹²ÏíÖ®£¬¶à½ø³ÌµÄÊ±ºò±ØĞëÊÇ¸¸×Ó¹²ÏíËø£¬·ñÔòÎŞ·¨ÊµÏÖËø¹¦ÄÜ
+ *      2. ÉèÖÃ»¥³âËøÉúĞ§·¶Î§:»¥³âËø±äÁ¿¿ÉÒÔÊÇ½ø³Ì×¨ÓÃµÄ£¨½ø³ÌÄÚ£©±äÁ¿£¬Ò²¿ÉÒÔÊÇÏµÍ³·¶Î§ÄÚµÄ
+ *         £¨½ø³Ì¼ä£©±äÁ¿¡£ÒªÔÚ¶à¸ö½ø³ÌÖĞµÄÏß³ÌÖ®¼ä¹²Ïí»¥³âËø£¬¿ÉÒÔÔÚ¹²ÏíÄÚ´æÖĞ´´½¨»¥³âËø£¬²¢½« 
+ *         pshared ÊôĞÔÉèÖÃÎª PTHREAD_PROCESS_SHARED¡£ 
+ * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
  **/
 int msd_pthread_lock_init(msd_lock_t **ppl) 
 {
     pthread_mutexattr_t     mattr;
     
-	/* å…±äº«å†…å­˜ä¹‹ä¸Šï¼Œç”Ÿæˆlock */
+	/* ¹²ÏíÄÚ´æÖ®ÉÏ£¬Éú³Élock */
     *ppl = mmap(0, sizeof(msd_lock_t), PROT_WRITE | PROT_READ,
                 MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (*ppl == MAP_FAILED)
@@ -60,7 +60,7 @@ int msd_pthread_lock_init(msd_lock_t **ppl)
         return MSD_ERR;
     }
 
-    /* è®¾ç½®äº’æ–¥é”èŒƒå›´: PTHREAD_PROCESS_SHARED */
+    /* ÉèÖÃ»¥³âËø·¶Î§: PTHREAD_PROCESS_SHARED */
     if (pthread_mutexattr_setpshared(&mattr, 
             PTHREAD_PROCESS_SHARED) != 0) 
     {
@@ -80,9 +80,9 @@ int msd_pthread_lock_init(msd_lock_t **ppl)
 }
 
 /**
- * åŠŸèƒ½: lock
- * å‚æ•°: @pl
- * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
+ * ¹¦ÄÜ: lock
+ * ²ÎÊı: @pl
+ * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
  **/
 int msd_pthread_do_lock(msd_lock_t *pl) 
 {
@@ -94,9 +94,9 @@ int msd_pthread_do_lock(msd_lock_t *pl)
 }
 
 /**
- * åŠŸèƒ½: unlock
- * å‚æ•°: @pl
- * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
+ * ¹¦ÄÜ: unlock
+ * ²ÎÊı: @pl
+ * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
  **/
 int msd_pthread_do_unlock(msd_lock_t *pl) 
 {
@@ -108,8 +108,8 @@ int msd_pthread_do_unlock(msd_lock_t *pl)
 }
 
 /**
- * åŠŸèƒ½: destroy lock
- * å‚æ•°: @pl
+ * ¹¦ÄÜ: destroy lock
+ * ²ÎÊı: @pl
  **/
 void msd_pthread_lock_destroy(msd_lock_t *pl) 
 {
@@ -131,13 +131,13 @@ union semun
 }; 
 
 /**
- * åŠŸèƒ½: Lock implementation based on System V semaphore.
- * å‚æ•°: @ppl @pathname
- * æè¿°:
- *      1. çˆ¶å­å…±äº«ä¹‹ã€‚å…¶å®æ­¤å¤„æ— è®ºç”¨MAP_SHAREDæˆ–è€…MAP_PRIVATEéƒ½æ˜¯å¯ä»¥çš„åŸå› æ˜¯ä¿¡
- *         å·é‡ä½¿ç”¨çš„åŸç†æ˜¯é€šè¿‡ä¿¡å·é‡çš„idã€‚ç±»æ¯”äºpthreadçš„æ¨¡å¼ï¼Œåªèƒ½ç”¨MAP_SHAREDï¼Œ
- *         å¦åˆ™æ— æ³•å®ç°é”åŠŸèƒ½
- * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
+ * ¹¦ÄÜ: Lock implementation based on System V semaphore.
+ * ²ÎÊı: @ppl @pathname
+ * ÃèÊö:
+ *      1. ¸¸×Ó¹²ÏíÖ®¡£ÆäÊµ´Ë´¦ÎŞÂÛÓÃMAP_SHARED»òÕßMAP_PRIVATE¶¼ÊÇ¿ÉÒÔµÄÔ­ÒòÊÇĞÅ
+ *         ºÅÁ¿Ê¹ÓÃµÄÔ­ÀíÊÇÍ¨¹ıĞÅºÅÁ¿µÄid¡£Àà±ÈÓÚpthreadµÄÄ£Ê½£¬Ö»ÄÜÓÃMAP_SHARED£¬
+ *         ·ñÔòÎŞ·¨ÊµÏÖËø¹¦ÄÜ
+ * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
  **/
 int msd_sysv_sem_init(msd_lock_t **ppl, const char *pathname) 
 {
@@ -147,7 +147,7 @@ int msd_sysv_sem_init(msd_lock_t **ppl, const char *pathname)
     int oflag = IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR;
     key_t key = IPC_PRIVATE;
     
-	/* å…±äº«å†…å­˜ä¹‹ä¸Šï¼Œç”Ÿæˆlock */
+	/* ¹²ÏíÄÚ´æÖ®ÉÏ£¬Éú³Élock */
     *ppl = mmap(0, sizeof(msd_lock_t), PROT_WRITE | PROT_READ,
                 MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (*ppl == MAP_FAILED)
@@ -164,12 +164,12 @@ int msd_sysv_sem_init(msd_lock_t **ppl, const char *pathname)
             return MSD_ERR;
         }
     }
-    /* ä¿¡å·é‡ç”Ÿæˆ */
+    /* ĞÅºÅÁ¿Éú³É */
     if ((semid = semget(key, 1, oflag)) < 0) 
     {
         return MSD_ERR;
     }
-    /* ä¿¡å·é‡è®¾ç½® */
+    /* ĞÅºÅÁ¿ÉèÖÃ */
     arg.val = 1;
     do 
     {
@@ -185,16 +185,16 @@ int msd_sysv_sem_init(msd_lock_t **ppl, const char *pathname)
         return MSD_ERR;
     }
     
-    /* !! å°†idèµ‹å€¼ç»™ppl */
+    /* !! ½«id¸³Öµ¸øppl */
     (*ppl)->semid = semid;
     //printf("Sem lock init\n");
     return semid;
 }
 
 /**
- * åŠŸèƒ½: lock
- * å‚æ•°: @semid
- * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
+ * ¹¦ÄÜ: lock
+ * ²ÎÊı: @semid
+ * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
  **/
 int msd_sysv_sem_lock(int semid) 
 {
@@ -209,9 +209,9 @@ int msd_sysv_sem_lock(int semid)
 }
 
 /**
- * åŠŸèƒ½: unlock
- * å‚æ•°: @semid
- * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
+ * ¹¦ÄÜ: unlock
+ * ²ÎÊı: @semid
+ * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
  **/
 int msd_sysv_sem_unlock(int semid) 
 {
@@ -226,9 +226,9 @@ int msd_sysv_sem_unlock(int semid)
 }
 
 /**
- * åŠŸèƒ½: destroy lock
- * å‚æ•°: @pl, @semid
- * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
+ * ¹¦ÄÜ: destroy lock
+ * ²ÎÊı: @pl, @semid
+ * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
  **/
 void msd_sysv_sem_destroy(msd_lock_t *pl, int semid) 
 {
@@ -238,7 +238,7 @@ void msd_sysv_sem_destroy(msd_lock_t *pl, int semid)
         rc = semctl(semid, 0, IPC_RMID, 0);
     } while (rc < 0 && errno == EINTR);
 	
-	/* é‡Šæ”¾é” */
+	/* ÊÍ·ÅËø */
 	munmap( pl, sizeof(msd_lock_t) );
 }
 
@@ -260,7 +260,7 @@ static int strxcat(char *dst, const char *src, int size)
     int src_len = strlen(src);
     if (dst_len + src_len < size) 
     {
-        memcpy(dst + dst_len, src, src_len + 1);/* åŠ 1ï¼Œéœ€è¦å¤åˆ¶srcæœ«å°¾çš„'\0' */
+        memcpy(dst + dst_len, src, src_len + 1);/* ¼Ó1£¬ĞèÒª¸´ÖÆsrcÄ©Î²µÄ'\0' */
         return MSD_OK;
     } 
     else 
@@ -272,24 +272,24 @@ static int strxcat(char *dst, const char *src, int size)
 }
 
 /**
- * åŠŸèƒ½: Lock implemention based on 'fcntl'. 
- * å‚æ•°: @
- * æè¿°:
- *      1. mkstempå‡½æ•°åœ¨ç³»ç»Ÿä¸­ä»¥å”¯ä¸€çš„æ–‡ä»¶ååˆ›å»ºä¸€ä¸ªæ–‡ä»¶å¹¶æ‰“å¼€ï¼Œåªæœ‰ä¸€ä¸ªå‚æ•°ï¼Œ
- *         è¿™ä¸ªå‚æ•°æ˜¯ä¸ªä»¥â€œXXXXXXâ€ç»“å°¾çš„éç©ºå­—ç¬¦ä¸²ã€‚mkstempå‡½æ•°ä¼šç”¨éšæœºäº§ç”Ÿçš„å­—
- *         ç¬¦ä¸²æ›¿æ¢â€œXXXXXXâ€ï¼Œä¿è¯äº†æ–‡ä»¶åçš„å”¯ä¸€æ€§ã€‚
- *      2. ä¸´æ—¶æ–‡ä»¶ä½¿ç”¨å®Œæˆååº”åŠæ—¶åˆ é™¤ï¼Œå¦åˆ™ä¸´æ—¶æ–‡ä»¶ç›®å½•ä¼šå¡æ»¡åƒåœ¾ã€‚mkstempå‡½æ•°
- *         åˆ›å»ºçš„ä¸´æ—¶æ–‡ä»¶ä¸èƒ½è‡ªåŠ¨åˆ é™¤ï¼Œæ‰€ä»¥æ‰§è¡Œå®Œ mkstempå‡½æ•°åè¦è°ƒç”¨unlinkå‡½æ•°ï¼Œ
- *         unlinkå‡½æ•°åˆ é™¤æ–‡ä»¶çš„ç›®å½•å…¥å£ï¼Œä½†ä¸´æ—¶æ–‡ä»¶è¿˜å¯ä»¥é€šè¿‡æ–‡ä»¶æè¿°ç¬¦è¿›è¡Œè®¿é—®ï¼Œ
- *         ç›´åˆ°æœ€åä¸€ä¸ªæ‰“å¼€çš„è¿›ç¨‹å…³ é—­æ–‡ä»¶æ“ä½œç¬¦ï¼Œæˆ–è€…ç¨‹åºé€€å‡ºåä¸´æ—¶æ–‡ä»¶è¢«è‡ªåŠ¨å½»åº•åœ°åˆ é™¤ã€‚
- * è¿”å›: æˆåŠŸï¼Œ å¤±è´¥ï¼Œ
+ * ¹¦ÄÜ: Lock implemention based on 'fcntl'. 
+ * ²ÎÊı: @
+ * ÃèÊö:
+ *      1. mkstempº¯ÊıÔÚÏµÍ³ÖĞÒÔÎ¨Ò»µÄÎÄ¼şÃû´´½¨Ò»¸öÎÄ¼ş²¢´ò¿ª£¬Ö»ÓĞÒ»¸ö²ÎÊı£¬
+ *         Õâ¸ö²ÎÊıÊÇ¸öÒÔ¡°XXXXXX¡±½áÎ²µÄ·Ç¿Õ×Ö·û´®¡£mkstempº¯Êı»áÓÃËæ»ú²úÉúµÄ×Ö
+ *         ·û´®Ìæ»»¡°XXXXXX¡±£¬±£Ö¤ÁËÎÄ¼şÃûµÄÎ¨Ò»ĞÔ¡£
+ *      2. ÁÙÊ±ÎÄ¼şÊ¹ÓÃÍê³ÉºóÓ¦¼°Ê±É¾³ı£¬·ñÔòÁÙÊ±ÎÄ¼şÄ¿Â¼»áÈûÂúÀ¬»ø¡£mkstempº¯Êı
+ *         ´´½¨µÄÁÙÊ±ÎÄ¼ş²»ÄÜ×Ô¶¯É¾³ı£¬ËùÒÔÖ´ĞĞÍê mkstempº¯ÊıºóÒªµ÷ÓÃunlinkº¯Êı£¬
+ *         unlinkº¯ÊıÉ¾³ıÎÄ¼şµÄÄ¿Â¼Èë¿Ú£¬µ«ÁÙÊ±ÎÄ¼ş»¹¿ÉÒÔÍ¨¹ıÎÄ¼şÃèÊö·û½øĞĞ·ÃÎÊ£¬
+ *         Ö±µ½×îºóÒ»¸ö´ò¿ªµÄ½ø³Ì¹Ø ±ÕÎÄ¼ş²Ù×÷·û£¬»òÕß³ÌĞòÍË³öºóÁÙÊ±ÎÄ¼ş±»×Ô¶¯³¹µ×µØÉ¾³ı¡£
+ * ·µ»Ø: ³É¹¦£¬ Ê§°Ü£¬
  **/
 int msd_fcntl_init(msd_lock_t **ppl, const char *pathname) 
 {
     char s[MAXPATHLEN];
     int fd;
 
-    /* å…±äº«å†…å­˜ä¹‹ä¸Šï¼Œç”Ÿæˆlockã€‚ */
+    /* ¹²ÏíÄÚ´æÖ®ÉÏ£¬Éú³Élock¡£ */
     *ppl = mmap(0, sizeof(msd_lock_t), PROT_WRITE | PROT_READ,
                 MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (*ppl == MAP_FAILED)
@@ -301,14 +301,14 @@ int msd_fcntl_init(msd_lock_t **ppl, const char *pathname)
     strncpy(s, pathname, MAXPATHLEN - 1);
     strxcat(s, ".sem.XXXXXX", MAXPATHLEN);    
     
-    /* ç”Ÿæˆå”¯ä¸€çš„æ–‡ä»¶ï¼Œå¹¶æ‰“å¼€ */
+    /* Éú³ÉÎ¨Ò»µÄÎÄ¼ş£¬²¢´ò¿ª */
     fd = mkstemp(s);
     if (fd < 0) 
     {
         return MSD_ERR;
     }
     
-    /* å»é™¤å¼•ç”¨ */
+    /* È¥³ıÒıÓÃ */
     unlink(s);
 
     (*ppl)->fd = fd;
@@ -316,17 +316,17 @@ int msd_fcntl_init(msd_lock_t **ppl, const char *pathname)
     return fd;
 }
 /**
- * åŠŸèƒ½: lock
- * å‚æ•°: @fd
- *       @flag, è¯»é”æˆ–å†™é”
- * è¿”å›: æˆåŠŸï¼Œ å¤±è´¥ï¼Œ
+ * ¹¦ÄÜ: lock
+ * ²ÎÊı: @fd
+ *       @flag, ¶ÁËø»òĞ´Ëø
+ * ·µ»Ø: ³É¹¦£¬ Ê§°Ü£¬
  **/
 int msd_fcntl_lock(int fd, int flag) 
 {
     int rc;
     struct flock l;
 
-    /*æ•´ä¸ªæ–‡ä»¶é”å®š*/
+    /*Õû¸öÎÄ¼şËø¶¨*/
     l.l_whence  = SEEK_SET;
     l.l_start   = 0;
     l.l_len     = 0;
@@ -334,22 +334,22 @@ int msd_fcntl_lock(int fd, int flag)
 
     if (flag == MSD_LOCK_RD) 
     {
-        l.l_type = F_RDLCK; /* å»ºç«‹è¯»å–é” */
+        l.l_type = F_RDLCK; /* ½¨Á¢¶ÁÈ¡Ëø */
     } 
     else 
     {
-        l.l_type = F_WRLCK; /* å»ºç«‹è¯»å†™é” */
+        l.l_type = F_WRLCK; /* ½¨Á¢¶ÁĞ´Ëø */
     }
     
-    /*F_SETLKW å’ŒF_SETLK ä½œç”¨ç›¸åŒï¼Œä½†æ˜¯æ— æ³•å»ºç«‹é”å®šæ—¶ï¼Œæ­¤è°ƒç”¨ä¼šä¸€ç›´ç­‰åˆ°é”å®šåŠ¨ä½œæˆåŠŸä¸ºæ­¢ã€‚*/
+    /*F_SETLKW ºÍF_SETLK ×÷ÓÃÏàÍ¬£¬µ«ÊÇÎŞ·¨½¨Á¢Ëø¶¨Ê±£¬´Ëµ÷ÓÃ»áÒ»Ö±µÈµ½Ëø¶¨¶¯×÷³É¹¦ÎªÖ¹¡£*/
     rc = fcntl(fd, F_SETLKW, &l);
     return rc;
 }
 
 /**
- * åŠŸèƒ½: unlock
- * å‚æ•°: @fd
- * è¿”å›: æˆåŠŸï¼Œ å¤±è´¥ï¼Œ
+ * ¹¦ÄÜ: unlock
+ * ²ÎÊı: @fd
+ * ·µ»Ø: ³É¹¦£¬ Ê§°Ü£¬
  **/
 int msd_fcntl_unlock(int fd) 
 {
@@ -359,35 +359,35 @@ int msd_fcntl_unlock(int fd)
     l.l_start = 0;
     l.l_len = 0;
     l.l_pid = 0;
-    l.l_type = F_UNLCK;/* è§£é”ï¼ˆåˆ é™¤é”ï¼‰ */
+    l.l_type = F_UNLCK;/* ½âËø£¨É¾³ıËø£© */
 
     rc = fcntl(fd, F_SETLKW, &l);
     return rc;
 }
 
 /**
- * åŠŸèƒ½: destroy lock
- * å‚æ•°: @pl @fd
- * è¿”å›: æˆåŠŸï¼Œ å¤±è´¥ï¼Œ
+ * ¹¦ÄÜ: destroy lock
+ * ²ÎÊı: @pl @fd
+ * ·µ»Ø: ³É¹¦£¬ Ê§°Ü£¬
  **/
 void msd_fcntl_destroy(msd_lock_t *pl, int fd) 
 {
     close(fd);
 
-    /* é‡Šæ”¾é” */
+    /* ÊÍ·ÅËø */
 	munmap( pl, sizeof(msd_lock_t) );
 }
 #endif
 
 #ifdef __MSD_LOCK_TEST_MAIN__
 
-static msd_lock_t *msd_lock;/* é” */
+static msd_lock_t *msd_lock;/* Ëø */
 
 void call_lock()
 {
     /*
-        è‹¥é”æ— æ•ˆï¼Œæ•´ä¸ªç¨‹åºæ‰§è¡Œæ—¶é—´å¤§æ¦‚ä¸º5ç§’(ä¸¤ä¸ªè¿›ç¨‹å¹¶è¡Œ)
-        å¦åˆ™ï¼Œæ•´ä¸ªç¨‹åºæ‰§è¡Œæ—¶é—´å¤§æ¦‚ä¸º10ç§’(é”ç”Ÿæ•ˆäº†ï¼Œé”ä¹‹é—´çš„ä»£ç æˆäº†ä¸´ç•ŒåŒº)
+        ÈôËøÎŞĞ§£¬Õû¸ö³ÌĞòÖ´ĞĞÊ±¼ä´ó¸ÅÎª5Ãë(Á½¸ö½ø³Ì²¢ĞĞ)
+        ·ñÔò£¬Õû¸ö³ÌĞòÖ´ĞĞÊ±¼ä´ó¸ÅÎª10Ãë(ËøÉúĞ§ÁË£¬ËøÖ®¼äµÄ´úÂë³ÉÁËÁÙ½çÇø)
     */
     MSD_LOCK_LOCK(msd_lock);
     printf("child call lock %d\n", getpid());
@@ -395,7 +395,7 @@ void call_lock()
     MSD_LOCK_UNLOCK(msd_lock);
 }
 
-/*æµ‹è¯•é”*/
+/*²âÊÔËø*/
 void msd_test_lock()
 {
     int i;
@@ -421,7 +421,7 @@ void msd_test_lock()
             printf("spawn child %d\n", pid);
         }
     }
-    //çˆ¶è¿›ç¨‹ç­‰å¾…å­è¿›ç¨‹é€€å‡º
+    //¸¸½ø³ÌµÈ´ı×Ó½ø³ÌÍË³ö
     int status;
     for(i=0; i<2; i++)
     {
@@ -441,7 +441,7 @@ void call_lock_in_pthread(void *arg)
 void msd_test_lock_in_pthread()
 {
     int i;
-    pthread_t thread[2];               /*ä¿å­˜çº¿ç¨‹å·*/
+    pthread_t thread[2];               /*±£´æÏß³ÌºÅ*/
 
     for(i=0; i<2; i++)
     {
@@ -455,7 +455,7 @@ void msd_test_lock_in_pthread()
     }   
     printf("Master thread exit!\n");
 }
-
+ 
 int main()
 {
     if (MSD_LOCK_INIT(msd_lock) != 0) 
@@ -463,10 +463,10 @@ int main()
         return MSD_ERR;
     }
     
-    /* æµ‹è¯•é”åœ¨å¤šè¿›ç¨‹ä¸­çš„æ•ˆæœ */
+    /* ²âÊÔËøÔÚ¶à½ø³ÌÖĞµÄĞ§¹û */
     //msd_test_lock();
 
-    /* æµ‹è¯•é”åœ¨å¤šçº¿ç¨‹ä¸­çš„æ•ˆæœ */
+    /* ²âÊÔËøÔÚ¶àÏß³ÌÖĞµÄĞ§¹û */
     msd_test_lock_in_pthread();
     
     MSD_LOCK_DESTROY(msd_lock);

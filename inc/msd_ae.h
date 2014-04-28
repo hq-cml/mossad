@@ -144,9 +144,9 @@ long long msd_ae_create_time_event(msd_ae_event_loop *el, long long milliseconds
 int msd_ae_delete_time_event(msd_ae_event_loop *el, long long id);
 int msd_ae_process_events(msd_ae_event_loop *el, int flags);
 int msd_ae_wait(int fd, int mask, long long milliseconds);
-void msd_ae_main(msd_ae_event_loop *el);
+void msd_ae_main_loop(msd_ae_event_loop *el);
 char *msd_ae_get_api_name(void);
 void msd_ae_set_before_sleep_proc(msd_ae_event_loop *el, 
         msd_ae_before_sleep_proc *before_sleep);
-
+ 
 #endif /*__MSD_AE_H_INCLUDED__ */

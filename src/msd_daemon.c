@@ -16,7 +16,7 @@
  *     Company :  Qh 
  *
  **/
- 
+  
 #include "msd_core.h"
 
 /* To change the process title in Linux and Solaris we have to
@@ -315,14 +315,17 @@ finish:
 
 /**
  * 功能: 读取pid_file文件，对读出的进程号发送信号，判断其存活
- *       如果此进程已挂了则删除pid_file文件，否则返回进程pid
+ *       如果pid_file不存在，则直接返回0；如果存在，但是进程号
+ *       对应的进程已挂了则删除pid_file文件，返回0；否则返回
+ *       真实进程pid
  * 参数: @pid_file
  * 说明：
  *       1. 该函数用于程序开始处，判断是否有其他实例已经在运行
- * 返回: 成功，pid文件内容, 失败，-1
+ * 返回: 成功，pid文件内容，或者0, 失败，-1
  **/
 pid_t msd_pid_file_running(char *pid_file) 
 {
+    
     int fd, locked, len;
     char buf[16];
     pid_t pid = (pid_t)-1;
@@ -330,6 +333,7 @@ pid_t msd_pid_file_running(char *pid_file)
     if ((fd = open(pid_file, O_RDONLY, 0644)) < 0) 
     {
         pid = 0;
+        //perror("Open pid_file:");
         goto finish;
     }
     
@@ -354,6 +358,7 @@ pid_t msd_pid_file_running(char *pid_file)
     }
 
     pid = (pid_t)strtol(buf, NULL, 10);
+    //printf("pid:%d\n", pid);
     if (pid == 0) 
     {
         fprintf(stderr, "PID file [%s] corrupted, removing\n", pid_file);
@@ -371,7 +376,7 @@ pid_t msd_pid_file_running(char *pid_file)
     if (kill(pid, 0) != 0 && errno != EPERM) 
     {
         int saved_errno = errno;
-		fprintf(stderr, "kill failed, %d\n", pid);
+		//fprintf(stderr, "kill failed, %d\n", pid);
         unlink(pid_file);
         errno = saved_errno;
         pid = 0;

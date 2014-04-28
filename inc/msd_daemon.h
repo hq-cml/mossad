@@ -19,7 +19,7 @@
 
 #ifndef __MSD_DAEMON_H_INCLUDED__
 #define __MSD_DAEMON_H_INCLUDED__
-
+ 
 /*
 #include <stdarg.h>
 #include <unistd.h>
@@ -52,4 +52,5 @@ void msd_daemonize();
 pid_t msd_pid_file_running(char *pid_file);
 int msd_pid_file_create(char *pid_file);
 
+//жпнд
 #endif /* __MSD_DAEMON_H_INCLUDED__ */

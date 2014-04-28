@@ -35,18 +35,18 @@ typedef struct msd_dlist_node
 
 typedef struct msd_dlist 
 {
-    unsigned int len;                   /* å…ƒç´ ä¸ªæ•° */
-    msd_dlist_node *head;               /* ç¬¬ä¸€ä¸ªèŠ‚ç‚¹ */
-    msd_dlist_node *tail;               /* æœ€åä¸€ä¸ªèŠ‚ç‚¹ */
+    unsigned int len;                   /* ÔªËØ¸öÊı */
+    msd_dlist_node *head;               /* µÚÒ»¸ö½Úµã */
+    msd_dlist_node *tail;               /* ×îºóÒ»¸ö½Úµã */
     void *(*dup)(void *ptr);            
-    void (*free)(void *ptr);            /* freeæ¯ä¸ªèŠ‚ç‚¹ */
+    void (*free)(void *ptr);            /* freeÃ¿¸ö½Úµã */
     int (*match)(void *ptr, void *key);
 
 } msd_dlist;
 
 typedef struct msd_dlist_iter 
 {
-    msd_dlist_node *node; /* è¯¥è¿­ä»£å™¨å¯¹åº”çš„å…ƒç´ çš„åœ°å€ */
+    msd_dlist_node *node; /* ¸Ãµü´úÆ÷¶ÔÓ¦µÄÔªËØµÄµØÖ· */
     int direction;
 } msd_dlist_iter;
 
@@ -80,7 +80,7 @@ void msd_dlist_destroy_iterator(msd_dlist_iter *iter);
 msd_dlist *msd_dlist_dup(msd_dlist *orig);
 msd_dlist_node *msd_dlist_search_key(msd_dlist *dl, void *key);
 msd_dlist_node *msd_dlist_index(msd_dlist *dl, int index);
-
+ 
 void msd_dlist_rewind(msd_dlist *dl, msd_dlist_iter *iter);
 void msd_dlist_rewind_tail(msd_dlist *dl, msd_dlist_iter *iter);
 #endif /* __MSD_DLIST_H_INCLUDED__ */

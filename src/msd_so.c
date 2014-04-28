@@ -17,15 +17,15 @@
  *
  **/
 #include "msd_core.h"
-
+ 
 /**
- * åŠŸèƒ½: æ ¹æ®å‚æ•°symæ•°ç»„é‡Œé¢çš„é¡ºåºï¼Œé€ä¸ªä¸ªåŠ è½½å‡½æ•°ï¼Œåˆ°å…¨å±€dllä¸­
- * å‚æ•°: @phandleï¼ŒåŠ¨æ€åº“å¥æŸ„çš„æŒ‡é’ˆ
- *       @symï¼Œsmd_symbol_tæ•°ç»„
- *       @filenameï¼Œsoæ–‡ä»¶ä½ç½®
- * æ³¨æ„:
- *      1. éå†symæ•°ç»„ï¼Œåˆ†åˆ«åˆå§‹åŒ–å…¨å±€dllä¸­çš„å„ä¸ªå‡½æ•°
- * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
+ * ¹¦ÄÜ: ¸ù¾İ²ÎÊısymÊı×éÀïÃæµÄË³Ğò£¬Öğ¸ö¸ö¼ÓÔØº¯Êı£¬µ½È«¾ÖdllÖĞ
+ * ²ÎÊı: @phandle£¬¶¯Ì¬¿â¾ä±úµÄÖ¸Õë
+ *       @sym£¬smd_symbol_tÊı×é
+ *       @filename£¬soÎÄ¼şÎ»ÖÃ
+ * ×¢Òâ:
+ *      1. ±éÀúsymÊı×é£¬·Ö±ğ³õÊ¼»¯È«¾ÖdllÖĞµÄ¸÷¸öº¯Êı
+ * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
  **/
 int msd_load_so(void **phandle, msd_symbol_t *sym, const char *filename) 
 {
@@ -43,13 +43,13 @@ int msd_load_so(void **phandle, msd_symbol_t *sym, const char *filename)
     {
         if (sym[i].no_error) 
         {
-            //ä¸å…³å¿ƒdlsymæ˜¯å¦å¤±è´¥ï¼Œè‹¥å¤±è´¥åˆ™åªæ‰“å°é”™è¯¯ä¿¡æ¯ 
+            //²»¹ØĞÄdlsymÊÇ·ñÊ§°Ü£¬ÈôÊ§°ÜÔòÖ»´òÓ¡´íÎóĞÅÏ¢ 
             *(void **)(sym[i].sym_ptr) = dlsym(*phandle, sym[i].sym_name);
             dlerror();
         } 
         else 
         {
-            //è‹¥dlsymå¤±è´¥ï¼Œä¼šå…³é—­å¥æŸ„ï¼Œé‡Šæ”¾èµ„æº
+            //ÈôdlsymÊ§°Ü£¬»á¹Ø±Õ¾ä±ú£¬ÊÍ·Å×ÊÔ´
             *(void **)(sym[i].sym_ptr) = dlsym(*phandle, sym[i].sym_name);
             if ((error = dlerror()) != NULL) 
             { 
@@ -65,7 +65,7 @@ int msd_load_so(void **phandle, msd_symbol_t *sym, const char *filename)
 }
 
 /*
- * åŠŸèƒ½: close å¥æŸ„
+ * ¹¦ÄÜ: close ¾ä±ú
  */
 void msd_unload_so(void **phandle) 
 {
@@ -78,7 +78,7 @@ void msd_unload_so(void **phandle)
 
 #ifdef __MSD_SO_TEST_MAIN__
 
-//åŠ¨æ€åº“ç±»å‹ï¼Œæˆå‘˜æ˜¯åŠ¨æ€åº“åŒ…å«çš„å‡½æ•°åŸå‹
+//¶¯Ì¬¿âÀàĞÍ£¬³ÉÔ±ÊÇ¶¯Ì¬¿â°üº¬µÄº¯ÊıÔ­ĞÍ
 typedef struct dll_func_struct 
 {
     int (*handle_init)(const void *data, int proc_type);
@@ -88,7 +88,7 @@ typedef struct dll_func_struct
 
 dll_func_t dll;
 
-//ä¸åŠ¨æ€åº“ä¸€ä¸€å¯¹åº”çš„æ ‡è®°æ•°ç»„ï¼ŒåŒ…å«äº†æ¯ä¸ªåŠ¨æ€åº“å‡½æ•°çš„å…·ä½“ä¿¡æ¯
+//Óë¶¯Ì¬¿âÒ»Ò»¶ÔÓ¦µÄ±ê¼ÇÊı×é£¬°üº¬ÁËÃ¿¸ö¶¯Ì¬¿âº¯ÊıµÄ¾ßÌåĞÅÏ¢
 msd_symbol_t syms[] = 
 {
     {"handle_init", (void **)&dll.handle_init, 1},

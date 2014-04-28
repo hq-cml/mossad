@@ -41,7 +41,6 @@ static int msd_ae_api_create(msd_ae_event_loop *el)
         return MSD_ERR;
     }
 
-    /* 1024 is just a hint for the kernel */
     state->epfd = epoll_create(MSD_AE_SETSIZE);
     if (state->epfd == -1) 
     {
@@ -892,7 +891,7 @@ void msd_ae_main_loop(msd_ae_event_loop *el)
         msd_ae_process_events(el, MSD_AE_ALL_EVENTS);
     }
 }
-
+ 
 /**
  * 功能: set before_sleep_proc
  * 参数: @el, @before_sleep

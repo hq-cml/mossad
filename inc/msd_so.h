@@ -26,12 +26,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 */
-
+ 
 typedef struct msd_symbol_struct 
 {
-    char    *sym_name; /* åŠ¨æ€åº“ä¸­æŸä¸ªå‡½æ•°çš„åç§° */
-    void    **sym_ptr; /* åŠ¨æ€åº“ä¸­æŸä¸ªå‡½æ•°çš„åœ°å€ */
-    int     no_error;  /* å¦‚æœä¸º1ï¼Œåˆ™ä¸å…³å¿ƒdlsymæ˜¯å¦å¤±è´¥ï¼›è‹¥ä¸º0ï¼Œåˆ™dlsymå¤±è´¥åä¼šé‡Šæ”¾å¥æŸ„ */
+    char    *sym_name; /* ¶¯Ì¬¿âÖĞÄ³¸öº¯ÊıµÄÃû³Æ */
+    void    **sym_ptr; /* ¶¯Ì¬¿âÖĞÄ³¸öº¯ÊıµÄµØÖ· */
+    int     no_error;  /* Èç¹ûÎª1£¬Ôò²»¹ØĞÄdlsymÊÇ·ñÊ§°Ü£»ÈôÎª0£¬ÔòdlsymÊ§°Üºó»áÊÍ·Å¾ä±ú */
 } msd_symbol_t;
 
 int msd_load_so(void **phandle, msd_symbol_t *syms, const char *filename);

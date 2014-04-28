@@ -7,7 +7,7 @@
  *
  *    Filename :  Mossad.c
  * 
- * Description :  Mossad main logicã€‚
+ * Description :  Mossad main logic¡£
  * 
  *     Created :  Apr 11, 2012 
  *     Version :  0.0.1 
@@ -16,10 +16,16 @@
  *     Company :  Qh 
  *
  **/
-
 #include "msd_core.h"
 
-/* é•¿å‚æ•°åˆ—è¡¨ */
+/* Æô¶¯·½Ê½ */
+typedef enum start_mode{
+    PROGRAM_START,
+    PROGRAM_STOP,
+    PROGRAM_RESTART
+}start_mode_t;
+
+/* ³¤²ÎÊýÁÐ±í */
 static struct option const long_options[] = {
     {"config",  required_argument, NULL, 'c'},
     {"help",    no_argument,       NULL, 'h'},
@@ -28,11 +34,12 @@ static struct option const long_options[] = {
     {NULL, 0, NULL, 0}
 };
 
-msd_instance_t *g_ins;
+msd_instance_t  *g_ins;
+start_mode_t     g_start_mode;
 
 /**
- * åŠŸèƒ½: åˆå§‹åŒ–instance
- * è¿”å›žï¼šæˆåŠŸï¼šinstance æŒ‡é’ˆ
+ * ¹¦ÄÜ: ³õÊ¼»¯instance
+ * ·µ»Ø£º³É¹¦£ºinstance Ö¸Õë
  **/
 static msd_instance_t * msd_create_instance()
 {
@@ -43,10 +50,8 @@ static msd_instance_t * msd_create_instance()
         MSD_BOOT_FAILED("Init instance faliled!");
     }
     
-    if(!(instance->conf_path = msd_str_new_empty()))
-    {
-        MSD_BOOT_FAILED("Init conf_path faliled!");
-    }
+    instance->conf_path = NULL;
+    instance->pid_file  = NULL;
     
     if(!(instance->conf = malloc(sizeof(msd_conf_t))))
     {
@@ -54,12 +59,14 @@ static msd_instance_t * msd_create_instance()
     }    
 
     instance->log       = NULL;
+    instance->pool      = NULL;
+    instance->master    = NULL;
     
     return instance;
 }
 
 /**
- * åŠŸèƒ½: é”€æ¯instance
+ * ¹¦ÄÜ: Ïú»Ùinstance
  **/
 static void msd_destroy_instance()
 {
@@ -67,7 +74,7 @@ static void msd_destroy_instance()
 }
 
 /**
- * åŠŸèƒ½: æ‰“å°"å…³äºŽ"ä¿¡æ¯
+ * ¹¦ÄÜ: ´òÓ¡"¹ØÓÚ"ÐÅÏ¢
  **/
 static void msd_print_info() 
 {
@@ -79,7 +86,7 @@ static void msd_print_info()
 }
 
 /**
- * åŠŸèƒ½: æ‰“å°"ç‰ˆæœ¬"ä¿¡æ¯
+ * ¹¦ÄÜ: ´òÓ¡"°æ±¾"ÐÅÏ¢
  **/
 static void msd_print_version()
 {
@@ -87,7 +94,7 @@ static void msd_print_version()
 }
 
 /**
- * åŠŸèƒ½ï¼šæ‰“å°usage
+ * ¹¦ÄÜ£º´òÓ¡usage
  **/
 static void msd_usage(int status) 
 {
@@ -104,11 +111,10 @@ static void msd_usage(int status)
 }
 
 /**
- * åŠŸèƒ½ï¼šè§£æžé€‰é¡¹
+ * ¹¦ÄÜ£º½âÎöÑ¡Ïî
  **/
 static void msd_get_options(int argc, char **argv) 
 {
-    //char a[111];
     int c;
     while ((c = getopt_long(argc, argv, "c:hvi", 
                     long_options, NULL)) != -1) 
@@ -116,7 +122,7 @@ static void msd_get_options(int argc, char **argv)
         switch (c) 
         {
         case 'c':
-            g_ins->conf_path = msd_str_cpy(g_ins->conf_path, optarg);
+            g_ins->conf_path = msd_str_new(optarg);
             break;
         case 'h':
             msd_usage(EXIT_SUCCESS);
@@ -136,9 +142,29 @@ static void msd_get_options(int argc, char **argv)
         }
     }
 
-    if (optind == argc) 
+    if (optind + 1 == argc) 
     {
-        //daemon_action = MSD_DAEMON_START;
+        if (!strcasecmp(argv[optind], "stop")) 
+        {
+            g_start_mode = PROGRAM_STOP;
+        } 
+        else if (!strcasecmp(argv[optind], "start")) 
+        {
+            g_start_mode = PROGRAM_START;
+        }
+        else if (!strcasecmp(argv[optind], "restart")) 
+        {
+            g_start_mode = PROGRAM_RESTART;
+        }        
+        else 
+        {
+            msd_usage(EXIT_FAILURE); 
+            exit(1);
+        }
+    } 
+    else if (optind == argc) 
+    {
+        g_start_mode = PROGRAM_START;
     } 
     else 
     {
@@ -150,15 +176,15 @@ static void msd_get_options(int argc, char **argv)
 /*------------------------ Main -----------------------*/
 int main(int argc, char **argv)
 {
+    int pid;
     g_ins = msd_create_instance();
     
     msd_get_options(argc, argv);
     
-    /* åˆå§‹åŒ–conf */
-    if(g_ins->conf_path->len == 0)
+    /* ³õÊ¼»¯conf */
+    if(!g_ins->conf_path)
     {
-        g_ins->conf_path = msd_str_cpy(g_ins->conf_path, "./mossad.conf");
-        if(! g_ins->conf_path)
+        if(!(g_ins->conf_path = msd_str_new("./mossad.conf")))
         {
             MSD_BOOT_FAILED("Init conf_path faliled!");
         }
@@ -167,9 +193,9 @@ int main(int argc, char **argv)
     {
         MSD_BOOT_FAILED("Init conf faliled!");
     }
-    MSD_BOOT_SUCCESS("INIT CONF SUCCESS");
+    MSD_BOOT_SUCCESS("Init conf success");
 
-    /* æ—¥å¿—åˆå§‹åŒ– */
+    /* ³õÊ¼»¯log */
     if (msd_log_init(msd_conf_get_str_value(g_ins->conf, "log_path", "./"),
             msd_conf_get_str_value(g_ins->conf, "log_name", MSD_PROG_NAME".log"),
             msd_conf_get_int_value(g_ins->conf, "log_level", MSD_LOG_LEVEL_ALL),
@@ -177,19 +203,116 @@ int main(int argc, char **argv)
             msd_conf_get_int_value(g_ins->conf, "log_num", MSD_LOG_FILE_NUM),
             msd_conf_get_int_value(g_ins->conf, "log_multi", MSD_LOG_MULTIMODE_NO)) < 0) 
     {
-        MSD_BOOT_FAILED("INIT LOG FAILED");
+        MSD_BOOT_FAILED("Init log failed");
     }
-    MSD_BOOT_SUCCESS("INIT LOG SUCCESS");
-    MSD_INFO_LOG("Mossad begin to run");
-    printf("Port:%d\n", msd_conf_get_int_value(g_ins->conf, "port", 9527));
+    MSD_BOOT_SUCCESS("Init log success");
+    MSD_INFO_LOG("Init conf success");
+    MSD_INFO_LOG("Init log success");  
+
+    /* Daemon */
+    if(msd_conf_get_int_value(g_ins->conf, "daemon", 1))
+    {
+        msd_daemonize(0, 1);
+        fprintf(stderr, "Can you see me?\n");
+    }
     
+    /* »ñÈ¡pid */
+    g_ins->pid_file = msd_str_new(msd_conf_get_str_value(g_ins->conf, "pid_file", "/tmp/mossad.pid"));
+    if((pid = msd_pid_file_running(g_ins->pid_file->buf)) == -1) 
+    {
+        MSD_BOOT_FAILED("Checking running daemon:%s", strerror(errno));
+    }
+    
+    /* ¸ù¾ÝÆô¶¯ÃüÁî·ÖÎö£¬ÊÇstart»¹ÊÇstop */
+    if (g_start_mode == PROGRAM_START) 
+    {
+        MSD_BOOT_SUCCESS("Mossad begin to start");
+        MSD_INFO_LOG("Mossad begin to run");
+ 
+        if (pid > 0) 
+        {
+            MSD_BOOT_FAILED("The mossad have been running, pid=%u", (unsigned int)pid);
+        }
+    
+        if ((msd_pid_file_create(g_ins->pid_file->buf)) != 0) 
+        {
+            MSD_BOOT_FAILED("Create pid file failed: %s", strerror(errno));
+        }
+        MSD_BOOT_SUCCESS("Create pid file");
+        MSD_INFO_LOG("Create pid file");
+    } 
+    else if(g_start_mode == PROGRAM_STOP) 
+    {
+        MSD_BOOT_SUCCESS("Mossad begin to start");
+        MSD_INFO_LOG("Mossad begin to run");
+        
+        if (pid == 0) 
+        {
+            MSD_BOOT_FAILED("No mossad daemon running now");
+        }
+
+        /* 
+         * ¸ù¾Ýpid_fileÎÄ¼þ¼ÇÔØµÄpid£¬·¢ËÍSIGKILLÐÅºÅ£¬ÖÕÖ¹³ÌÐò 
+         * SIGQUIT»áÊ¹µÃ½ÓÊÕ½ø³Ì²úÉúcoredump£¬ÎªÁË·ÀÖ¹Îó»á£¬»¹ÊÇÓÃSIGKILL
+         **/
+        if (kill(pid, SIGKILL) != 0) 
+        {
+            fprintf(stderr, "kill %u failed\n", (unsigned int)pid);
+            exit(1);
+        }
+        MSD_BOOT_SUCCESS("The mossad process stop! Pid:%u", (unsigned int)pid);
+        return 0;
+    } 
+    else if(g_start_mode == PROGRAM_RESTART)
+    {
+        //TODO
+    }
+    else 
+    {
+        msd_usage(EXIT_FAILURE);
+        return 0;
+    }    
+    
+    /* ¼ÓÔØso¶¯Ì¬¿â£¬ÓÃ»§µÄÂß¼­¶¼Ð´ÔÚÁËsoÖÐ */
+    //TODO
+    
+    /* ·Å¿ª×ÊÔ´ÏÞÖÆ */
+    msd_rlimit_reset();
+    
+    /* ³õÊ¼»¯Ïß³Ì³Ø */
+    if(!(g_ins->pool = msd_thread_pool_create(
+            msd_conf_get_int_value(g_ins->conf, "worker_num", 10),
+            msd_conf_get_int_value(g_ins->conf, "stack_size", 10*1024*1024),
+            msd_thread_worker_task)))
+    {        
+        MSD_BOOT_FAILED("Create threadpool failed");
+    }
+ 
+    
+    /* ³£ÓÃÐÅºÅ×¢²á¼°³õÊ¼»¯ÐÅºÅ´¦ÀíÏß³Ì */
+
+
+    /* ÓÃ»§×Ô¶¨Òå³õÊ¼»Øµ÷ */
+
+    
+    /* ÐÞ¸Ä½ø³ÌµÄTitle */
+
+
+    /* Master¿ªÊ¼¹¤×÷ */ 
+    if(MSD_OK != msd_master_cycle())
+    {
+        MSD_BOOT_FAILED("Create master failed");
+    }
+    printf("before sleep\n");
+    msd_thread_sleep(60);
+    msd_destroy_instance();
     return 0;
 }
 
 
 
 
-
+ 
 
 
 

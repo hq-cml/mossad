@@ -8,10 +8,10 @@
  *    Filename :  Msd_log.c
  * 
  * Description :  Msd_log, a generic log implementation.
- *                两个版本的日志：进程版本和线程版本。
- *                当mossad采用多进程时，用进程版本；采用多线程时，用线程版本
- *                对外接口都是统一的，只需要在msd_core.h中定义需要类型的宏
- *                #define MSD_LOG_MODE_THREAD(默认)
+ *                �����汾����־�����̰汾���̰߳汾��
+ *                ��mossad���ö����ʱ���ý��̰汾�����ö��߳�ʱ�����̰߳汾
+ *                ����ӿڶ���ͳһ�ģ�ֻ��Ҫ��msd_core.h�ж�����Ҫ���͵ĺ�
+ *                #define MSD_LOG_MODE_THREAD(Ĭ��)
  *                #define MSD_LOG_MODE_PROCESS
  *
  *     Created :  Mar 6, 2012 
@@ -26,22 +26,22 @@
 static char *msd_log_level_name[] = { /* char **msd_log_level_name */
     "FATAL",
     "ERROR",
-    "WARNING",
-    "NOTICE",
+    "WARN",
+    "INFO",
     "DEBUG"
 };
 
-static msd_log_t g_log; /* 全局Log句柄 */
+static msd_log_t g_log; /* ȫ��Log��� */
 
 /**
- * 功能: 开辟一块共享内存(废弃!)
- * 描述:
- *      1. 匿名方式打开共享内存，不需要映射文件
- *      2. MAP_PRIVATE，进程的私有的共享内存，即便其可能派生了子进程，父子打印出来的msd_log_buffer
- *         的值都是相同的，但他们确实私有的，互不影响
- *      3. MAP_SHARED，真正能够父子进程互相共享
- *      4. 经过测试，在多线程模式下，共享内存的方式会发生错乱，所以不使用共享内存模式
- * 返回: 成功，0 失败，-x
+ * ����: ����һ�鹲���ڴ�(����!)
+ * ����:
+ *      1. ������ʽ�򿪹����ڴ棬����Ҫӳ���ļ�
+ *      2. MAP_PRIVATE�����̵�˽�еĹ����ڴ棬����������������ӽ��̣����Ӵ�ӡ������msd_log_buffer
+ *         ��ֵ������ͬ�ģ�������ȷʵ˽�еģ�����Ӱ��
+ *      3. MAP_SHARED�������ܹ����ӽ��̻��๲��
+ *      4. �������ԣ��ڶ��߳�ģʽ�£������ڴ�ķ�ʽ�ᷢ�����ң����Բ�ʹ�ù����ڴ�ģʽ
+ * ����: �ɹ���0 ʧ�ܣ�-x
 
 static int msd_get_map_mem()
 {
@@ -62,7 +62,7 @@ static int msd_get_map_mem()
  **/
  
 /**
- * 功能: 根据ok的值，输出红色或者绿色在屏幕，最长不超过80字符
+ * ����: ����ok��ֵ�������ɫ������ɫ����Ļ���������80�ַ�
  **/
 void msd_boot_notify(int ok, const char *fmt, ...)
 {
@@ -71,12 +71,12 @@ void msd_boot_notify(int ok, const char *fmt, ...)
 
     char log_buffer[MSD_LOG_BUFFER_SIZE] = {0};
     va_start(ap, fmt);
-    n = vsnprintf(log_buffer, MSD_SCREEN_COLS, fmt, ap);/*n 是成功写入的字符数*/
+    n = vsnprintf(log_buffer, MSD_SCREEN_COLS, fmt, ap);/*n �ǳɹ�д����ַ���*/
     va_end(ap);
 
     if(n > MSD_CONTENT_COLS)
     {
-        printf("%-*.*s%s%s\n", MSD_CONTENT_COLS-5, MSD_CONTENT_COLS-5,/*其中前边*定义的是总的宽度，后边*是指定输出字符个数。*/
+        printf("%-*.*s%s%s\n", MSD_CONTENT_COLS-5, MSD_CONTENT_COLS-5,/*����ǰ��*��������ܵĿ��ȣ����*��ָ������ַ�������*/
                 log_buffer, " ... ", ok==0? MSD_OK_STATUS:MSD_FAILED_STATUS);
     }
     else
@@ -87,9 +87,9 @@ void msd_boot_notify(int ok, const char *fmt, ...)
 }
 
 /**
- * 功能: 重置日志文件fd
- * 参数: @index
- * 返回: 成功，0 失败，-x
+ * ����: ������־�ļ�fd
+ * ����: @index
+ * ����: �ɹ���0 ʧ�ܣ�-x
  **/
 static int msd_log_reset_fd(int index)
 {
@@ -108,7 +108,7 @@ static int msd_log_reset_fd(int index)
     }
 
     /* in case exec.. */
-    /*如果子进程被exec族函数替换，则他是无法操作该文件了*/
+    /*����ӽ��̱�exec�庯���滻���������޷��������ļ���*/
     status = fcntl(g_log.g_msd_log_files[index].fd, F_GETFD, 0);
     status |= FD_CLOEXEC;
     fcntl(g_log.g_msd_log_files[index].fd, F_SETFD, status);  
@@ -116,23 +116,23 @@ static int msd_log_reset_fd(int index)
 }
 
 /**
- * 功能: log init
- * 参数: @dir 目录位置
- *       @filename 文件名
+ * ����: log init
+ * ����: @dir Ŀ¼λ��
+ *       @filename �ļ���
  *       @level 
  *       @size
  *       @lognum
  *       @multi
- * 描述:
+ * ����:
  *      1. access(dir, mode)
- *         mode:表示测试的模式可能的值有:
- *              R_OK:是否具有读权限             
- *              W_OK:是否具有可写权限
- *              X_OK:是否具有可执行权限             
- *              F_OK:文件是否存在             
- *              返回值:若测试成功则返回0,否则返回-1
+ *         mode:��ʾ���Ե�ģʽ���ܵ�ֵ��:
+ *              R_OK:�Ƿ���ж�Ȩ��             
+ *              W_OK:�Ƿ���п�дȨ��
+ *              X_OK:�Ƿ���п�ִ��Ȩ��             
+ *              F_OK:�ļ��Ƿ����             
+ *              ����ֵ:�����Գɹ��򷵻�0,���򷵻�-1
  *  
- * 返回: 成功，0 失败，-x
+ * ����: �ɹ���0 ʧ�ܣ�-x
  **/
 int msd_log_init(const char *dir, const char *filename, int level, int size, int lognum, int multi)
 {
@@ -158,7 +158,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
     g_log.msd_log_num   = lognum;
     g_log.msd_log_multi = multi; /* !!multi */
 
-    /* 初始化roate锁 */
+    /* ��ʼ��roate�� */
     if (MSD_LOCK_INIT(g_log.msd_log_rotate_lock) != 0) 
     {
         return MSD_ERR;
@@ -180,7 +180,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
             strcat(g_log.g_msd_log_files[i].path, "_");
             strcat(g_log.g_msd_log_files[i].path, msd_log_level_name[i]);
 
-            /*初始化fd*/
+            /*��ʼ��fd*/
             if(MSD_OK != msd_log_reset_fd(i))
             {
                 return MSD_FAILED;
@@ -198,7 +198,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
         }
         strcat(g_log.g_msd_log_files[0].path, filename);
 
-        /*初始化fd*/
+        /*��ʼ��fd*/
         if(MSD_OK != msd_log_reset_fd(0))
         {
             return MSD_FAILED;
@@ -217,7 +217,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
 }
 
 /**
- * 功能: close log
+ * ����: close log
  **/
 void msd_log_close()
 {
@@ -242,17 +242,17 @@ void msd_log_close()
         }
     }
     
-    MSD_LOCK_DESTROY(g_log.msd_log_rotate_lock); /* 消除锁 */
+    MSD_LOCK_DESTROY(g_log.msd_log_rotate_lock); /* ������ */
 }
 
 #ifdef MSD_LOG_MODE_PROCESS
 /**
- * 功能: 日志切割，进程版本
- * 参数: @
- * 描述:
- *      1. rotate的时候，加锁保护，防止紊乱
- *      2. 为了保证多进程模式下的可靠，分别采用了fstat和stat
- * 返回: 成功，0 失败，-x
+ * ����: ��־�и���̰汾
+ * ����: @
+ * ����:
+ *      1. rotate��ʱ�򣬼�����������ֹ����
+ *      2. Ϊ�˱�֤�����ģʽ�µĿɿ����ֱ������fstat��stat
+ * ����: �ɹ���0 ʧ�ܣ�-x
  **/
 static int msd_log_rotate(int fd, const char* path, int level)
 {
@@ -265,17 +265,17 @@ static int msd_log_rotate(int fd, const char* path, int level)
     index = g_log.msd_log_multi? level:0;
 
     /*
-     * 注意!
-     * 此处须用fstat，而下面那处须用stat。为了兼容多进程的情况，此处须用fd，因为别的进程有可能
-     * 已经rotate了日志文件，如果用了path，就可能检测出大小没有超过阈值(因为别的进程已rotate)，
-     * 但是写入的时候用的是fd，这就出了问题，因为该进程fd指向的已经是xxx.log.max，而不再是xxx.log
-     * ，所以日志会写到已经rotate了的xx.log.max当中去。但是如果此处用fd，就不会有这种问题，因为即
-     * 便文件名字变化了，但是fd仍然指向的是原来的文件，这样仍然判断test.log.max，仍然可以发现日志超标
+     * ע��!
+     * �˴�����fstat���������Ǵ�����stat��Ϊ�˼��ݶ���̵�������˴�����fd����Ϊ��Ľ����п���
+     * �Ѿ�rotate����־�ļ����������path���Ϳ��ܼ�����Сû�г�����ֵ(��Ϊ��Ľ�����rotate)��
+     * ����д���ʱ���õ���fd����ͳ������⣬��Ϊ�ý���fdָ����Ѿ���xxx.log.max����������xxx.log
+     * ��������־��д���Ѿ�rotate�˵�xx.log.max����ȥ����������˴���fd���Ͳ������������⣬��Ϊ��
+     * ���ļ����ֱ仯�ˣ�����fd��Ȼָ�����ԭ�����ļ���������Ȼ�ж�test.log.max����Ȼ���Է�����־����
      **/
     /* get the file satus, store in st */
     if(MSD_OK != fstat(fd, &st))
     {
-        /*若出现异常，则尝试重置fd，无论是否成功，返回FAILED*/
+        /*�������쳣����������fd�������Ƿ�ɹ�������FAILED*/
         //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         msd_log_reset_fd(index);
         //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
@@ -284,17 +284,17 @@ static int msd_log_rotate(int fd, const char* path, int level)
 
     if(st.st_size >= g_log.msd_log_size)
     {
-        //加锁
+        //����
         MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         printf("process %d get the lock\n", getpid());
         //sleep(5);
         /*
-         * 注意!
-         * 再次判断是否超标，此处必须用stat，而上面那处必须用fstat，因为如果用了fd，必然检测出日志超标
-         * ，毕竟上面已经检测过了一次。此时有可能其他进程已经完成了roate，所以得用path再来判断一次，则
-         * 1.如果仍然超标: 说明没有其他进程rotate过，那本进程负责rotate
-         * 2.如果不再超标: 说明其他进程已经完成了roate，本进程fd已经指向了xx.log.max，
-         *   则本进程只需要更新自己的fd
+         * ע��!
+         * �ٴ��ж��Ƿ񳬱꣬�˴�������stat���������Ǵ�������fstat����Ϊ�������fd����Ȼ������־����
+         * ���Ͼ������Ѿ�������һ�Ρ���ʱ�п������������Ѿ������roate�����Ե���path�����ж�һ�Σ���
+         * 1.�����Ȼ����: ˵��û����������rotate�����Ǳ����̸���rotate
+         * 2.������ٳ���: ˵�����������Ѿ������roate��������fd�Ѿ�ָ����xx.log.max��
+         *   �򱾽���ֻ��Ҫ�����Լ���fd
          **/
         if(MSD_OK != stat(path, &st))
         {
@@ -306,8 +306,8 @@ static int msd_log_rotate(int fd, const char* path, int level)
         }
         
         /*
-         * 如果此刻发现，日志文件已经不符合roate的条件了，说明了已经有其他进程rotate了，
-         * 则此刻应该返回OK或者NONEED并解锁，然后重置自己的fd
+         * ����˿̷��֣���־�ļ��Ѿ�������roate�������ˣ�˵�����Ѿ�����������rotate�ˣ�
+         * ��˿�Ӧ�÷���OK����NONEED��������Ȼ�������Լ���fd
          **/        
         if(st.st_size < g_log.msd_log_size)
         {
@@ -322,17 +322,17 @@ static int msd_log_rotate(int fd, const char* path, int level)
             
             printf("process %d relase the lock,ohter process roate\n", getpid());
             /*
-             * 两种思路:经测试发现概率上第一种效果较好
-             * 1.继续加锁，返回OK，等自己写完之后解锁
-             * 2.直接解锁，返回NONEED，然后由write函数写入  
+             * ����˼·:�����Է��ָ����ϵ�һ��Ч���Ϻ�
+             * 1.��������������OK�����Լ�д��֮�����
+             * 2.ֱ�ӽ���������NONEED��Ȼ����write����д��  
              */
-            /*交由wirte函数写入完毕后再释放*/
+            /*����wirte����д����Ϻ����ͷ�*/
             //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
             //return MSD_NONEED;
             return MSD_OK;
         }
         
-        /* 仍然超标，说明其他进程没有进行rotate，则由本进程完成 */
+        /* ��Ȼ���꣬˵����������û�н���rotate�����ɱ�������� */
         /* find the first not exist file name */
         for(i = 0; i < g_log.msd_log_num; i++)
         {
@@ -354,7 +354,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
                     return MSD_FAILED;               
                 }
                 
-                /* 我实施了rotate，则不应该解锁，应该等待我写完了，才解锁 */
+                /* ��ʵʩ��rotate����Ӧ�ý�����Ӧ�õȴ���д���ˣ��Ž��� */
                 //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
                 //sleep(5);
                 return MSD_OK;
@@ -362,7 +362,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
         }
         
         /* all path.n exist, then ,rotate */
-        /* 如果日志数已经达到上限，则会将所有的带后缀的日志整体前移，并将当前日志，以最大后缀命名 */
+        /* �����־���Ѿ��ﵽ���ޣ���Ὣ���еĴ���׺����־����ǰ�ƣ�������ǰ��־��������׺���� */
         for(i=1; i<g_log.msd_log_num; i++)
         {
             snprintf(tmppath1, MSD_LOG_PATH_MAX, "%s.%d", path, i);
@@ -371,7 +371,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             rename(tmppath1, tmppath2);
         }
 
-        /*将当前日志，以最大后缀命名*/
+        /*����ǰ��־��������׺����*/
         snprintf(tmppath2, MSD_LOG_PATH_MAX, "%s.%d", path, g_log.msd_log_num-1);
         rename(path, tmppath2);
 
@@ -385,7 +385,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
         }
         
         printf("process %d roate the file\n", getpid());
-        /*我实施了rotate，则不应该解锁，应该等待我写完了，才解锁*/
+        /*��ʵʩ��rotate����Ӧ�ý�����Ӧ�õȴ���д���ˣ��Ž���*/
         //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
         //sleep(2);
         return MSD_OK;
@@ -396,11 +396,11 @@ static int msd_log_rotate(int fd, const char* path, int level)
 
 }
 /**
- * 功能: 日志写入，进程版本
- * 参数: @level， @fmt , @...
- * 描述:
- *      1. 每次写入前，会触发rotate检查 
- * 返回: 成功，0 失败，-x
+ * ����: ��־д�룬���̰汾
+ * ����: @level�� @fmt , @...
+ * ����:
+ *      1. ÿ��д��ǰ���ᴥ��rotate��� 
+ * ����: �ɹ���0 ʧ�ܣ�-x
  **/
 int msd_log_write(int level, const char *fmt, ...)
 {
@@ -430,15 +430,15 @@ int msd_log_write(int level, const char *fmt, ...)
     }
     */
     now = time(NULL);
-    /*localtime_r() 函数将日历时间timep转换为用户指定的时区的时间。但是它可以将数据存储到用户提供的结构体中。*/
+    /*localtime_r() ����������ʱ��timepת��Ϊ�û�ָ����ʱ����ʱ�䡣���������Խ����ݴ洢���û��ṩ�Ľṹ���С�*/
     localtime_r(&now, &tm);
 
-    pos = sprintf(log_buffer, "[%04d-%02d-%02d %02d:%02d:%02d][%05d][%s]",
+    pos = sprintf(log_buffer, "[%04d-%02d-%02d %02d:%02d:%02d][%05d][%5s]",
                 tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
                 tm.tm_hour, tm.tm_min, tm.tm_sec, getpid(),
                 msd_log_level_name[level]);
 
-    /*加工日志内容*/
+    /*�ӹ���־����*/
     va_start(ap, fmt);
     end = vsnprintf(log_buffer+pos, MSD_LOG_BUFFER_SIZE-pos, fmt, ap);
     va_end(ap);
@@ -446,7 +446,7 @@ int msd_log_write(int level, const char *fmt, ...)
 
     index = g_log.msd_log_multi? level:0;
 
-    /*异常处理*/
+    /*�쳣����*/
     if(g_log.g_msd_log_files[index].fd == -1)
     {
         //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
@@ -460,7 +460,7 @@ int msd_log_write(int level, const char *fmt, ...)
 
     if(MSD_NONEED == (rotate_result = msd_log_rotate(g_log.g_msd_log_files[index].fd, (const char*)g_log.g_msd_log_files[index].path, level)))
     {
-        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 是为了'\n' */            
+        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 ��Ϊ��'\n' */            
         {
             fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
             return MSD_FAILED;
@@ -468,13 +468,13 @@ int msd_log_write(int level, const char *fmt, ...)
     }
     else if(MSD_OK == rotate_result)
     {
-        /* 返回MSD_OK 说明是由本进程执行了roate，或者在处于锁定状态中的时候，别的进程完成了roate，则应该在完成了写入操作之后再解锁 */
+        /* ����MSD_OK ˵�����ɱ�����ִ����roate�������ڴ�������״̬�е�ʱ�򣬱�Ľ��������roate����Ӧ���������д�����֮���ٽ��� */
         if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))       
         {
             fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
             return MSD_FAILED;
         }
-        /*解锁*/
+        /*����*/
         printf("process %d relase the lock\n", getpid());
         MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);        
     }
@@ -488,13 +488,12 @@ int msd_log_write(int level, const char *fmt, ...)
 }
 #else
 
-
 /**
- * 功能: 日志切割，线程版本
- * 参数: @
- * 描述:
- *      1. rotate的时候，加锁保护，防止紊乱
- * 返回: 成功，0 失败，-x
+ * ����: ��־�и�̰߳汾
+ * ����: @
+ * ����:
+ *      1. rotate��ʱ�򣬼�����������ֹ����
+ * ����: �ɹ���0 ʧ�ܣ�-x
  **/
 static int msd_log_rotate(int fd, const char* path, int level)
 {
@@ -509,8 +508,8 @@ static int msd_log_rotate(int fd, const char* path, int level)
     /* get the file satus, store in st */
     if(MSD_OK != fstat(fd, &st))
     {
-        /* 若出现异常，则尝试重置fd，无论是否成功，返回FAILED
-         * 不加锁，测试中发现，会发生自己把自己锁住
+        /* �������쳣����������fd�������Ƿ�ɹ�������FAILED
+         * �������������з��֣��ᷢ���Լ����Լ���ס
          */
         //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         msd_log_reset_fd(index);
@@ -520,15 +519,15 @@ static int msd_log_rotate(int fd, const char* path, int level)
 
     if(st.st_size >= g_log.msd_log_size)
     {
-        //加锁
+        //����
         MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         printf("thread %lu get the lock\n", (unsigned long)pthread_self());
         //sleep(5);
         /*
-         * 注意!
-         * 再次判断是否超标，此处有可能其他进程已经完成了roate，所以再判断一次，则
-         * 1.如果仍然超标: 说明没有其线程rotate过，那本进程负责rotate
-         * 2.如果不再超标: 说明其他线程已经完成了roate，fd已经更新，则直接退出
+         * ע��!
+         * �ٴ��ж��Ƿ񳬱꣬�˴��п������������Ѿ������roate���������ж�һ�Σ���
+         * 1.�����Ȼ����: ˵��û�����߳�rotate�����Ǳ����̸���rotate
+         * 2.������ٳ���: ˵�������߳��Ѿ������roate��fd�Ѿ����£���ֱ���˳�
          **/
         if(MSD_OK != fstat(fd, &st))
         {
@@ -539,7 +538,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             return MSD_FAILED;
         }
         
-        /* 说明其他线程已经完成了roate，fd已经更新，则直接退出 */        
+        /* ˵�������߳��Ѿ������roate��fd�Ѿ����£���ֱ���˳� */        
         if(st.st_size < g_log.msd_log_size)
         {
         
@@ -548,7 +547,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             return MSD_NONEED;
         }
         
-        /* 仍然超标，说明其他线程没有进行rotate，则由本进程完成 */
+        /* ��Ȼ���꣬˵�������߳�û�н���rotate�����ɱ�������� */
         /* find the first not exist file name */
         for(i = 0; i < g_log.msd_log_num; i++)
         {
@@ -577,7 +576,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
         }
         
         /* all path.n exist, then ,rotate */
-        /* 如果日志数已经达到上限，则会将所有的带后缀的日志整体前移，并将当前日志，以最大后缀命名 */
+        /* �����־���Ѿ��ﵽ���ޣ���Ὣ���еĴ���׺����־����ǰ�ƣ�������ǰ��־��������׺���� */
         for(i=1; i<g_log.msd_log_num; i++)
         {
             snprintf(tmppath1, MSD_LOG_PATH_MAX, "%s.%d", path, i);
@@ -586,7 +585,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             rename(tmppath1, tmppath2);
         }
 
-        /*将当前日志，以最大后缀命名*/
+        /*����ǰ��־��������׺����*/
         snprintf(tmppath2, MSD_LOG_PATH_MAX, "%s.%d", path, g_log.msd_log_num-1);
         rename(path, tmppath2);
 
@@ -610,11 +609,11 @@ static int msd_log_rotate(int fd, const char* path, int level)
 
 }
 /**
- * 功能: 日志写入，线程版本
- * 参数: @level， @fmt , @...
- * 描述:
- *      1. 每次写入前，会触发rotate检查 
- * 返回: 成功，0 失败，-x
+ * ����: ��־д�룬�̰߳汾
+ * ����: @level�� @fmt , @...
+ * ����:
+ *      1. ÿ��д��ǰ���ᴥ��rotate��� 
+ * ����: �ɹ���0 ʧ�ܣ�-x
  **/
 int msd_log_write(int level, const char *fmt, ...)
 {
@@ -642,17 +641,17 @@ int msd_log_write(int level, const char *fmt, ...)
     {
         return MSD_FAILED;
     }
-    */
+    */ 
     now = time(NULL);
-    /*localtime_r() 函数将日历时间timep转换为用户指定的时区的时间。但是它可以将数据存储到用户提供的结构体中。*/
+    /*localtime_r() ����������ʱ��timepת��Ϊ�û�ָ����ʱ����ʱ�䡣���������Խ����ݴ洢���û��ṩ�Ľṹ���С�*/
     localtime_r(&now, &tm);
 
-    pos = sprintf(log_buffer, "[%04d-%02d-%02d %02d:%02d:%02d][%05d][%s]",
+    pos = sprintf(log_buffer, "[%04d-%02d-%02d %02d:%02d:%02d][%lu][%5s]",
                 tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
-                tm.tm_hour, tm.tm_min, tm.tm_sec, getpid(),
+                tm.tm_hour, tm.tm_min, tm.tm_sec, pthread_self(),
                 msd_log_level_name[level]);
 
-    /*加工日志内容*/
+    /*�ӹ���־����*/
     va_start(ap, fmt);
     end = vsnprintf(log_buffer+pos, MSD_LOG_BUFFER_SIZE-pos, fmt, ap);
     va_end(ap);
@@ -660,7 +659,7 @@ int msd_log_write(int level, const char *fmt, ...)
 
     index = g_log.msd_log_multi? level:0;
 
-    /*异常处理*/
+    /*�쳣����*/
     if(g_log.g_msd_log_files[index].fd == -1)
     {
         //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
@@ -674,7 +673,7 @@ int msd_log_write(int level, const char *fmt, ...)
 
     if(MSD_NONEED == (rotate_result = msd_log_rotate(g_log.g_msd_log_files[index].fd, (const char*)g_log.g_msd_log_files[index].path, level)))
     {
-        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 是为了'\n' */            
+        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 ��Ϊ��'\n' */            
         {
             fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
             return MSD_FAILED;
@@ -682,7 +681,7 @@ int msd_log_write(int level, const char *fmt, ...)
     }
     else if(MSD_OK == rotate_result)
     {
-        /* 返回MSD_OK 说明是由本进程执行了roate，则写入操作 */
+        /* ����MSD_OK ˵�����ɱ�����ִ����roate����д����� */
         if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))       
         {
             fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
@@ -706,13 +705,13 @@ void test(void *arg)
     int j=0;
     for(j=0; j < 1; j++)
     {
-        MSD_FATAL_LOG("%s", "chil"); //一行是60个字节
+        MSD_FATAL_LOG("%s", "chil"); //һ����60���ֽ�
     }
 }
 
 int main()
 {
-    /******** 普通测试 **********/
+    /******** ��ͨ���� **********/
     /*
     printf("%s\n",MSD_OK_STATUS);
     printf("%s\n",MSD_FAILED_STATUS);
@@ -746,33 +745,33 @@ int main()
     }
     */
 
-    /**************测试rotate在多进程模式下的切换紊乱问题**************/  
+    /**************����rotate�ڶ����ģʽ�µ��л���������**************/  
     /*
-     * 用例1:文件大小限制为6000，log_num=9，1000个进程并发写入60字节
-     *       结果完美写入了10个文件，无错乱，无丢失，可以看看，和原始
-     *       版本比较非常明显
+     * ����1:�ļ���С����Ϊ6000��log_num=9��1000�����̲���д��60�ֽ�
+     *       �������д����10���ļ����޴��ң��޶�ʧ�����Կ�������ԭʼ
+     *       �汾�ȽϷǳ�����
      */
     /*
-     * 用例2:文件大小限制为60000，log_num=9，40个进程并发写入600000字节
-     *       多进程版本时而出现文件略大的问题，但是日志总数量稳定。原始
-     *       版本日志文件大小没谱，日志数量也没什么谱
+     * ����2:�ļ���С����Ϊ60000��log_num=9��40�����̲���д��600000�ֽ�
+     *       ����̰汾ʱ�������ļ��Դ�����⣬������־�������ȶ���ԭʼ
+     *       �汾��־�ļ���Сû�ף���־����Ҳûʲô��
      */
     /*
-     * 用例3:文件大小限制为60000，log_num=9，1000个进程并发写入600000字节
-     *       多进程版本能够勉强应付，有轻微的超额写入的问题，但是基本日志数量 
-     *       等都很稳定，一直保持在10个。原始版本没法看了，单个日志大小以及
-     *       日志数量两个指标都没谱
+     * ����3:�ļ���С����Ϊ60000��log_num=9��1000�����̲���д��600000�ֽ�
+     *       ����̰汾�ܹ���ǿӦ��������΢�ĳ���д������⣬���ǻ�����־���� 
+     *       �ȶ����ȶ���һֱ������10����ԭʼ�汾û�����ˣ�������־��С�Լ�
+     *       ��־��������ָ�궼û��
      */
     /*
-     * 用例4:文件大小限制为1G，log_num=9，1000个进程并发写入6000000字节
-     *       多进程版本也有点扛不住，日志roate后大概1.1G左右，原始版本就不测了  
+     * ����4:�ļ���С����Ϊ1G��log_num=9��1000�����̲���д��6000000�ֽ�
+     *       ����̰汾Ҳ�е㿸��ס����־roate����1.1G���ң�ԭʼ�汾�Ͳ�����  
      */
     /*
-     * 用例5:文件大小限制为6000000，log_num=9，40个进程并发写入600000*2字节
-     *       测试多进程版本中当解锁后发现其他进程rotate了日志，有两种思路
-     *       1.继续加锁，返回OK，等自己写完之后解锁
-     *       2.直接解锁，返回NONEED，然后写入  
-     *       结论第一种概率上较好
+     * ����5:�ļ���С����Ϊ6000000��log_num=9��40�����̲���д��600000*2�ֽ�
+     *       ���Զ���̰汾�е�����������������rotate����־��������˼·
+     *       1.��������������OK�����Լ�д��֮�����
+     *       2.ֱ�ӽ���������NONEED��Ȼ��д��  
+     *       ���۵�һ�ָ����ϽϺ�
      */
     /*
     MSD_BOOT_SUCCESS("the programe start");
@@ -791,7 +790,7 @@ int main()
             int j=0;
             for(j=0; j < 1; j++)
             {
-                MSD_FATAL_LOG("%s", "chil"); //一行是60个字节
+                MSD_FATAL_LOG("%s", "chil"); //һ����60���ֽ�
                 //MSD_FATAL_LOG("%s", "chil");
             }
             exit(0);
@@ -807,7 +806,7 @@ int main()
         }
     }
 
-    //父进程等待子进程退出
+    //�����̵ȴ��ӽ����˳�
     int status;
     for(i=0; i<child_cnt; i++)
     {
@@ -822,18 +821,18 @@ int main()
         perror("ls error");
     }
     */
-    /**************测试rotate在多线程模式下的切换紊乱问题**************/ 
+    /**************����rotate�ڶ��߳�ģʽ�µ��л���������**************/ 
     /*
-     * 用例1,2,3,4: 和第一个进程的用例相同，换成线程
-     * 结论：在极端情况下面，也不能完全保证每份日志大小，但是基本能够稳定。日志数量大小
-     *       可以稳定保证
+     * ����1,2,3,4: �͵�һ�����̵�������ͬ�������߳�
+     * ���ۣ��ڼ���������棬Ҳ������ȫ��֤ÿ����־��С�����ǻ����ܹ��ȶ�����־������С
+     *       �����ȶ���֤
      */
     MSD_BOOT_SUCCESS("the programe start");
     msd_log_init("./logs","test.log", MSD_LOG_LEVEL_ALL, 1<<30, 9, 0);    
     int i;
     int child_cnt = 1000;
     //int child_cnt = 40;    
-    pthread_t thread[child_cnt];               /*保存线程号*/
+    pthread_t thread[child_cnt];               /*�����̺߳�*/
 
     for(i=0; i<child_cnt; i++)
     {
