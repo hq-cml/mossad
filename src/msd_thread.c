@@ -18,6 +18,11 @@
  **/
 #include "msd_core.h"
 
+extern msd_instance_t *g_ins;
+
+void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int fd, 
+        void *client_data, int mask);
+
 /**
  * 功能:创建线程池
  * 参数:@num: 工作线程个数 
@@ -86,6 +91,7 @@ msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void*
 int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task)(void *), int idx)
 {
     msd_thread_worker_t *worker  = NULL;
+    char error_buf[256];
     if(!(worker = calloc(1, sizeof(msd_thread_worker_t))))
     {
         MSD_ERROR_LOG("Thread_worker_creat failed, idx:%d", idx);
@@ -96,7 +102,8 @@ int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task)(void 
     worker->idx                  = idx;
     pool->thread_worker_array[idx] = worker; /* 放入对应的位置 */
 
-    /* 创建通信管道
+    /* 
+     * 创建通信管道
      * master线程将需要处理的fd写入管道，woker线程从管道取出
      **/
     int fds[2];
@@ -106,17 +113,29 @@ int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task)(void 
         MSD_ERROR_LOG("Thread_worker_creat pipe failed, idx:%d", idx);
         return MSD_ERR;
     }
-    worker->notify_read_fd = fds[0];
+    worker->notify_read_fd  = fds[0];
     worker->notify_write_fd = fds[1];
-    
-    /*
-    worker->ev_base = (struct event_base*) event_init();
-    if (!worker->ev_base)
+
+    /* 管道不能是阻塞的! */
+    if((MSD_OK != msd_anet_nonblock(error_buf,  worker->notify_read_fd))
+        || (MSD_OK != msd_anet_nonblock(error_buf,  worker->notify_write_fd)))
     {
-        GKOLOG(FATAL, "Worker event base initialize error");
-        return -1;
+        close(worker->notify_read_fd);
+        close(worker->notify_write_fd);
+        free(worker);
+        MSD_ERROR_LOG("Set pipe nonblock failed, err:%s", error_buf);
+        return MSD_ERR;        
     }
-    */
+
+    /* 创建ae句柄 */
+    if(!(worker->t_ael = msd_ae_create_event_loop()))
+    {
+        close(worker->notify_read_fd);
+        close(worker->notify_write_fd);
+        free(worker);
+        MSD_ERROR_LOG("Create ae failed");
+        return MSD_ERR;  
+    }
     
     /* 创建线程 */
     pthread_attr_t attr;
@@ -189,17 +208,93 @@ void msd_thread_sleep(int s)
  *       1.  
  * 返回:成功:0; 失败:-x
  **/
-void* msd_thread_worker_task(void* arg) 
+void* msd_thread_worker_cycle(void* arg) 
 {
     msd_thread_worker_t *worker = (msd_thread_worker_t *)arg;
     MSD_INFO_LOG("Thread no.%d begin to work", worker->idx);
+
     
-    while(1)
+    if (msd_ae_create_file_event(worker->t_ael, worker->notify_read_fd, 
+                MSD_AE_READABLE, msd_thread_worker_process_notify, arg) == MSD_ERR) 
     {
-        msd_thread_sleep(1);
-        //printf("I am thread %d, My tid:%lu\n", worker->idx, (long unsigned int)worker->tid);
+        MSD_ERROR_LOG("Create file event failed");
+        msd_ae_free_event_loop(worker->t_ael);
+        return (void *)NULL; 
+
     }
-    return NULL;
+
+    //TODO
+    //启动定时器，清理超时的client
+
+    
+    msd_ae_main_loop(worker->t_ael);
+ 
+    return (void*)NULL;
+}
+
+/**
+ * 功能: worker线程工作函数
+ * 参数: @arg: 线程函数，通常来说，都是线程自身句柄的指针
+ * 说明: 
+ *       1.  
+ * 返回:成功:0; 失败:-x
+ **/
+void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int notify_fd, 
+        void *client_data, int mask)
+{
+    msd_thread_worker_t *worker = (msd_thread_worker_t *)client_data;
+    msd_master_t        *master = g_ins->master;
+    int                  client_idx;
+    msd_conn_client_t   **pclient = NULL;
+    int                  read_len;
+
+    /* 领取client idx */
+    if((read_len = read(notify_fd, &client_idx, sizeof(int)))!= sizeof(int))
+    {
+        MSD_ERROR_LOG("Worker[%d] read the notify_fd error! read_len:%d", worker->idx, read_len);
+        return;
+    }
+    MSD_INFO_LOG("Worker[%d] Get the task. Client_idx[%d]", worker->idx, client_idx);
+
+    /* 根据client idx获取到client地址 */
+    pclient = (msd_conn_client_t **)msd_vector_get_at(master->client_vec, client_idx);
+
+    /* 欢迎信息 */
+    if(g_ins->so_func->handle_open)
+    {
+        g_ins->so_func->handle_open(*pclient);
+    }
+    /*
+    if (dll.handle_open) 
+    {
+        if (dll.handle_open(&retbuf, &len, cli_ip, cli_port) != 0) 
+        {
+            QBH_WARNING_LOG("%p:close connection %s:%d according to handle_open",
+                    c, c->remote_ip, c->remote_port);
+            qbh_close_client(c);
+            return;
+        } 
+        else 
+        {
+            // 将handle_open的输出结果，返回给client 
+            // You can send something such as welcome information once
+            // upon client's connection. 
+            if (retbuf != NULL) 
+            {
+                c->sendbuf = qbh_sdscatlen(c->sendbuf, retbuf, len);
+                if (qbh_ae_create_file_event(ael, c->fd, QBH_AE_WRITABLE, 
+                            qbh_write_to_client, c) == QBH_ERROR) 
+                {
+                    QBH_ERROR_LOG("%p:create write file event failed on"
+                            " connection %s:%d", 
+                            c, c->remote_ip, c->remote_port);
+                    qbh_close_client(c);
+                }
+            }
+        }
+    }
+    */
+    
 }
 
  

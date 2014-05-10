@@ -36,6 +36,21 @@ static struct option const long_options[] = {
 
 msd_instance_t  *g_ins;
 start_mode_t     g_start_mode;
+msd_so_func_t    g_so;
+
+/* Master会利用syms实现对so各个函数的遍历初始化 */
+static msd_so_symbol_t syms[] = 
+{
+    /* symbol_name,     function pointer,         optional */
+    {"msd_handle_init",     (void **)&g_so.handle_init,       1}, 
+    {"msd_handle_fini",     (void **)&g_so.handle_fini,       1}, 
+    {"msd_handle_open",     (void **)&g_so.handle_open,       1}, 
+    {"msd_handle_close",    (void **)&g_so.handle_close,      1}, 
+    {"msd_handle_input",    (void **)&g_so.handle_input,      0},  /* 必选 */
+    {"msd_handle_process",  (void **)&g_so.handle_process,    0},  /* 必选 */
+    {NULL, NULL, 0}
+};
+
 
 /**
  * 功能: 初始化instance
@@ -274,7 +289,23 @@ int main(int argc, char **argv)
     }    
     
     /* 加载so动态库，用户的逻辑都写在了so中 */
-    //TODO
+    g_ins->so_file = msd_str_new(msd_conf_get_str_value(g_ins->conf, "so_file", NULL));
+    if (msd_load_so(&(g_ins->so_handle), syms, g_ins->so_file->buf) < 0) 
+    {
+        MSD_BOOT_FAILED("Load so file %s", g_ins->so_file->buf ? g_ins->so_file->buf : "(NULL)");
+    }
+    //TODO g_ins->so_handle需要有地方释放
+    g_ins->so_func = &g_so;
+    
+    if (g_ins->so_func->handle_init) 
+    {
+        /* 调用handle_init */
+        if (g_ins->so_func->handle_init(NULL) != MSD_OK) 
+        {
+            MSD_BOOT_FAILED("Invoke hook handle_init in master");
+        }
+    }
+
     
     /* 放开资源限制 */
     msd_rlimit_reset();
@@ -283,7 +314,7 @@ int main(int argc, char **argv)
     if(!(g_ins->pool = msd_thread_pool_create(
             msd_conf_get_int_value(g_ins->conf, "worker_num", 10),
             msd_conf_get_int_value(g_ins->conf, "stack_size", 10*1024*1024),
-            msd_thread_worker_task)))
+            msd_thread_worker_cycle)))
     {        
         MSD_BOOT_FAILED("Create threadpool failed");
     }

@@ -52,9 +52,11 @@ int msd_master_cycle()
     }
     g_ins->master          = master;
     master->start_time     = time(NULL);
+    master->cur_conn       = -1;
+    master->cur_thread     = -1;
     master->client_limit   = msd_conf_get_int_value(g_ins->conf, "client_limit", 10000);
-    master->ael            = msd_ae_create_event_loop();
-    if(!master->ael)
+    master->m_ael          = msd_ae_create_event_loop();
+    if(!master->m_ael)
     {
         MSD_ERROR_LOG("Create AE Pool failed");
         free(master);
@@ -65,7 +67,7 @@ int msd_master_cycle()
     if(!master->client_vec)
     {
         MSD_ERROR_LOG("Create AE Pool failed");
-        msd_ae_free_event_loop(master->ael);
+        msd_ae_free_event_loop(master->m_ael);
         free(master);
         return MSD_ERR;    
     }
@@ -80,7 +82,7 @@ int msd_master_cycle()
     if (listen_fd == MSD_ERR) 
     {
         MSD_ERROR_LOG("Create Server failed");
-        msd_ae_free_event_loop(master->ael);
+        msd_ae_free_event_loop(master->m_ael);
         free(master);
         return MSD_ERR;
     }
@@ -92,7 +94,7 @@ int msd_master_cycle()
         || (MSD_OK != msd_anet_tcp_nodelay(error_buf, listen_fd)))
     {
         MSD_ERROR_LOG("Set noblock or nodelay failed");
-        msd_ae_free_event_loop(master->ael);
+        msd_ae_free_event_loop(master->m_ael);
         close(listen_fd);
         free(master);
         return MSD_ERR;        
@@ -100,18 +102,19 @@ int msd_master_cycle()
     MSD_DEBUG_LOG("Set Nonblock and Nodelay Success");
     master->listen_fd = listen_fd;
 
-    if (msd_ae_create_file_event(master->ael, listen_fd, 
+    /* 注册listen_fd的读取事件 */
+    if (msd_ae_create_file_event(master->m_ael, listen_fd, 
                 MSD_AE_READABLE, msd_master_accept, NULL) == MSD_ERR) 
     {
         MSD_ERROR_LOG("Create file event failed");
-        msd_ae_free_event_loop(master->ael);
+        msd_ae_free_event_loop(master->m_ael);
         close(listen_fd);
         free(master);
         return MSD_ERR; 
 
     }
     MSD_INFO_LOG("Create Master Ae Success");
-    msd_ae_main_loop(master->ael);
+    msd_ae_main_loop(master->m_ael);
     /*
     if (qbh_ae_create_file_event(ael, notifier, QBH_AE_READABLE, 
                 qbh_notifier_handler, NULL) == QBH_ERROR) 
@@ -217,7 +220,7 @@ static void msd_master_accept(msd_ae_event_loop *el, int fd,
         MSD_ERROR_LOG("Worker dispatch failed, worker_id:%d", worker_id);
     }
 
-    MSD_DEBUG_LOG("Worker %d Get the task. Ip:%s, Port:%d", worker_id, cli_ip, cli_port);
+    MSD_INFO_LOG("Worker[%d] Get the client[%d] task. Ip:%s, Port:%d", worker_id, client_idx, cli_ip, cli_port);
     return;
 }
 
@@ -346,11 +349,13 @@ static int msd_conn_client_find_free_slot()
     //pthread_mutex_lock(&conn_list_lock);
     for (i = 0; i < master->client_limit; i++)
     {
+        //printf("loop\n");
         idx = (i + master->cur_conn+ 1) % master->client_limit;
         pclient = (msd_conn_client_t **)msd_vector_get_at(master->client_vec, idx);
         client = *pclient;
         if (!client || 0 == client->access_time)
         {
+            master->cur_conn = idx;
             break;
         }
     }
@@ -460,9 +465,9 @@ static int msd_thread_worker_dispatch(int client_idx)
                 &client_idx, sizeof(int));
     if (res == -1)
     {
-        MSD_ERROR_LOG("Pipe write error");
+        MSD_ERROR_LOG("Pipe write error, errno:%d", errno);
     }
-
+    MSD_DEBUG_LOG("Notify the worker[%d] process the client[%d]", worker_id, client_idx);
     return worker_id;
 }
 

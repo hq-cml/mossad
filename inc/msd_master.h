@@ -36,7 +36,7 @@ typedef struct msd_master
     int                 total_clients;  /* 当前client的总个数 */
     unsigned int        start_time;
     msd_vector_t        *client_vec;    /* msd_conn_client类型的vector，新的连接，会找到自己的合适位置 */
-    msd_ae_event_loop   *ael;
+    msd_ae_event_loop   *m_ael;         /* ae句柄，用于listen_fd的监听 */
     msd_lock_t          *thread_woker_list_lock;
        
 /*
@@ -77,7 +77,7 @@ typedef struct msd_master
 typedef struct msd_conn_client
 {
     int     magic;         /* 一个初始化的时候置上的魔幻数，用来标识cli指针是否发生异常 */
-    int     fd;            /* client连接过来之后，conn这边生成的fd */    
+    int     fd;            /* client连接过来之后，conn这边生成的fd (非阻塞的!) */    
     int     close_conn;    /* whether close connection after send response */
     char    *remote_ip;    /* client ip */
     int     remote_port;   /* client port */

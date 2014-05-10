@@ -30,11 +30,13 @@
 typedef struct msd_symbol_struct 
 {
     char    *sym_name; /* 动态库中某个函数的名称 */
-    void    **sym_ptr; /* 动态库中某个函数的地址 */
-    int     no_error;  /* 如果为1，则不关心dlsym是否失败；若为0，则dlsym失败后会释放句柄 */
-} msd_symbol_t;
+    void    **sym_ptr; /* 动态库中某个函数的地址(二级指针) */
+    int     no_error;  /* 如果为1，则不关心dlsym是否失败(非必选的so函数)
+                        * 若为0，则dlsym失败后会释放句柄(必选的so函数)
+                        */
+} msd_so_symbol_t;
 
-int msd_load_so(void **phandle, msd_symbol_t *syms, const char *filename);
+int msd_load_so(void **phandle, msd_so_symbol_t *syms, const char *filename);
 void msd_unload_so(void **phandle);
 
 #endif /* __MSD_DLL_H_INCLUDED__ */

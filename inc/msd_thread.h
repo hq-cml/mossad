@@ -52,8 +52,11 @@ struct thread_worker{
     pthread_t          tid;             /* 线程id */
     int                notify_read_fd;  /* master和woker线程通信管道读取端 */
     int                notify_write_fd; /* master和woker线程通信管道写入端 */  
+
+    msd_ae_event_loop  *t_ael;          /* worker线程ae句柄，用于监听管道和所负责的client fd */
     
     msd_thread_pool_t  *pool;           /* 依附于的线程池句柄 */
+    
     
     //struct event_base *ev_base;
     //struct event ev_notify;
@@ -86,7 +89,7 @@ msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void*
 int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task)(void *arg), int idx);
 int msd_thread_pool_destroy(msd_thread_pool_t *pool);
 int msd_thread_worker_destroy(msd_thread_worker_t *worker);
-void* msd_thread_worker_task(void* arg);
+void* msd_thread_worker_cycle(void* arg);
 void msd_thread_sleep(int s);
 /*
 threadpool_t *threadpool_create(int init, int max, int stack_size);

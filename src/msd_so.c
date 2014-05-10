@@ -27,7 +27,7 @@
  *      1. 遍历sym数组，分别初始化全局dll中的各个函数
  * 返回: 成功，0 失败，-x
  **/
-int msd_load_so(void **phandle, msd_symbol_t *sym, const char *filename) 
+int msd_load_so(void **phandle, msd_so_symbol_t *sym, const char *filename) 
 {
     char    *error;
     int     i = 0;
@@ -89,7 +89,7 @@ typedef struct dll_func_struct
 dll_func_t dll;
 
 //与动态库一一对应的标记数组，包含了每个动态库函数的具体信息
-msd_symbol_t syms[] = 
+msd_so_symbol_t syms[] = 
 {
     {"handle_init", (void **)&dll.handle_init, 1},
     {"handle_fini", (void **)&dll.handle_fini, 1},
