@@ -27,7 +27,10 @@
  
 /* 默认分割字符：'\t',' ','\r','\n' */
 static const unsigned char g_default_ifs[256] = {[9]=1, [10]=1, [13]=1, [32]=1};
- 
+
+static msd_str_t* msd_str_newlen(const void *init, size_t init_len);
+//static void msd_str_dump(msd_str_t *pstr);
+
 /**
  * 功能:获得字符串长度 
  **/
@@ -69,7 +72,7 @@ static inline size_t msd_str_alloc_size(const msd_str_t *pstr)
  *      2. 此函数不对外，因为如果init_len不对，会造成字符串"空洞"
  * 返回:成功:字符串指针;失败:NULL
  **/
-msd_str_t* msd_str_newlen(const void *init, size_t init_len)
+static msd_str_t* msd_str_newlen(const void *init, size_t init_len)
 {
     msd_str_t *pstr;
 
@@ -156,25 +159,25 @@ void msd_str_clear(msd_str_t *pstr)
 
 /**
  * 功能:字符串扩容 
- * 参数:@pstr:初始字符串指针 
+ * 参数:@pstr:初始字符串指针的指针 
  *      @add_len:扩容的量 
  * 描述:
  *      1.如果free空间足够，则直接退出
  *      2.如果free空间不够，则至少能扩容2倍new_len
  *      3.执行完该函数后，len字段不会变化，变化的是free
- *      4.由于realloc特性，新的地址可能和pstr不同
+ *      4.由于realloc特性，新的地址可能和pstr不同，所以pstr是二级指针
  *      5.由于realloc特性，无需释放原来的pstr(自动释放)
  * 返回:成功:字符串指针(可能是新地址);失败:NULL
  **/
-static msd_str_t* msd_str_expand_room(msd_str_t *pstr, size_t add_len)
+static msd_str_t* msd_str_expand_room(msd_str_t **pstr, size_t add_len)
 {
     msd_str_t *pstr_new = NULL;
-    size_t cur_free     = msd_str_avail(pstr);
-    size_t cur_len      = msd_str_len(pstr);
+    size_t cur_free     = msd_str_avail(*pstr);
+    size_t cur_len      = msd_str_len(*pstr);
     size_t new_len      = 0;
 
     if(cur_free >= add_len)
-        return pstr;
+        return *pstr;
     
     new_len = cur_len+add_len;
     if(new_len < MSD_STRING_MAX_PREALLOC)
@@ -182,19 +185,20 @@ static msd_str_t* msd_str_expand_room(msd_str_t *pstr, size_t add_len)
     else
         new_len += MSD_STRING_MAX_PREALLOC;
 
-    pstr_new = realloc(pstr, sizeof(msd_str_t)+new_len+1);
+    pstr_new = realloc(*pstr, sizeof(msd_str_t)+new_len+1);
     if(NULL == pstr_new)
     {
         //TODO log
         //danger: perhaps cause mem leak
         return NULL;
     }
-    else if(pstr_new != pstr)
+    else if(pstr_new != *pstr)
     {
         //TODO log
     }
 
     pstr_new->free = new_len-cur_len;
+    *pstr = pstr_new;
     return pstr_new;
 }
 
@@ -225,7 +229,7 @@ void msd_str_incr_len(msd_str_t *pstr, int incr)
 
 /**
  * 功能:字符串拼接 
- * 参数:@pstr:初始字符串 
+ * 参数:@pstr:初始字符串二级指针 
  *      @t:待拼接串 
  *      @len:拼接长度 
  * 描述:
@@ -233,13 +237,14 @@ void msd_str_incr_len(msd_str_t *pstr, int incr)
  *      2.返回的pstr_new可能和pstr不同
  * 返回:成功:新字符串指针;失败:NULL
  **/
-msd_str_t *msd_str_cat_len(msd_str_t *pstr, const void *t, size_t len)
+msd_str_t *msd_str_cat_len(msd_str_t **pstr, const void *t, size_t len)
 {
-    size_t cur_len = msd_str_len(pstr);
+    size_t cur_len = msd_str_len(*pstr);
     msd_str_t *pstr_new = msd_str_expand_room(pstr, len);
     
     if(!pstr_new)
         return NULL;
+    assert(pstr_new == *pstr);
     memcpy(pstr_new->buf+cur_len, t, len);
     pstr_new->len = cur_len+len;
     pstr_new->free -= len;
@@ -250,67 +255,70 @@ msd_str_t *msd_str_cat_len(msd_str_t *pstr, const void *t, size_t len)
 
 /**
  * 功能:字符串拼接 
- * 参数:@pstr:初始字符串 
+ * 参数:@pstr:初始字符串二级指针  
  *      @t:待拼接串 
  * 返回:成功:新字符串指针;失败:NULL
  **/
-msd_str_t *msd_str_cat(msd_str_t *pstr, const void *t)
+msd_str_t *msd_str_cat(msd_str_t **pstr, const void *t)
 {
     return msd_str_cat_len(pstr, t, strlen(t));
 }
 
 /**
  * 功能:字符串拼接 
- * 参数:@init:初始字符串 
+ * 参数:@init:初始字符串二级指针  
  *      @init_len:初始字符串长度 
  * 描述:以init表示的字符串，初始化一个新串
  * 返回:成功:字符串指针;失败:NULL
  **/
-msd_str_t *msd_str_cat_msd_str(msd_str_t *pstr, msd_str_t *pstr1)
+msd_str_t *msd_str_cat_msd_str(msd_str_t **pstr, msd_str_t *pstr1)
 {
     return msd_str_cat_len(pstr, pstr1->buf, pstr1->len);
 }
 
 /**
  * 功能:字符串拷贝 
- * 参数:@pstr:初始字符串 
+ * 参数:@pstr:初始字符串二级指针  
  *      @t:待拷贝串 
  *      @len:待拷贝串长度 
  * 返回:成功:字符串指针;失败:NULL
  **/
-msd_str_t *msd_str_cpy_len(msd_str_t *pstr, const void *t, size_t len)
+msd_str_t *msd_str_cpy_len(msd_str_t **pstr, const void *t, size_t len)
 {
-    size_t totlen = pstr->free+pstr->len;
+    msd_str_t *pstr_new;
+    size_t totlen = (*pstr)->free + (*pstr)->len;
     if(totlen < len)
     {
         /* maybe the pstr is not the orginal one */
-        pstr = msd_str_expand_room(pstr, len-pstr->len);
-        if(!pstr)
+        pstr_new = msd_str_expand_room(pstr, len-(*pstr)->len);
+        if(!pstr_new)
             return NULL;
+            
+        assert(pstr_new == *pstr);
         /* after expand room, the free/len maybe changed */
-        totlen = pstr->free+pstr->len;
+        totlen = pstr_new->free+pstr_new->len;
     }
-    memcpy(pstr->buf, t, len);
-    pstr->len = len;
-    pstr->free = totlen-len;
-    pstr->buf[len] = '\0';
-    return pstr;
+    memcpy((*pstr)->buf, t, len);
+    (*pstr)->len = len;
+    (*pstr)->free = totlen-len;
+    (*pstr)->buf[len] = '\0';
+    return (*pstr);
 }
 
 /**
  * 功能:初始拷贝 
- * 参数:@pstr:初始字符串 
+ * 参数:@pstr:初始字符串二级指针  
  *      @t:待拷贝串 
  * 返回:成功:字符串指针;失败:NULL
  **/
-msd_str_t *msd_str_cpy(msd_str_t *pstr, const void *t)
+msd_str_t *msd_str_cpy(msd_str_t **pstr, const void *t)
 {
     return msd_str_cpy_len(pstr, t, strlen(t));
 }
 
 /**
  * 功能:格式化拼接字符串 
- * 参数:@pstr:初始字符串 
+ * 参数:@pstr:初始字符串二级指针 
  *      @fmt:格式
  *      @...:不定参数
  * 描述:
@@ -325,13 +333,13 @@ msd_str_t *msd_str_cpy(msd_str_t *pstr, const void *t)
  *         复制len-1个字节，最后一个补充'\0'
  * 返回:成功:字符串指针;失败:NULL
  **/
-msd_str_t * msd_str_cat_sprintf(msd_str_t *pstr, const char *fmt, ...)
+msd_str_t * msd_str_cat_sprintf(msd_str_t **pstr, const char *fmt, ...)
 {
     va_list ap;
     va_list ap_cpy;
     char    *buf = NULL;
     size_t  buf_len = 16;
-
+    msd_str_t *pstr_new;
     va_start(ap, fmt);
     while(1)
     {
@@ -351,9 +359,10 @@ msd_str_t * msd_str_cat_sprintf(msd_str_t *pstr, const char *fmt, ...)
         break;
     }
     va_end(ap);
-    pstr = msd_str_cat(pstr, buf);
+    pstr_new = msd_str_cat(pstr, buf);
     free(buf);
-    return pstr;
+    assert(pstr_new == *pstr);
+    return *pstr;
 }
 
 /**
@@ -373,13 +382,14 @@ msd_str_t * msd_str_cat_sprintf(msd_str_t *pstr, const char *fmt, ...)
  *         复制len-1个字节，最后一个补充'\0'
  * 返回:成功:字符串指针;失败:NULL
  **/
-msd_str_t * msd_str_sprintf(msd_str_t *pstr, const char *fmt, ...)
+msd_str_t * msd_str_sprintf(msd_str_t **pstr, const char *fmt, ...)
 {
     va_list ap;
     va_list ap_cpy;
     char    *buf = NULL;
     size_t  buf_len = 16;
-
+    msd_str_t *pstr_new;
+    
     va_start(ap, fmt);
     while(1)
     {
@@ -399,9 +409,10 @@ msd_str_t * msd_str_sprintf(msd_str_t *pstr, const char *fmt, ...)
         break;
     }
     va_end(ap);
-    pstr = msd_str_cpy(pstr, buf);
+    pstr_new = msd_str_cpy(pstr, buf);
     free(buf);
-    return pstr;
+    assert(pstr_new == *pstr);
+    return *pstr;
 }
 
 /**
@@ -453,7 +464,7 @@ int msd_str_range(msd_str_t *pstr, int start, int end)
     if(end<0   || end>(cur_len-1))
         return MSD_ERR;
     if(end<start)
-        return MSD_ERR;
+        return MSD_NONEED;
 
     new_len = end-start+1;
     memmove(pstr->buf, pstr->buf+start, new_len);
@@ -594,7 +605,10 @@ int msd_str_explode(unsigned char *buf, unsigned char *field[],
 }
 
 #ifdef __MSD_STRING_TEST_MAIN__
-void msd_str_dump(msd_str_t *pstr)
+/**
+ * 功能: string dump
+ **/
+static void msd_str_dump(msd_str_t *pstr)
 {
     printf("The string data : %s\n", pstr->buf);
     //printf("The string size of msd_str_t : %d\n", (int)sizeof(msd_str_t)); #8
@@ -610,8 +624,8 @@ void msd_str_dump(msd_str_t *pstr)
     if(strlen(pstr->buf) != msd_str_len(pstr))
     {
         printf("Error:Hole exist!\n");
-        printf("strlen(pstr->buf):%d\n", strlen(pstr->buf));
-        printf("msd_str_len(pstr):%d\n", msd_str_len(pstr));
+        printf("strlen(pstr->buf):%d\n", (int)strlen(pstr->buf));
+        printf("msd_str_len(pstr):%d\n", (int)msd_str_len(pstr));
     }
     printf("\n");
 }
@@ -623,6 +637,8 @@ int main()
     msd_str_t *pstr_new = NULL;
     char buf[100];
     memset(buf, 0, 100); 
+
+    //test hole
     /*
     pstr = msd_str_newlen("hello",10);
     msd_str_dump(pstr);
@@ -644,12 +660,13 @@ int main()
     pstr = msd_str_new_empty();
     msd_str_dump(pstr);
     pstr_new = msd_str_dup(pstr);
-    //msd_str_dump(pstr_new);#segment fault
+    //msd_str_dump(pstr_new);//segment fault
     msd_str_free(pstr);
     msd_str_free(pstr_new);
-    */ 
+    */
     
     //test mem leak
+    /*
     for(i=0; i<10000000; i++)
     {
         pstr = msd_str_new("hello");
@@ -657,7 +674,7 @@ int main()
     }
     printf("sleep 100s\n");
     sleep(100);
-    
+    */
     /*
     pstr = msd_str_new("hello");
     msd_str_dump(pstr);
@@ -668,57 +685,65 @@ int main()
     /* 
     pstr = msd_str_new("hello");
     msd_str_dump(pstr);
-    msd_str_expand_room(pstr, 100);
+    msd_str_expand_room(&pstr, 100);
     msd_str_dump(pstr);
     msd_str_free(pstr);
-    */
-    /*
+    msd_str_free(pstr);
+    */ 
+    /* 
     pstr = msd_str_new("hello");
-    msd_str_expand_room(pstr, 100);
+    msd_str_expand_room(&pstr, 100);
     i = read(0, pstr->buf+pstr->len, 100);
     printf("read len:%d\n", i); 
     msd_str_incr_len(pstr, i);
     msd_str_dump(pstr);
-    msd_str_free(pstr);
-    */ 
-    /*    
+    */
+    /*  
     pstr = msd_str_new("hello");
-    pstr = msd_str_cat(pstr, " world!");  
+    msd_str_cat(&pstr, " world!");  
     msd_str_dump(pstr);
     msd_str_free(pstr);
     */
     /*
     pstr = msd_str_new("hello");
     pstr_new = msd_str_new(" world!");  
-    pstr = msd_str_cat_msd_str(pstr, pstr_new);
+    msd_str_cat_msd_str(&pstr, pstr_new);
     msd_str_dump(pstr);
     msd_str_free(pstr);
     msd_str_free(pstr_new);
-    */
+    */ 
     /*
     pstr = msd_str_new("hello");
-    pstr_new = msd_str_new("hello");  
-    pstr = msd_str_cpy(pstr, "abcdefghigklmn");
-    pstr_new = msd_str_cpy(pstr_new, "a");
+    pstr_new = msd_str_new("12345"); 
+
+    printf("%p, %p\n", pstr, pstr_new);
+    msd_str_dump(pstr);
+    msd_str_dump(pstr_new); 
+    
+    printf("addr1:%p\n", msd_str_cpy(&pstr, "abcdefghigklmn"));
+    printf("addr2:%p\n", msd_str_cpy(&pstr_new, "a"));
+    
+    printf("%p, %p\n", pstr, pstr_new);
     msd_str_dump(pstr);
     msd_str_dump(pstr_new);
+    
     msd_str_free(pstr);
     msd_str_free(pstr_new);
     */
     /*
     pstr = msd_str_new("hello");
-    pstr = msd_str_cat_sprintf(pstr, " %s, I am %s, I'm %d years old"
+    msd_str_cat_sprintf(&pstr, " %s, I am %s, I'm %d years old"
                 , "every one", "hq", 28);
     msd_str_dump(pstr);
     msd_str_free(pstr);
     */
-    /*
+    
     pstr = msd_str_new("abcde");
-    pstr = msd_str_sprintf(pstr, "hello %s, I am %s, I'm %d years old"
+    pstr = msd_str_sprintf(&pstr, "hello %s, I am %s, I'm %d years old"
                 , "every one", "hq", 28);
     msd_str_dump(pstr);
     msd_str_free(pstr);
-    */
+    
     /*  
     pstr = msd_str_new("   abcde    ");
     msd_str_dump(pstr);
@@ -762,6 +787,8 @@ int main()
     msd_str_free(pstr);
     msd_str_free(pstr_new);
     */
+
+    /*
     strcpy(buf, "abcd\t\nefgh ijkl \rmn");
     //strcpy(buf, "abcd");
     i=5;
@@ -772,6 +799,7 @@ int main()
     {
         printf("data:%s, len:%d\n", filed[j], strlen(filed[j]));
     }
+    */
     return 0;
 }
 #endif

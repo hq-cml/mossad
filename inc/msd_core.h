@@ -107,11 +107,11 @@ typedef struct msd_so_func_struct
                                                                        */   
     int (*handle_open)(msd_conn_client_t *client);
     void (*handle_close)(char *);                                     /* 当关闭与某个client的连接的时候调用，第一个参数client ip, 第二个client port，此函数可选 */                                             
-    int (*handle_input)(const char*, int, char *, int);               /* 用来获取client发送请求消息的具体长度，即得到协议长度
+    int (*handle_input)(msd_conn_client_t *client);               /* 用来获取client发送请求消息的具体长度，即得到协议长度
                                                                        * mossad获取到此长度之后从接收缓冲区中读取相应长度的请求数据，交给handle_process来处理
                                                                        * 第一个参数是接收缓冲区，第二个接收缓冲区长度，第三个client ip, 第四个client port 
                                                                        */
-    int (*handle_process)(char *, int, char **, int *, char *, int);  /* Worker进程专用，用来根据client的输入，产生出输出，吐出数据
+    int (*handle_process)(msd_conn_client_t *client);  /* Worker进程专用，用来根据client的输入，产生出输出，吐出数据
                                                                        * 参数:第一个是接收缓冲区，第二个是接收内容长度
                                                                        *      第三个是发送缓冲区，第四个是发送内容的长度引用
                                                                        *      第五个参数client ip, 第六个client port

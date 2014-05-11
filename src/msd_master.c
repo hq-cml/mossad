@@ -278,51 +278,6 @@ static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
     client->idx = idx;
 
     return idx;
-    
-    /* 注册读取事件 
-        不该在此处注册，应该在woker线程里面注册
-        if (qbh_ae_create_file_event(ael, cli_fd, QBH_AE_READABLE,
-                qbh_read_from_client, cli) == QBH_ERROR) 
-        {
-            QBH_ERROR_LOG("%p:Create read file event failed for connection:%s:%d",
-                    cli, cli_ip, cli_port);
-            close(cli_fd);
-            free(cli);
-            return NULL;
-        }
-    */
-
-    /*
-    //TODO 设置协议长度?
-    if (dll.handle_open) 
-    {
-        if (dll.handle_open(&retbuf, &len, cli_ip, cli_port) != 0) 
-        {
-            QBH_WARNING_LOG("%p:close connection %s:%d according to handle_open",
-                    c, c->remote_ip, c->remote_port);
-            qbh_close_client(c);
-            return;
-        } 
-        else 
-        {
-            // 将handle_open的输出结果，返回给client 
-            // You can send something such as welcome information once
-            // upon client's connection. 
-            if (retbuf != NULL) 
-            {
-                c->sendbuf = qbh_sdscatlen(c->sendbuf, retbuf, len);
-                if (qbh_ae_create_file_event(ael, c->fd, QBH_AE_WRITABLE, 
-                            qbh_write_to_client, c) == QBH_ERROR) 
-                {
-                    QBH_ERROR_LOG("%p:create write file event failed on"
-                            " connection %s:%d", 
-                            c, c->remote_ip, c->remote_port);
-                    qbh_close_client(c);
-                }
-            }
-        }
-    }  
-    */
 
 }
 

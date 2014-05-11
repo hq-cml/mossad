@@ -18,10 +18,21 @@
  **/
 #include "msd_core.h"
 
+#define MSD_IOBUF_SIZE    4096
+#define MSD_MAX_PROT_LEN  10485760 /* 最大请求包10M */
+
+
 extern msd_instance_t *g_ins;
 
-void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int fd, 
+static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int fd, 
         void *client_data, int mask);
+
+static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task)(void *arg), 
+        int idx);
+
+static int msd_thread_worker_destroy(msd_thread_worker_t *worker);
+
+static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, int mask);
 
 /**
  * 功能:创建线程池
@@ -88,7 +99,7 @@ msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void*
  *      3. 启动woker线程，开始干活，函数返回
  * 返回:成功:0; 失败:-x
  **/
-int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task)(void *), int idx)
+static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task)(void *), int idx)
 {
     msd_thread_worker_t *worker  = NULL;
     char error_buf[256];
@@ -180,7 +191,7 @@ int msd_thread_pool_destroy(msd_thread_pool_t *pool)
  * 参数: @pool: 线程池句柄 
  * 返回:成功:0; 失败:-x
  **/
-int msd_thread_worker_destroy(msd_thread_worker_t *worker) 
+static int msd_thread_worker_destroy(msd_thread_worker_t *worker) 
 {
     assert(worker);
     //TODO
@@ -239,7 +250,7 @@ void* msd_thread_worker_cycle(void* arg)
  *       1.  
  * 返回:成功:0; 失败:-x
  **/
-void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int notify_fd, 
+static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int notify_fd, 
         void *client_data, int mask)
 {
     msd_thread_worker_t *worker = (msd_thread_worker_t *)client_data;
@@ -262,39 +273,145 @@ void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int notify_f
     /* 欢迎信息 */
     if(g_ins->so_func->handle_open)
     {
-        g_ins->so_func->handle_open(*pclient);
-    }
-    /*
-    if (dll.handle_open) 
-    {
-        if (dll.handle_open(&retbuf, &len, cli_ip, cli_port) != 0) 
+        if(MSD_OK != g_ins->so_func->handle_open(*pclient))
         {
-            QBH_WARNING_LOG("%p:close connection %s:%d according to handle_open",
-                    c, c->remote_ip, c->remote_port);
-            qbh_close_client(c);
+            //TODO close conn
+            
+            MSD_ERROR_LOG("Handle open error! Close connection. IP:%s, Port:%d.", 
+                            (*pclient)->remote_ip, (*pclient)->remote_port);
+            return;
+        }
+    }
+        
+    /* 注册读取事件 */
+    if (msd_ae_create_file_event(worker->t_ael, (*pclient)->fd, MSD_AE_READABLE,
+                msd_read_from_client, *pclient) == MSD_ERR) 
+    {
+        //TODO close conn
+        MSD_ERROR_LOG("Create read file event failed for connection:%s:%d",
+                (*pclient)->remote_ip, (*pclient)->remote_port);
+        return;
+    }  
+}
+
+/**
+ * 功能: client可读时的回调函数。
+ * 参数: @arg: 线程函数，通常来说，都是线程自身句柄的指针
+ * 说明: 
+ *       1.  
+ * 返回:成功:0; 失败:-x
+ **/
+static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, int mask) 
+{
+    msd_conn_client_t *client = (msd_conn_client_t *)privdata;
+    int nread;
+    char buf[MSD_IOBUF_SIZE];
+    MSD_AE_NOTUSED(el);  /* 不使用，啥也不干 */
+    MSD_AE_NOTUSED(mask);
+    
+    MSD_DEBUG_LOG("Read from client %s:%d", client->remote_ip, client->remote_port);
+    
+    nread = read(fd, buf, MSD_IOBUF_SIZE - 1);
+    client->access_time = time(NULL);
+    if (nread == -1) 
+    {
+        /* 非阻塞的fd，读取不会阻塞，如果无内容可读，则errno==EAGAIN */
+        if (errno == EAGAIN) 
+        {
+            MSD_WARNING_LOG("Read connection %s:%d eagain: %s",
+                     client->remote_ip, client->remote_port, strerror(errno));
+            nread = 0;
             return;
         } 
         else 
         {
-            // 将handle_open的输出结果，返回给client 
-            // You can send something such as welcome information once
-            // upon client's connection. 
-            if (retbuf != NULL) 
-            {
-                c->sendbuf = qbh_sdscatlen(c->sendbuf, retbuf, len);
-                if (qbh_ae_create_file_event(ael, c->fd, QBH_AE_WRITABLE, 
-                            qbh_write_to_client, c) == QBH_ERROR) 
-                {
-                    QBH_ERROR_LOG("%p:create write file event failed on"
-                            " connection %s:%d", 
-                            c, c->remote_ip, c->remote_port);
-                    qbh_close_client(c);
-                }
-            }
+            MSD_ERROR_LOG("Read connection %s:%d failed: %s",
+                     client->remote_ip, client->remote_port, strerror(errno));
+            //TODO qbh_close_client(cli);
+            return;
         }
+    } 
+    else if (nread == 0) 
+    {
+        MSD_INFO_LOG("Client close connection %s:%d",client->remote_ip, client->remote_port);
+        //TODO qbh_close_client(cli);
+        close(fd);
+        return;
     }
-    */
-    
+    buf[nread] = '\0';
+
+    //printf("%d %d  %d  %d\n", buf[nread-3], buf[nread-2], buf[nread-1], buf[nread]);
+    MSD_INFO_LOG("Read from client %s:%d. Length:%d, Content:%s", 
+                    client->remote_ip, client->remote_port, nread, buf);
+
+    /* 将读出的内容拼接到recvbuf上面，这里是拼接，因为可能请求的包很大
+     * 需要多次read才能将读取内容拼装成一个完整的请求 */
+    msd_str_cat(&(client->recvbuf), buf);
+
+    if (client->recv_prot_len == 0) 
+    {
+        /* 每次读取的长度不定，所以recv_prot_len是一个变量，不断调整 */ 
+        client->recv_prot_len = g_ins->so_func->handle_input(client);
+        MSD_DEBUG_LOG("Get the recv_prot_len %d", client->recv_prot_len);
+    } 
+
+    if (client->recv_prot_len < 0 || client->recv_prot_len > MSD_MAX_PROT_LEN) 
+    {
+        MSD_ERROR_LOG("Invalid protocol length:%d for connection %s:%d", 
+                 client->recv_prot_len, client->remote_ip, client->remote_port);
+        //TODO qbh_close_client(cli);
+        return;
+    } 
+
+    if (client->recv_prot_len == 0) 
+    {
+        /* 当处理一个比较大型的请求包的时候(或者客户端是telnet，每一次回车都会触发一个TCP包发送)
+         * 一个请求可能会由多个TCP包发送过来andle_input暂时还无法判断出整个请求的长度，则返回0，
+         * 表示需要继续读取数据，直到handle_input能够判断出请求长度为止
+         */
+        MSD_INFO_LOG("Unkonw the accurate protocal lenght, do noting!. connection %s:%d", 
+                        client->remote_ip, client->remote_port);
+        return;
+    } 
+
+    if ( client->recvbuf->len >= client->recv_prot_len) 
+    {
+        //TODO 这个地方还需要多一些例子测测，比如transfer等，光用一个echo不够
+
+        /* 目前读取到的数据，已经足够拼出一个完整请求包，则调用handle_process */
+        if(MSD_OK != g_ins->so_func->handle_process(client))
+        {
+            MSD_ERROR_LOG("The handle_process failed. connection %s:%d", 
+                        client->remote_ip, client->remote_port);
+            //TODO msd_str_range
+            //TODO recv_prot_len
+            return;
+        }
+        else
+        {
+            MSD_DEBUG_LOG("The handle_process success. connection %s:%d", 
+                        client->remote_ip, client->remote_port);
+
+            // 每次只读取recv_prot_len数据长度，如果recvbuf里面还有剩余数据，则应该截出来保留
+            if(MSD_OK != msd_str_range(client->recvbuf, client->recv_prot_len,  client->recvbuf->len - 1))
+            {
+                /* 当recv_prot_len==recvbuf->len的时候，range()返回错误，直接清空缓冲区 */
+                msd_str_clear(client->recvbuf);
+            }
+            
+            /* 将协议长度清0，因为每次请求都是独立的，请求的协议长度是可能发生变化，比如http服务器 
+             * 需要由handle_input函数去实时计算 */
+            client->recv_prot_len = 0; 
+        }
+                              
+    }
+    else
+    {
+        /* 目前读取到的数据还不够组装成需要的请求，则继续等待读取 */
+        MSD_DEBUG_LOG("The data lenght not enough, do noting!. connection %s:%d", 
+                        client->remote_ip, client->remote_port);
+        return;
+    }
 }
 
  

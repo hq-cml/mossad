@@ -44,20 +44,19 @@ typedef struct _msd_string_s
     char buf[];  /* 数据开始指针 */
 }msd_str_t;
 
-msd_str_t* msd_str_newlen(const void *init, size_t init_len);
 msd_str_t* msd_str_new(const void *init);
 msd_str_t* msd_str_new_empty(void);
 msd_str_t* msd_str_dup(msd_str_t *init);
 void       msd_str_free(msd_str_t *pstr);
 void       msd_str_clear(msd_str_t *pstr);
 void       msd_str_incr_len(msd_str_t *pstr, int incr);
-msd_str_t* msd_str_cat_len(msd_str_t *pstr, const void *t, size_t len);
-msd_str_t* msd_str_cat(msd_str_t *pstr, const void *t);
-msd_str_t* msd_str_cat_msd_str(msd_str_t *pstr, msd_str_t *pstr1);
-msd_str_t* msd_str_cpy_len(msd_str_t *pstr, const void *t, size_t len);
-msd_str_t* msd_str_cpy(msd_str_t *pstr, const void *t);
-msd_str_t* msd_str_cat_sprintf(msd_str_t *pstr, const char *fmt, ...);
-msd_str_t* msd_str_sprintf(msd_str_t *pstr, const char *fmt, ...);
+msd_str_t* msd_str_cat_len(msd_str_t **pstr, const void *t, size_t len);
+msd_str_t* msd_str_cat(msd_str_t **pstr, const void *t);
+msd_str_t* msd_str_cat_msd_str(msd_str_t **pstr, msd_str_t *pstr1);
+msd_str_t* msd_str_cpy_len(msd_str_t **pstr, const void *t, size_t len);
+msd_str_t* msd_str_cpy(msd_str_t **pstr, const void *t);
+msd_str_t* msd_str_cat_sprintf(msd_str_t **pstr, const char *fmt, ...);
+msd_str_t* msd_str_sprintf(msd_str_t **pstr, const char *fmt, ...);
 void       msd_str_trim(msd_str_t *pstr, const char *cset);
 int        msd_str_range(msd_str_t *pstr, int start, int end);
 void       msd_str_tolower(char *s);

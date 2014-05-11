@@ -86,15 +86,8 @@ struct thread_pool{
 };
  
 msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void* (*worker_task)(void *arg));
-int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task)(void *arg), int idx);
 int msd_thread_pool_destroy(msd_thread_pool_t *pool);
-int msd_thread_worker_destroy(msd_thread_worker_t *worker);
 void* msd_thread_worker_cycle(void* arg);
 void msd_thread_sleep(int s);
-/*
-threadpool_t *threadpool_create(int init, int max, int stack_size);
-int threadpool_add_task(threadpool_t *tp, void (*func)(void*), void *arg, int priority);
-int threadpool_destroy(threadpool_t *tp);
-void threadpool_clear_task_queue(threadpool_t *pool);
-*/
+
 #endif /* __MSD_THREAD_H_INCLUDED__ */
