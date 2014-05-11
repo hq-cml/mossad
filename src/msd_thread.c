@@ -270,13 +270,17 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
     /* 根据client idx获取到client地址 */
     pclient = (msd_conn_client_t **)msd_vector_get_at(master->client_vec, client_idx);
 
+    /* 将worker_id写入client结构 */
+    (*pclient)->worker_id = worker->idx;
+    //TODO 应该加一个向woker->conn自增之类的操作
+
+    
     /* 欢迎信息 */
     if(g_ins->so_func->handle_open)
     {
         if(MSD_OK != g_ins->so_func->handle_open(*pclient))
         {
-            //TODO close conn
-            
+            msd_close_client(client_idx, NULL);
             MSD_ERROR_LOG("Handle open error! Close connection. IP:%s, Port:%d.", 
                             (*pclient)->remote_ip, (*pclient)->remote_port);
             return;
@@ -287,7 +291,7 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
     if (msd_ae_create_file_event(worker->t_ael, (*pclient)->fd, MSD_AE_READABLE,
                 msd_read_from_client, *pclient) == MSD_ERR) 
     {
-        //TODO close conn
+        msd_close_client(client_idx, "create file event failed");
         MSD_ERROR_LOG("Create read file event failed for connection:%s:%d",
                 (*pclient)->remote_ip, (*pclient)->remote_port);
         return;
@@ -327,15 +331,15 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
         {
             MSD_ERROR_LOG("Read connection %s:%d failed: %s",
                      client->remote_ip, client->remote_port, strerror(errno));
-            //TODO qbh_close_client(cli);
+
+            msd_close_client(client->idx, "Read data failed!");
             return;
         }
     } 
     else if (nread == 0) 
     {
         MSD_INFO_LOG("Client close connection %s:%d",client->remote_ip, client->remote_port);
-        //TODO qbh_close_client(cli);
-        close(fd);
+        msd_close_client(client->idx, NULL);
         return;
     }
     buf[nread] = '\0';
@@ -359,7 +363,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     {
         MSD_ERROR_LOG("Invalid protocol length:%d for connection %s:%d", 
                  client->recv_prot_len, client->remote_ip, client->remote_port);
-        //TODO qbh_close_client(cli);
+        msd_close_client(client->idx, "Wrong recv_port_len!");
         return;
     } 
 
@@ -376,33 +380,31 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
 
     if ( client->recvbuf->len >= client->recv_prot_len) 
     {
-        //TODO 这个地方还需要多一些例子测测，比如transfer等，光用一个echo不够
-
+        //TODO 这个地方还需要多一些例子测测，比如http，transfer等，
+        //各个分支都走一遍，光用一个echo不够
+        msd_close_client(client->idx, "fuck!");return;
         /* 目前读取到的数据，已经足够拼出一个完整请求包，则调用handle_process */
         if(MSD_OK != g_ins->so_func->handle_process(client))
         {
             MSD_ERROR_LOG("The handle_process failed. connection %s:%d", 
                         client->remote_ip, client->remote_port);
-            //TODO msd_str_range
-            //TODO recv_prot_len
-            return;
         }
         else
         {
             MSD_DEBUG_LOG("The handle_process success. connection %s:%d", 
                         client->remote_ip, client->remote_port);
-
-            // 每次只读取recv_prot_len数据长度，如果recvbuf里面还有剩余数据，则应该截出来保留
-            if(MSD_OK != msd_str_range(client->recvbuf, client->recv_prot_len,  client->recvbuf->len - 1))
-            {
-                /* 当recv_prot_len==recvbuf->len的时候，range()返回错误，直接清空缓冲区 */
-                msd_str_clear(client->recvbuf);
-            }
-            
-            /* 将协议长度清0，因为每次请求都是独立的，请求的协议长度是可能发生变化，比如http服务器 
-             * 需要由handle_input函数去实时计算 */
-            client->recv_prot_len = 0; 
         }
+
+        /* 每次只读取recv_prot_len数据长度，如果recvbuf里面还有剩余数据，则应该截出来保留 */
+        if(MSD_OK != msd_str_range(client->recvbuf, client->recv_prot_len,  client->recvbuf->len - 1))
+        {
+            /* 当recv_prot_len==recvbuf->len的时候，range()返回错误，直接清空缓冲区 */
+            msd_str_clear(client->recvbuf);
+        }
+            
+        /* 将协议长度清0，因为每次请求都是独立的，请求的协议长度是可能发生变化，比如http服务器 
+         * 需要由handle_input函数去实时计算 */
+        client->recv_prot_len = 0; 
                               
     }
     else
@@ -410,11 +412,10 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
         /* 目前读取到的数据还不够组装成需要的请求，则继续等待读取 */
         MSD_DEBUG_LOG("The data lenght not enough, do noting!. connection %s:%d", 
                         client->remote_ip, client->remote_port);
-        return;
     }
+    return;
 }
 
- 
 #ifdef __MSD_THREAD_TEST_MAIN__
 
 int g_int = 0;

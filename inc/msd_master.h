@@ -128,6 +128,7 @@ typedef struct msd_conn_client
 }msd_conn_client_t;
 
 int msd_master_cycle();
+void msd_close_client(int client_idx, const char *info);
 
 
 #endif

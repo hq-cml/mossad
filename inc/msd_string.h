@@ -34,7 +34,7 @@
 #include <assert.h>
 #include <ctype.h>
 */
-#define MSD_STRING_MAX_PREALLOC (1024*1024)
+#define MSD_STRING_MAX_PREALLOC (10*1024*1024)
 
 typedef struct _msd_string_s
 {

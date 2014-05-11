@@ -24,12 +24,10 @@ static void msd_master_accept(msd_ae_event_loop *el, int fd,
         void *client_data, int mask);
 static int msd_create_client(int cli_fd, const char *cli_ip, 
         int cli_port);
-static int msd_conn_client_find_free_slot();
-static int msd_conn_client_clear(msd_conn_client_t *client);
+static int msd_client_find_free_slot();
+static int msd_client_clear(msd_conn_client_t *client);
 static int msd_thread_worker_dispatch(int client_idx);
 static int msd_thread_list_find_next();
-static void msd_close_client(int client_idx);
-
 
 /**
  * 功能: 主线程工作
@@ -54,6 +52,7 @@ int msd_master_cycle()
     master->start_time     = time(NULL);
     master->cur_conn       = -1;
     master->cur_thread     = -1;
+    master->total_clients  = 0;
     master->client_limit   = msd_conf_get_int_value(g_ins->conf, "client_limit", 10000);
     master->m_ael          = msd_ae_create_event_loop();
     if(!master->m_ael)
@@ -216,7 +215,7 @@ static void msd_master_accept(msd_ae_event_loop *el, int fd,
     /* 任务下发 */
     if(MSD_ERR == (worker_id = msd_thread_worker_dispatch(client_idx)))
     {
-        msd_close_client(client_idx);
+        msd_close_client(client_idx, "Dispatch failed!");
         MSD_ERROR_LOG("Worker dispatch failed, worker_id:%d", worker_id);
     }
 
@@ -242,7 +241,7 @@ static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
     msd_conn_client_t **pclient;
     msd_conn_client_t  *client;
     
-    idx = msd_conn_client_find_free_slot();
+    idx = msd_client_find_free_slot();
     if(MSD_ERR == idx)
     {
         MSD_ERROR_LOG("Max client num. Can not create more");
@@ -253,6 +252,9 @@ static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
     client  = *pclient;
     if (!client)
     {
+        /* client有可能为空，如果曾经没有放置过client，就会是空
+         * 如果曾经的client被close了，则不是空
+         */
         client = (msd_conn_client_t *)calloc(1, sizeof(*client));
         if (!client) 
         {
@@ -263,8 +265,10 @@ static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
         MSD_DEBUG_LOG("Create client struct.Idx:%d", idx);
     }
 
-    msd_conn_client_clear(client);
-
+    /* client总数自增 */
+    master->total_clients++;
+    
+    msd_client_clear(client);
     /* 初始化cli结构 */
     client->magic = MSD_MAGIC_DEBUG;  /* 初始化魔幻数 */
     client->fd = cli_fd;
@@ -292,7 +296,7 @@ static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
  *         client->access_time为空，说明是孔洞，曾经的client已关闭
  * 返回:成功:0，不返回; 失败:-x 
  **/
-static int msd_conn_client_find_free_slot()
+static int msd_client_find_free_slot()
 {
     int i;
     int idx = -1;
@@ -301,6 +305,7 @@ static int msd_conn_client_find_free_slot()
     msd_conn_client_t *client;
     
     //有必要锁?
+    //TODO 有必要
     //pthread_mutex_lock(&conn_list_lock);
     for (i = 0; i < master->client_limit; i++)
     {
@@ -325,73 +330,38 @@ static int msd_conn_client_find_free_slot()
 /**
  * 功能: 清空conn_client结构
  * 描述:
- *      1. 
+ *      1. 只是清空client结构里面的成员，client本身不释放
+ *      2. 对于是指针的成员，需要放置二次free
  * 返回:成功:0，不返回; 失败:-x 
  **/
-static int msd_conn_client_clear(msd_conn_client_t *client)
+static int msd_client_clear(msd_conn_client_t *client)
 {
+    assert(client);
     if (client)
     {
-        client->fd = 0;
+        client->fd = -1;
         client->close_conn= 0;
-        free(client->remote_ip);
+        if(client->remote_ip)
+        {
+            free(client->remote_ip);
+            client->remote_ip = NULL;
+        }    
         client->remote_ip = 0;
         client->remote_port = 0;
         client->recv_prot_len = 0;
-        msd_str_free(client->recvbuf);
-        client->recvbuf = NULL;
-        msd_str_free(client->sendbuf);
-        client->sendbuf= NULL;
+        if(client->recvbuf)
+        {
+            msd_str_free(client->recvbuf);
+            client->recvbuf = NULL;
+        }
+        if(client->sendbuf)
+        {
+            msd_str_free(client->sendbuf);
+            client->sendbuf= NULL;
+        }
         client->access_time = 0;
 
-        client->worker_id = 0;
-
-        /*
-        thread_worker * worker = *(g_worker_list + client->worker_id);
-        /// todo free every connection comes?
-        if (client->read_buffer)
-        {
-            if(client->r_buf_arena_id >= 0)
-            {
-                worker->mem.free_block(client->r_buf_arena_id);
-                client->r_buf_arena_id = INVILID_BLOCK;
-                client->read_buffer = NULL;
-            }
-            else
-            {
-                free(client->read_buffer);
-                client->read_buffer = NULL;
-            }
-        }
-        client->rbuf_size = RBUF_SZ;
-        client->have_read = 0;
-        client->need_read = CMD_PREFIX_BYTE;
-
-        /// todo free every connection comes?
-        if (client->__write_buffer)
-        {
-            if(client->w_buf_arena_id >= 0)
-            {
-                worker->mem.free_block(client->w_buf_arena_id);
-                client->w_buf_arena_id = INVILID_BLOCK;
-                client->__write_buffer = NULL;
-            }
-            else
-            {
-                free(client->__write_buffer);
-                client->__write_buffer = NULL;
-            }
-        }
-        client->wbuf_size = WBUF_SZ - CMD_PREFIX_BYTE;
-        client->have_write = 0;
-        client->__need_write = CMD_PREFIX_BYTE;
-        client->need_write = 0;
-
-        /// Delete event
-        event_del(&client->event);
-
-        client->conn_time = 0;
-        */
+        client->worker_id = -1;
         return 0;
     }
     return MSD_OK;
@@ -464,30 +434,55 @@ static int msd_thread_list_find_next()
 
 /**
  * 功能: 关闭client
+ * 参数: @client_idx
+ *       @info，关闭的提示信息
+ * 说明: 
+ *    1. 
  **/
-static void msd_close_client(int client_idx) 
+void msd_close_client(int client_idx, const char *info) 
 {
     msd_conn_client_t **pclient;
     msd_conn_client_t  *client;
     msd_conn_client_t  *null = NULL;
+    msd_thread_worker_t *worker = NULL;
 
     pclient = (msd_conn_client_t **)msd_vector_get_at(g_ins->master->client_vec,client_idx);
     client  = *pclient;
-    /*
-    //TODO
-    if (dll.handle_close) 
+
+    /* 调用handle_close */
+    if (g_ins->so_func->handle_close) 
     {
-        dll.handle_close(cli->remote_ip, cli->remote_port);
+        g_ins->so_func->handle_close(client, info);
     }
-    msd_ae_delete_file_event(ael, cli->fd, QBH_AE_READABLE);
-    msd_ae_delete_file_event(ael, cli->fd, QBH_AE_WRITABLE);
-    */
+
+    /* 删除client对应fd的ae事件 */
+    worker = g_ins->pool->thread_worker_array[client->worker_id];
+    if(worker)
+    {
+        msd_ae_delete_file_event(worker->t_ael, client->fd, MSD_AE_READABLE);
+        msd_ae_delete_file_event(worker->t_ael, client->fd, MSD_AE_WRITABLE);
+    }
+    else
+    {
+        MSD_FATAL_LOG("The worker lost!!");
+    }
     
-    /* qbh_vector_set_at的第三个参数是data的指针，而在处的data代表的client_conn的指针，
-     * 所以第三个参数应该是个二级指针 */
+    /* 删除conn_vec对应节点，msd_vctor_set_at的第三个参数是data的指针，
+     * 而在处的data代表的client_conn的指针，所以第三个参数应该是个二级指针 
+     **/
     msd_vector_set_at(g_ins->master->client_vec, client->idx, (void *)&null);
+
+    /* close掉client对应fd */
     close(client->fd);
-    client->fd = -1;
+
+    /* 调用msd_client_clear()清空client结构 */
+    msd_client_clear(client);
+
+    /* free client本身 */
+    free(client);
+
+    MSD_INFO_LOG("Close client[%d], info:%s", client->idx, info);
 
 }
+
 
