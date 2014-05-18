@@ -54,9 +54,8 @@ struct thread_worker{
     int                notify_write_fd; /* master和woker线程通信管道写入端 */  
 
     msd_ae_event_loop  *t_ael;          /* worker线程ae句柄，用于监听管道和所负责的client fd */
-    
     msd_thread_pool_t  *pool;           /* 依附于的线程池句柄 */
-    
+    msd_dlist_t        *client_list;    /* 本线程负责的client，组成的队列 */
     
     //struct event_base *ev_base;
     //struct event ev_notify;
@@ -69,13 +68,14 @@ struct thread_worker{
 };
 
 struct thread_pool{
-    msd_lock_t            *thread_lock;           /* 日志roate锁 */
+    msd_lock_t            *thread_lock;           /* 工作线程锁，平级的工作线程之间，需要同步的时候用此锁 */
     msd_thread_worker_t   **thread_worker_array;  /* worker线程列表 */
     
     int                   thread_worker_num;      /* thread_worker_array数组长度 */
     int                   thread_stack_size;      /* 线程栈大小 */
     
     int                   client_timeout;         /* client超时时间 */
+    int                   poll_interval;          /* worker线程Cron频率 */
     //pthread_cond_t      cond;
     //pthread_cond_t      exit_cond;
     //dqueue_t            task_queue;

@@ -51,7 +51,6 @@ static msd_so_symbol_t syms[] =
     {NULL, NULL, 0}
 };
 
-
 /**
  * 功能: 初始化instance
  * 返回：成功：instance 指针
@@ -73,9 +72,13 @@ static msd_instance_t * msd_create_instance()
         MSD_BOOT_FAILED("Init malloc conf faliled!");
     }    
 
-    instance->log       = NULL;
-    instance->pool      = NULL;
-    instance->master    = NULL;
+    MSD_LOCK_INIT(instance->thread_woker_list_lock);
+    MSD_LOCK_INIT(instance->client_conn_vec_lock);
+
+    instance->log        = NULL;
+    instance->pool       = NULL;
+    instance->master     = NULL;
+    instance->sig_worker = NULL;
     
     return instance;
 }
@@ -208,7 +211,7 @@ int main(int argc, char **argv)
     {
         MSD_BOOT_FAILED("Init conf faliled!");
     }
-    MSD_BOOT_SUCCESS("Init conf success");
+    MSD_BOOT_SUCCESS("Init configure file");
 
     /* 初始化log */
     if (msd_log_init(msd_conf_get_str_value(g_ins->conf, "log_path", "./"),
@@ -220,7 +223,7 @@ int main(int argc, char **argv)
     {
         MSD_BOOT_FAILED("Init log failed");
     }
-    MSD_BOOT_SUCCESS("Init log success");
+    MSD_BOOT_SUCCESS("Init log");
     MSD_INFO_LOG("Init conf success");
     MSD_INFO_LOG("Init log success");  
 
@@ -242,7 +245,7 @@ int main(int argc, char **argv)
     if (g_start_mode == PROGRAM_START) 
     {
         MSD_BOOT_SUCCESS("Mossad begin to start");
-        MSD_INFO_LOG("Mossad begin to run");
+        MSD_INFO_LOG("Mossad begin to start");
  
         if (pid > 0) 
         {
@@ -258,8 +261,8 @@ int main(int argc, char **argv)
     } 
     else if(g_start_mode == PROGRAM_STOP) 
     {
-        MSD_BOOT_SUCCESS("Mossad begin to start");
-        MSD_INFO_LOG("Mossad begin to run");
+        MSD_BOOT_SUCCESS("Mossad begin to stop");
+        MSD_INFO_LOG("Mossad begin to stop");
         
         if (pid == 0) 
         {
@@ -294,7 +297,7 @@ int main(int argc, char **argv)
     {
         MSD_BOOT_FAILED("Load so file %s", g_ins->so_file->buf ? g_ins->so_file->buf : "(NULL)");
     }
-    //TODO g_ins->so_handle需要有地方释放
+    //TODO g_ins->so_func需要有地方释放
     g_ins->so_func = &g_so;
     
     if (g_ins->so_func->handle_init) 
@@ -305,37 +308,55 @@ int main(int argc, char **argv)
             MSD_BOOT_FAILED("Invoke hook handle_init in master");
         }
     }
-
+    MSD_BOOT_SUCCESS("Load so file");
+    MSD_INFO_LOG("Load so file success");
     
     /* 放开资源限制 */
     msd_rlimit_reset();
+    MSD_BOOT_SUCCESS("Reset limit");
+    MSD_INFO_LOG("Reset limit success");
+
+    /* 常用信号注册及初始化信号处理线程 */
+    if(MSD_OK != msd_init_private_signals())
+    {
+        MSD_BOOT_FAILED("Init private signals failed");
+    }
+    MSD_BOOT_SUCCESS("Register private signals");
+    MSD_INFO_LOG("Register private signals success");
+    
+    if(MSD_OK != msd_init_public_signals())
+    {
+        MSD_BOOT_FAILED("Init public signals failed");
+    }
+    MSD_BOOT_SUCCESS("Start public signals thread");
+    MSD_INFO_LOG("Start public signals thread success");
     
     /* 初始化线程池 */
     if(!(g_ins->pool = msd_thread_pool_create(
-            msd_conf_get_int_value(g_ins->conf, "worker_num", 10),
+            msd_conf_get_int_value(g_ins->conf, "worker_num", 5),
             msd_conf_get_int_value(g_ins->conf, "stack_size", 10*1024*1024),
             msd_thread_worker_cycle)))
     {        
         MSD_BOOT_FAILED("Create threadpool failed");
     }
- 
+    MSD_BOOT_SUCCESS("Create threadpool");
+    MSD_INFO_LOG("Create threadpool success");
     
-    /* 常用信号注册及初始化信号处理线程 */
-
-
     /* 用户自定义初始回调 */
 
     
     /* 修改进程的Title */
 
 
+    MSD_BOOT_SUCCESS("Mossad strat to run");
+    MSD_INFO_LOG("Mossad strat to run");
+
     /* Master开始工作 */ 
     if(MSD_OK != msd_master_cycle())
     {
         MSD_BOOT_FAILED("Create master failed");
     }
-    printf("before sleep\n");
-    msd_thread_sleep(60);
+
     msd_destroy_instance();
     return 0;
 }

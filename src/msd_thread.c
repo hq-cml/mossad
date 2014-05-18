@@ -34,6 +34,9 @@ static int msd_thread_worker_destroy(msd_thread_worker_t *worker);
 
 static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, int mask);
 
+static int msd_thread_worker_cron(msd_ae_event_loop *el, long long id, void *privdate);
+
+
 /**
  * 功能:创建线程池
  * 参数:@num: 工作线程个数 
@@ -72,6 +75,12 @@ msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void*
     
     pool->thread_worker_num = worker_num;
     pool->thread_stack_size = stack_size;    
+
+    /* 初始化client超时时间，默认5分钟 */
+    pool->client_timeout =  msd_conf_get_int_value(g_ins->conf, "client_timeout", 300);
+
+    /* 初始化cron频率 */
+    pool->poll_interval  =  msd_conf_get_int_value(g_ins->conf, "worker_poll_interval", 60);
     
     /* 初始化启动woker线程 */
     for (i = 0; i < worker_num; ++i) 
@@ -147,7 +156,18 @@ static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task
         MSD_ERROR_LOG("Create ae failed");
         return MSD_ERR;  
     }
-    
+
+    /* 初始化client队列 */
+    if(!(worker->client_list = msd_dlist_init()))
+    {
+        close(worker->notify_read_fd);
+        close(worker->notify_write_fd);
+        msd_ae_free_event_loop(worker->t_ael);
+        free(worker);
+        MSD_ERROR_LOG("Create ae failed");
+        return MSD_ERR;         
+    }
+
     /* 创建线程 */
     pthread_attr_t attr;
     pthread_attr_init(&attr);
@@ -222,8 +242,7 @@ void msd_thread_sleep(int s)
 void* msd_thread_worker_cycle(void* arg) 
 {
     msd_thread_worker_t *worker = (msd_thread_worker_t *)arg;
-    MSD_INFO_LOG("Thread no.%d begin to work", worker->idx);
-
+    MSD_INFO_LOG("Worker[%d] begin to work", worker->idx);
     
     if (msd_ae_create_file_event(worker->t_ael, worker->notify_read_fd, 
                 MSD_AE_READABLE, msd_thread_worker_process_notify, arg) == MSD_ERR) 
@@ -234,9 +253,9 @@ void* msd_thread_worker_cycle(void* arg)
 
     }
 
-    //TODO
-    //启动定时器，清理超时的client
-
+    /* 启动定时器，清理超时的client */
+    msd_ae_create_time_event(worker->t_ael, 1000*worker->pool->poll_interval,
+            msd_thread_worker_cron, worker, NULL);
     
     msd_ae_main_loop(worker->t_ael);
  
@@ -247,7 +266,9 @@ void* msd_thread_worker_cycle(void* arg)
  * 功能: worker线程工作函数
  * 参数: @arg: 线程函数，通常来说，都是线程自身句柄的指针
  * 说明: 
- *       1.  
+ *       1. 如果读出的client_idx是-1，则表示需要程序即将关闭
+ *       2. 如果读出的client_idx非-1，则根据idx取出client句柄
+ *          将client->fd加入读取事件集合，进行管理
  * 返回:成功:0; 失败:-x
  **/
 static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int notify_fd, 
@@ -257,6 +278,7 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
     msd_master_t        *master = g_ins->master;
     int                  client_idx;
     msd_conn_client_t   **pclient = NULL;
+    msd_conn_client_t    *client = NULL;
     int                  read_len;
 
     /* 领取client idx */
@@ -267,33 +289,53 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
     }
     MSD_INFO_LOG("Worker[%d] Get the task. Client_idx[%d]", worker->idx, client_idx);
 
+    /* 如果读出的client_idx是-1，则表示需要程序即将关闭 */
+    if(-1 == client_idx)
+    {
+        msd_thread_worker_shut_down();
+        return;
+    }
+    
     /* 根据client idx获取到client地址 */
+    MSD_LOCK_LOCK(g_ins->client_conn_vec_lock);
     pclient = (msd_conn_client_t **)msd_vector_get_at(master->client_vec, client_idx);
+    MSD_LOCK_UNLOCK(g_ins->client_conn_vec_lock);
+
+    if(pclient && *pclient)
+    {
+        client = *pclient;
+    }
+    else
+    {
+        MSD_ERROR_LOG("Worker[%d] get the client error! client_idx:%d", worker->idx, client_idx);
+        return;
+    }
 
     /* 将worker_id写入client结构 */
-    (*pclient)->worker_id = worker->idx;
-    //TODO 应该加一个向woker->conn自增之类的操作
-
+    client->worker_id = worker->idx;
+    
+    /* 向worker->client_list追加client */
+    msd_dlist_add_node_tail(worker->client_list, client);
     
     /* 欢迎信息 */
     if(g_ins->so_func->handle_open)
     {
-        if(MSD_OK != g_ins->so_func->handle_open(*pclient))
+        if(MSD_OK != g_ins->so_func->handle_open(client))
         {
             msd_close_client(client_idx, NULL);
             MSD_ERROR_LOG("Handle open error! Close connection. IP:%s, Port:%d.", 
-                            (*pclient)->remote_ip, (*pclient)->remote_port);
+                            client->remote_ip, client->remote_port);
             return;
         }
     }
         
     /* 注册读取事件 */
-    if (msd_ae_create_file_event(worker->t_ael, (*pclient)->fd, MSD_AE_READABLE,
-                msd_read_from_client, *pclient) == MSD_ERR) 
+    if (msd_ae_create_file_event(worker->t_ael, client->fd, MSD_AE_READABLE,
+                msd_read_from_client, client) == MSD_ERR) 
     {
         msd_close_client(client_idx, "create file event failed");
         MSD_ERROR_LOG("Create read file event failed for connection:%s:%d",
-                (*pclient)->remote_ip, (*pclient)->remote_port);
+                client->remote_ip, client->remote_port);
         return;
     }  
 }
@@ -382,7 +424,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     {
         //TODO 这个地方还需要多一些例子测测，比如http，transfer等，
         //各个分支都走一遍，光用一个echo不够
-        msd_close_client(client->idx, "fuck!");return;
+        
         /* 目前读取到的数据，已经足够拼出一个完整请求包，则调用handle_process */
         if(MSD_OK != g_ins->so_func->handle_process(client))
         {
@@ -415,6 +457,44 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     }
     return;
 }
+
+/**
+ * 功能: worker线程的时间回调函数。
+ * 参数: @el
+ *       @id，时间事件id
+ *       @privdata，worker指针
+ * 说明: 
+ *       遍历clients数组，找出满足超时条件的client节点
+ *       关闭之,每分钟运行一次 
+ * 返回:成功:0; 失败:-x
+ **/
+static int msd_thread_worker_cron(msd_ae_event_loop *el, long long id, void *privdate) 
+{
+    msd_thread_worker_t *worker = (msd_thread_worker_t *)privdate;
+    msd_dlist_iter      iter;
+    msd_dlist_node_t    *node;
+    msd_conn_client_t   *cli;
+    time_t              unix_clock = time(NULL);
+
+    MSD_INFO_LOG("Worker[%d] cron begin! Client count:%d", worker->idx, worker->client_list->len);
+     
+    msd_dlist_rewind(worker->client_list, &iter);
+
+    while ((node = msd_dlist_next(&iter))) 
+    {
+        cli = node->value;
+        /* client超时判断，默认是60秒超时 */
+        if ( unix_clock - cli->access_time > worker->pool->client_timeout) 
+        {
+            MSD_DEBUG_LOG("Connection %s:%d timeout closed", 
+                    cli->remote_ip, cli->remote_port);
+            msd_close_client(cli->idx, "Time out!");
+        }
+    }
+    MSD_INFO_LOG("Worker[%d] cron end! Client count:%d", worker->idx, worker->client_list->len);
+    return (1000 * worker->pool->poll_interval);
+}
+
 
 #ifdef __MSD_THREAD_TEST_MAIN__
 

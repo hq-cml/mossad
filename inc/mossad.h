@@ -55,6 +55,8 @@
 #include <sys/types.h>
 #include <netinet/tcp.h>
 #include <sys/cdefs.h>
+#include <execinfo.h>
+
  
 /* -------------------CONFIG------------------- */
 #define MSD_PTHREAD_LOCK_MODE       /* Lock mode */
@@ -83,7 +85,7 @@
 #include "msd_thread.h"
 #include "msd_master.h"
 #include "msd_plugin.h"
-
+#include "msd_signal.h"
  
 /* -----------------PUBLIC MACRO---------------- */
 #define MSD_OK       0
@@ -122,16 +124,21 @@ typedef struct msd_so_func_struct
 
 /* mossad实例结构 */
 typedef struct _msd_instance_t{
-    msd_str_t          *pid_file;
-    msd_str_t          *conf_path;
-    msd_conf_t         *conf;
-    msd_log_t          *log;
-    msd_thread_pool_t  *pool;
-    msd_master_t       *master;
+    msd_str_t           *pid_file;
+    msd_str_t           *conf_path;
+    msd_conf_t          *conf;
+    msd_log_t           *log;
 
-    msd_str_t          *so_file;   /* so文件路径 */
-    msd_so_func_t      *so_func;   /* 装载了全部so的函数的容器 */
-    void               *so_handle; /* so句柄指针 */
+    msd_master_t        *master;                 /* master线程句柄 */ 
+    msd_thread_pool_t   *pool;                   /* worker线程池句柄 */ 
+    msd_thread_signal_t *sig_worker;             /* signal worker线程句柄 */ 
+
+    msd_str_t           *so_file;                /* so文件路径 */
+    msd_so_func_t       *so_func;                /* 装载了全部so的函数的容器 */
+    void                *so_handle;              /* so句柄指针 */
+
+    msd_lock_t          *thread_woker_list_lock; /* woker list 锁 */
+    msd_lock_t          *client_conn_vec_lock;   /* client vector 锁 */
 }msd_instance_t;
 
 

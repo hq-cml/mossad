@@ -28,9 +28,9 @@
  *         is NULL.
  * 返回: 成功，dlist结构指针， 失败，NULL
  **/
-msd_dlist *msd_dlist_init(void) 
+msd_dlist_t *msd_dlist_init(void) 
 {
-    struct msd_dlist *dl;
+    msd_dlist_t *dl;
 
     if ((dl = malloc(sizeof(*dl))) == NULL) 
     {
@@ -52,11 +52,11 @@ msd_dlist *msd_dlist_init(void)
  *      1. If the list's 'free' pointer is not NULL, 
  *         the value will be freed automately first.
  **/
-void msd_dlist_destroy(msd_dlist *dl) 
+void msd_dlist_destroy(msd_dlist_t *dl) 
 {
     unsigned int len;
-    msd_dlist_node *curr = NULL;
-    msd_dlist_node *next = NULL;
+    msd_dlist_node_t *curr = NULL;
+    msd_dlist_node_t *next = NULL;
 
     curr = dl->head;
     len = dl->len;
@@ -81,9 +81,9 @@ void msd_dlist_destroy(msd_dlist *dl)
  *      2. 返回的值是传入时候的指针
  * 返回: 成功，dlist结构指针,失败，NULL
  **/
-msd_dlist *msd_dlist_add_node_head(msd_dlist *dl, void *value) 
+msd_dlist_t *msd_dlist_add_node_head(msd_dlist_t *dl, void *value) 
 {
-    msd_dlist_node *node = NULL;
+    msd_dlist_node_t *node = NULL;
     if ((node = malloc(sizeof(*node))) == NULL) 
     {
         return NULL;
@@ -121,9 +121,9 @@ msd_dlist *msd_dlist_add_node_head(msd_dlist *dl, void *value)
  *      1. 
  * 返回: 成功，dlist结构指针,失败，NULL
  **/
-msd_dlist *msd_dlist_add_node_tail(msd_dlist *dl, void *value) 
+msd_dlist_t *msd_dlist_add_node_tail(msd_dlist_t *dl, void *value) 
 {
-    msd_dlist_node *node;
+    msd_dlist_node_t *node;
     if ((node = malloc(sizeof(*node))) == NULL) 
     {
         return NULL;
@@ -161,10 +161,10 @@ msd_dlist *msd_dlist_add_node_tail(msd_dlist *dl, void *value)
  *         after==0 在基准点之前插入
  * 返回: 成功 ， 失败，
  **/
-msd_dlist *msd_dlist_insert_node(msd_dlist *dl, msd_dlist_node *mid_node, 
+msd_dlist_t *msd_dlist_insert_node(msd_dlist_t *dl, msd_dlist_node_t *mid_node, 
         void *value, int after) 
 {
-    msd_dlist_node *node;
+    msd_dlist_node_t *node;
     if ((node = malloc(sizeof(*node))) == NULL)
         return NULL;
 
@@ -210,7 +210,7 @@ msd_dlist *msd_dlist_insert_node(msd_dlist *dl, msd_dlist_node *mid_node,
  *      1. If the list's 'free' pointer is not NULL, 
  *         the value will be freed automately first.
  **/
-void msd_dlist_delete_node(msd_dlist *dl, msd_dlist_node *node) 
+void msd_dlist_delete_node(msd_dlist_t *dl, msd_dlist_node_t *node) 
 {
     if (node->prev) 
     {
@@ -247,7 +247,7 @@ void msd_dlist_delete_node(msd_dlist *dl, msd_dlist_node *node)
  *      1. 
  * 返回: 成功，iter结构指针，失败，NULL
  **/
-msd_dlist_iter *msd_dlist_get_iterator(msd_dlist *dl, int direction) 
+msd_dlist_iter *msd_dlist_get_iterator(msd_dlist_t *dl, int direction) 
 {
     msd_dlist_iter *iter;
     if ((iter = malloc(sizeof(*iter))) == NULL)
@@ -274,7 +274,7 @@ void msd_dlist_destroy_iterator(msd_dlist_iter *iter)
 /**
  * 功能: Create an iterator in the list iterator structure.
  **/
-void msd_dlist_rewind(msd_dlist *dl, msd_dlist_iter *iter) 
+void msd_dlist_rewind(msd_dlist_t *dl, msd_dlist_iter *iter) 
 {
     iter->node = dl->head;
     iter->direction = MSD_DLIST_START_HEAD;
@@ -283,7 +283,7 @@ void msd_dlist_rewind(msd_dlist *dl, msd_dlist_iter *iter)
 /**
  * 功能: Create an iterator in the list iterator structure.
  **/
-void msd_dlist_rewind_tail(msd_dlist *dl, msd_dlist_iter *iter) 
+void msd_dlist_rewind_tail(msd_dlist_t *dl, msd_dlist_iter *iter) 
 {
     iter->node = dl->tail;
     iter->direction = MSD_DLIST_START_TAIL;
@@ -301,9 +301,9 @@ void msd_dlist_rewind_tail(msd_dlist *dl, msd_dlist_iter *iter)
  *      }
  * 返回: 成功，node结构指针，失败，NULL
  **/
-msd_dlist_node *msd_dlist_next(msd_dlist_iter *iter) 
+msd_dlist_node_t *msd_dlist_next(msd_dlist_iter *iter) 
 {
-    msd_dlist_node *curr = iter->node;
+    msd_dlist_node_t *curr = iter->node;
     if (curr != NULL) 
     {
         if (iter->direction == MSD_DLIST_START_HEAD)
@@ -321,10 +321,10 @@ msd_dlist_node *msd_dlist_next(msd_dlist_iter *iter)
  *      1. 如果match函数存在，则用match函数比较，否则直接比较value指针和key
  * 返回: 成功，node指针,失败，NULL
  **/
-msd_dlist_node *msd_dlist_search_key(msd_dlist *dl, void *key) 
+msd_dlist_node_t *msd_dlist_search_key(msd_dlist_t *dl, void *key) 
 {
     msd_dlist_iter *iter = NULL;
-    msd_dlist_node *node = NULL;
+    msd_dlist_node_t *node = NULL;
     iter = msd_dlist_get_iterator(dl, MSD_DLIST_START_HEAD);
     while ((node = msd_dlist_next(iter)) != NULL) 
     {
@@ -358,11 +358,11 @@ msd_dlist_node *msd_dlist_search_key(msd_dlist *dl, void *key)
  *         used as value of the copied node. 
  * 返回: 成功，新的dlist结构指针，失败，NULL
  **/
-msd_dlist *msd_dlist_dup(msd_dlist *orig) 
+msd_dlist_t *msd_dlist_dup(msd_dlist_t *orig) 
 {
-    msd_dlist *copy;
+    msd_dlist_t *copy;
     msd_dlist_iter *iter;
-    msd_dlist_node *node;
+    msd_dlist_node_t *node;
 
     if ((copy = msd_dlist_init()) == NULL) 
     {
@@ -411,9 +411,9 @@ msd_dlist *msd_dlist_dup(msd_dlist *orig)
  *         -2 the penultimante and so on. 
  * 返回: 成功，node指针,失败，NULL
  **/
-msd_dlist_node *msd_dlist_index(msd_dlist *dl, int index) 
+msd_dlist_node_t *msd_dlist_index(msd_dlist_t *dl, int index) 
 {
-    msd_dlist_node *node;
+    msd_dlist_node_t *node;
 
     if (index < 0) 
     {
@@ -440,9 +440,9 @@ msd_dlist_node *msd_dlist_index(msd_dlist *dl, int index)
 #include <stdio.h>
 int main()
 {
-    msd_dlist *dl;
-    msd_dlist *copy;
-    msd_dlist_node *node;
+    msd_dlist_t *dl;
+    msd_dlist_t *copy;
+    msd_dlist_node_t *node;
     
     int a = 1;
     int b = 2;

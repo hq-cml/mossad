@@ -61,7 +61,7 @@
 #define MSD_LOG_FILE_SIZE       (1<<30) /* 2G */
 #define MSD_LOG_MULTIMODE_NO    0
 #define MSD_LOG_MULTIMODE_YES   1
-#define MSD_LOG_FILE_NUM        20
+#define MSD_LOG_FILE_NUM        10
 
 /* screen */
 #define MSD_SCREEN_COLS         80

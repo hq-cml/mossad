@@ -30,14 +30,15 @@ typedef struct msd_master
 {
     int                 listen_fd;
     int                 client_limit;   /* client节点个数限制 */
+    int                 poll_interval;  /* Master线程Cron频率 */
 
     int                 cur_conn;       /* 上一次新增client在client_vec的位置 */
     int                 cur_thread;     /* 上一次新增client时分配的线程号 */
     int                 total_clients;  /* 当前client的总个数 */
     unsigned int        start_time;
     msd_vector_t        *client_vec;    /* msd_conn_client类型的vector，新的连接，会找到自己的合适位置 */
-    msd_ae_event_loop   *m_ael;         /* ae句柄，用于listen_fd的监听 */
-    msd_lock_t          *thread_woker_list_lock;
+    msd_ae_event_loop   *m_ael;         /* ae句柄，用于listen_fd和signal_notify的监听 */
+
        
 /*
     char is_server;

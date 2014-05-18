@@ -94,6 +94,8 @@ static int msd_vector_resize(msd_vector_t *vec)
 /**
  * 功能: vector set at
  * 参数: @vec, @index, @data
+ * 注意:
+ *       本函数对count的处理时存在问题的，set_at有可能是在清空!
  * 返回: 成功 0 失败 -x
  **/
 int msd_vector_set_at(msd_vector_t *vec, unsigned int index, void *data) 
@@ -109,7 +111,7 @@ int msd_vector_set_at(msd_vector_t *vec, unsigned int index, void *data)
     }
     
     memcpy((char *)vec->data + (index * vec->size), data, vec->size);
-    ++vec->count;
+    ++vec->count; /* 错误! */
     return MSD_OK;
 } 
  
@@ -119,6 +121,7 @@ int msd_vector_set_at(msd_vector_t *vec, unsigned int index, void *data)
  *       @
  * 描述:
  *      1. vector索引从0开始
+ *      2. 这个函数不能用!，因为它依赖count!
  * 返回: 成功 0 失败 -x
  **/  
 int msd_vector_push(msd_vector_t *vec, void *data) 
@@ -221,6 +224,7 @@ msd_vector_iter_t *msd_vector_iter_new(msd_vector_t *vec)
  * 参数: @iter
  * 描述:
  *      1. 指针后移，pos自增，data移动到后一个元素的开始位置
+ *      2. 这个函数不能用!，因为它依赖count!
  * 返回: 成功 0 失败 -x
  **/
 int msd_vector_iter_next(msd_vector_iter_t *iter) 
@@ -250,6 +254,7 @@ int msd_vector_iter_next(msd_vector_iter_t *iter)
  * 参数: @iter
  * 描述:
  *      1. 指针前移，pos自减，data移动到前一个元素的开始位置
+ *      2. 这个函数不能用!，因为它依赖count!
  * 返回: 成功 0 失败 -x
  **/
 int msd_vector_iter_prev(msd_vector_iter_t *iter) 
