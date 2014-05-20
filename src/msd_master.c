@@ -458,9 +458,7 @@ void msd_close_client(int client_idx, const char *info)
     worker = g_ins->pool->thread_worker_array[client->worker_id];
     if(worker)
     {
-        msd_ae_delete_file_event(worker->t_ael, client->fd, MSD_AE_READABLE);
-        msd_ae_delete_file_event(worker->t_ael, client->fd, MSD_AE_WRITABLE);
-
+        msd_ae_delete_file_event(worker->t_ael, client->fd, MSD_AE_READABLE | MSD_AE_WRITABLE);
         if((node = msd_dlist_search_key(worker->client_list, client)))
         {
             MSD_INFO_LOG("Delete the client node[%d]. Addr:%s:%d", client->idx, client->remote_ip, client->remote_port);
@@ -561,7 +559,7 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
             while ((node = msd_dlist_next(&dlist_iter))) 
             {
                 client = node->value;
-                if(!(!client || 0 == client->access_time))
+                if(client && 0 != client->access_time)
                 {
                     worker_client_cnt++;
                 }
@@ -639,6 +637,9 @@ static void msd_shut_down()
     msd_master_t *master    = g_ins->master;
     msd_thread_pool_t *pool = g_ins->pool;
     msd_thread_worker_t *worker;
+    msd_conn_client_t  **pclient;
+    msd_conn_client_t   *client;
+    int master_client_cnt;
     int i, res, info;
 
     /* 关闭listen_fd，停止新的连接请求 */
@@ -665,7 +666,37 @@ static void msd_shut_down()
     }
     MSD_LOCK_UNLOCK(g_ins->thread_woker_list_lock);  
 
+    /* 循环等待所有的worker结束关闭 */
+    do{
+        /* 遍历client_vec，查看连接个数 */
+        printf("bbbbbbbbbbbbbbbbbbbbbb\n");
+        master_client_cnt = 0;
+        MSD_LOCK_LOCK(g_ins->client_conn_vec_lock);
+        for( i=0; i < master->client_limit; i++)
+        {
+            pclient = (msd_conn_client_t **)msd_vector_get_at(master->client_vec, i);
+            client  = *pclient;
+            if( client && 0 != client->access_time )
+            {
+                master_client_cnt++;
+            }
+        }
+        MSD_LOCK_UNLOCK(g_ins->client_conn_vec_lock);
+
+        if(master_client_cnt <= 0)
+        {
+            break;
+        }
+        else
+        {
+            printf("aaaaaaaaaaaaaaaaaa\n");
+            msd_thread_usleep(10000);/* 10毫秒 */
+        }
+    }while(1);
     
+    /* 销毁线程池 */
+    msd_thread_pool_destroy(pool);
+
     return;
 }
 

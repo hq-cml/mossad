@@ -68,7 +68,7 @@ struct thread_worker{
 };
 
 struct thread_pool{
-    msd_lock_t            *thread_lock;           /* 工作线程锁，平级的工作线程之间，需要同步的时候用此锁 */
+    msd_lock_t            *thread_lock;           /* 工作线程锁。各个平等的工作线程之间，需要同步的时候用此锁 */
     msd_thread_worker_t   **thread_worker_array;  /* worker线程列表 */
     
     int                   thread_worker_num;      /* thread_worker_array数组长度 */
@@ -89,5 +89,6 @@ msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void*
 int msd_thread_pool_destroy(msd_thread_pool_t *pool);
 void* msd_thread_worker_cycle(void* arg);
 void msd_thread_sleep(int s);
+void msd_thread_usleep(int s);
 
 #endif /* __MSD_THREAD_H_INCLUDED__ */

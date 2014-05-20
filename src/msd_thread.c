@@ -26,16 +26,11 @@ extern msd_instance_t *g_ins;
 
 static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int fd, 
         void *client_data, int mask);
-
 static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task)(void *arg), 
         int idx);
-
-static int msd_thread_worker_destroy(msd_thread_worker_t *worker);
-
 static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, int mask);
-
 static int msd_thread_worker_cron(msd_ae_event_loop *el, long long id, void *privdate);
-
+static void msd_thread_worker_shut_down(msd_thread_worker_t *worker);
 
 /**
  * 功能:创建线程池
@@ -91,9 +86,7 @@ msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void*
             return NULL;
         }
     }
-    
-    /* 初始化启动信号处理线程 */
-    //TODO
+
     return pool;
 }
 
@@ -194,27 +187,20 @@ int msd_thread_pool_destroy(msd_thread_pool_t *pool)
 {
     assert(pool);
     int i;
-    MSD_LOCK_LOCK(pool->thread_lock);
+    msd_thread_worker_t *worker;
+    MSD_LOCK_LOCK(g_ins->thread_woker_list_lock);
     for(i=0; i<pool->thread_worker_num; i++)
     {
-        msd_thread_worker_destroy(pool->thread_worker_array[i]);
+        worker = pool->thread_worker_array[i];
+        if(worker)
+        {
+            free(worker);
+        }
     }
-    MSD_LOCK_UNLOCK(pool->thread_lock);
+    MSD_LOCK_UNLOCK(g_ins->thread_woker_list_lock);
     MSD_LOCK_DESTROY(pool->thread_lock);
     free(pool->thread_worker_array);
     free(pool);
-    return MSD_OK;
-}
-
-/**
- * 功能: 销毁worker线程池
- * 参数: @pool: 线程池句柄 
- * 返回:成功:0; 失败:-x
- **/
-static int msd_thread_worker_destroy(msd_thread_worker_t *worker) 
-{
-    assert(worker);
-    //TODO
     return MSD_OK;
 }
 
@@ -233,10 +219,26 @@ void msd_thread_sleep(int s)
 }
 
 /**
+ * 功能: 线程睡眠函数
+ * 参数: @sec, 睡眠时长，秒数
+ * 说明: 
+ *       1.利用select变相实现睡眠效果
+ **/
+void msd_thread_usleep(int s) 
+{
+    struct timeval timeout;
+    timeout.tv_sec  = 0;
+    timeout.tv_usec = s;
+    select( 0, NULL, NULL, NULL, &timeout);
+}
+
+
+/**
  * 功能: worker线程工作函数
  * 参数: @arg: 线程函数，通常来说，都是线程自身句柄的指针
  * 说明: 
- *       1.  
+ *       1.msd_ae_free_event_loop不应该在ae的回调里面调用，在回调里面应该调用
+ *         msd_ae_stop，导致msd_ae_main_loop退出，然后ae的析构放在main_loop后
  * 返回:成功:0; 失败:-x
  **/
 void* msd_thread_worker_cycle(void* arg) 
@@ -256,9 +258,15 @@ void* msd_thread_worker_cycle(void* arg)
     /* 启动定时器，清理超时的client */
     msd_ae_create_time_event(worker->t_ael, 1000*worker->pool->poll_interval,
             msd_thread_worker_cron, worker, NULL);
-    
+
+    /* 无限循环 */
     msd_ae_main_loop(worker->t_ael);
- 
+
+    /* 至此，线程的生命走到尽头 */
+    worker->tid = 0;
+    worker->idx = -1;
+    msd_dlist_destroy(worker->client_list);
+    msd_ae_free_event_loop(worker->t_ael);
     return (void*)NULL;
 }
 
@@ -292,7 +300,7 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
     /* 如果读出的client_idx是-1，则表示需要程序即将关闭 */
     if(-1 == client_idx)
     {
-        msd_thread_worker_shut_down();
+        msd_thread_worker_shut_down(worker);
         return;
     }
     
@@ -495,6 +503,40 @@ static int msd_thread_worker_cron(msd_ae_event_loop *el, long long id, void *pri
     return (1000 * worker->pool->poll_interval);
 }
 
+/**
+ * 功能: 关闭自己负责的全部client
+ * 参数: @el
+ *       @id，时间事件id
+ *       @privdata，worker指针
+ * 说明: 
+ *       1. 遍历clients数组，关闭全部client 
+ *       2. 销毁所有成员的资源
+ *       3. 线程退出
+ * 返回:成功:0; 失败:-x
+ **/
+static void msd_thread_worker_shut_down(msd_thread_worker_t *worker)
+{
+    msd_dlist_iter      iter;
+    msd_dlist_node_t    *node;
+    msd_conn_client_t   *cli;
+
+    MSD_INFO_LOG("Worker[%d] begin to shutdown! Client count:%d", worker->idx, worker->client_list->len);
+
+    /* 遍历 */
+    msd_dlist_rewind(worker->client_list, &iter);
+    while ((node = msd_dlist_next(&iter))) 
+    {
+        cli = node->value;
+        msd_close_client(cli->idx, "Mossad is shutting down!");
+    }
+    MSD_INFO_LOG("Worker[%d] end shutdown! Client count:%d", worker->idx, worker->client_list->len);    
+
+    /* 去除事件，并将AE停止 */
+    msd_ae_delete_file_event(worker->t_ael, worker->notify_read_fd, MSD_AE_READABLE | MSD_AE_WRITABLE);
+    msd_ae_stop(worker->t_ael);
+    close(worker->notify_read_fd);
+    close(worker->notify_write_fd);    
+}
 
 #ifdef __MSD_THREAD_TEST_MAIN__
 

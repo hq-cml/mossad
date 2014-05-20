@@ -783,6 +783,7 @@ int msd_ae_process_events(msd_ae_event_loop *el, int flags)
         /* 处理完所有的file事件(在函数msd_ae_api_poll中，fired[]是不断覆盖的) */
         for (j = 0; j < numevents; ++j) 
         {
+            MSD_INFO_LOG("fd:%d\n", el->fired[j].fd);
             msd_ae_file_event *fe = &el->events[el->fired[j].fd];
             
             int mask = el->fired[j].mask;
