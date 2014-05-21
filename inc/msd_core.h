@@ -105,17 +105,17 @@
 typedef struct msd_so_func_struct 
 {
     int (*handle_init)(void *);                                       /* 当进程初始化的时候均会调用，参数是全局变量g_conf，此函数可选 */
-    void (*handle_fini)(void *);                                      /* 当进程退出的时候均会调用，参数是全局变量g_conf，此函数可选 */
-    /*int (*handle_open)(char **, int *, char *, int);*/                  /* 当有新连接来了，Accept之后调用可以输出一些欢迎信息之类，此函数是可选的，一般不用写，
+    int (*handle_fini)(void *);                                      /* 当进程退出的时候均会调用，参数是全局变量g_conf，此函数可选 */
+    /*int (*handle_open)(char **, int *, char *, int);*/              /* 当有新连接来了，Accept之后调用可以输出一些欢迎信息之类，此函数是可选的，一般不用写，
                                                                        * 第一个参数是输出缓冲区，第二个是输出长度引用，第三个clientip, 第四个client port 
                                                                        */   
     int (*handle_open)(msd_conn_client_t *);
-    void (*handle_close)(msd_conn_client_t *, const char *);                                     /* 当关闭与某个client的连接的时候调用，第一个参数client ip, 第二个client port，此函数可选 */                                             
-    int (*handle_input)(msd_conn_client_t *);               /* 用来获取client发送请求消息的具体长度，即得到协议长度
+    int (*handle_close)(msd_conn_client_t *, const char *);          /* 当关闭与某个client的连接的时候调用，第一个参数client ip, 第二个client port，此函数可选 */                                             
+    int (*handle_prot_len)(msd_conn_client_t *);                      /* 用来获取client发送请求消息的具体长度，即得到协议长度
                                                                        * mossad获取到此长度之后从接收缓冲区中读取相应长度的请求数据，交给handle_process来处理
                                                                        * 第一个参数是接收缓冲区，第二个接收缓冲区长度，第三个client ip, 第四个client port 
                                                                        */
-    int (*handle_process)(msd_conn_client_t *);  /* Worker进程专用，用来根据client的输入，产生出输出，吐出数据
+    int (*handle_process)(msd_conn_client_t *);                        /* Worker进程专用，用来根据client的输入，产生出输出，吐出数据
                                                                        * 参数:第一个是接收缓冲区，第二个是接收内容长度
                                                                        *      第三个是发送缓冲区，第四个是发送内容的长度引用
                                                                        *      第五个参数client ip, 第六个client port
@@ -127,7 +127,7 @@ typedef struct _msd_instance_t{
     msd_str_t           *pid_file;
     msd_str_t           *conf_path;
     msd_conf_t          *conf;
-    msd_log_t           *log;
+    //msd_log_t           *log;
 
     msd_master_t        *master;                 /* master线程句柄 */ 
     msd_thread_pool_t   *pool;                   /* worker线程池句柄 */ 

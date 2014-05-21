@@ -170,7 +170,7 @@ void msd_vector_destroy(msd_vector_t *vec)
  * 功能: destroy the vector
  * 参数: @vec
  * 描述:
- *      1. 仅释放data，vec本身结构不释放
+ *      1. 释放data，然后释放vec本身
  **/
 void msd_vector_free(msd_vector_t *vec) 
 {

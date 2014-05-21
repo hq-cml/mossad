@@ -24,14 +24,19 @@
 #define MSD_MSG_MAGIC      0x567890EF
 #define MSD_MAGIC_DEBUG    0x1234ABCD
 
-
+typedef enum msd_master_stat{
+    M_RUNNING,
+    M_STOPING,
+    M_STOP
+}msd_master_stat_t;
 
 typedef struct msd_master
 {
     int                 listen_fd;
     int                 client_limit;   /* client节点个数限制 */
     int                 poll_interval;  /* Master线程Cron频率 */
-
+    msd_master_stat_t   status;         /* Master线程状态 */
+    
     int                 cur_conn;       /* 上一次新增client在client_vec的位置 */
     int                 cur_thread;     /* 上一次新增client时分配的线程号 */
     int                 total_clients;  /* 当前client的总个数 */
@@ -130,6 +135,6 @@ typedef struct msd_conn_client
 
 int msd_master_cycle();
 void msd_close_client(int client_idx, const char *info);
-
+int msd_master_destroy(msd_master_t *master);
 
 #endif

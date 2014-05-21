@@ -29,7 +29,7 @@
  **/
 int msd_handle_init(void *conf) 
 {
-    MSD_DEBUG_LOG("Msd_handle_init is called!");
+    MSD_INFO_LOG("Msd_handle_init is called!");
     return MSD_OK;
 }
 
@@ -67,7 +67,7 @@ int msd_handle_open(msd_conn_client_t *client)
  *       1. 可选函数
  * 返回:成功:0; 失败:-x
  **/
-void msd_handle_close(msd_conn_client_t *client, const char *info) 
+int msd_handle_close(msd_conn_client_t *client, const char *info) 
 {
     int write_len;
     char buf[1024];
@@ -80,8 +80,9 @@ void msd_handle_close(msd_conn_client_t *client, const char *info)
     {
         MSD_ERROR_LOG("Handle close error! IP:%s, Port:%d. Error:%s", client->remote_ip, client->remote_port, strerror(errno));
         //TODO，将write加入ae_loop
+        return MSD_ERR;
     }
-    return;
+    return MSD_OK;
 }
 
 /**
@@ -91,7 +92,7 @@ void msd_handle_close(msd_conn_client_t *client, const char *info)
  *       1. 必选函数
  * 返回:成功:协议长度; 失败:
  **/
-int msd_handle_input(msd_conn_client_t *client) 
+int msd_handle_prot_len(msd_conn_client_t *client) 
 {
     return client->recvbuf->len;
 }
@@ -127,7 +128,8 @@ int msd_handle_process(msd_conn_client_t *client)
  * 说明: 
  *       1. 可选函数
  **/
-void msd_handle_fini(void *cycle) 
+int msd_handle_fini(void *cycle) 
 {
-    MSD_DEBUG_LOG("Msd_handle_fini is called!");
+    MSD_INFO_LOG("Msd_handle_fini is called!");
+    return MSD_OK;
 }

@@ -31,13 +31,13 @@ static int msd_thread_list_find_next();
 static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate);
 static void msd_master_recv_signal(msd_ae_event_loop *el, int fd, 
         void *client_data, int mask);
-static void msd_shut_down();
+static void msd_master_shut_down();
 
 /**
  * 功能: 主线程工作
  * 参数: 
  * 描述:
- *      1. client_vec的元素师conn_client的指针!而不是conn_client本身
+ *      1. client_vec的元素是conn_client的指针!而不是conn_client本身
  * 返回:成功:则会一直阻塞在ae_main里面，不返回; 失败:-x
  **/
 int msd_master_cycle() 
@@ -60,6 +60,7 @@ int msd_master_cycle()
     master->client_limit   = msd_conf_get_int_value(g_ins->conf, "client_limit", 100000);
     master->poll_interval  = msd_conf_get_int_value(g_ins->conf, "master_poll_interval", 600);
     master->m_ael          = msd_ae_create_event_loop();
+    master->status         = M_RUNNING;
     if(!master->m_ael)
     {
         MSD_ERROR_LOG("Create AE Pool failed");
@@ -117,7 +118,7 @@ int msd_master_cycle()
 
     /* 注册sig_worker->notify_read_fd的读取事件 */
     if (msd_ae_create_file_event(master->m_ael, g_ins->sig_worker->notify_read_fd, 
-                MSD_AE_READABLE, msd_master_recv_signal, NULL) == MSD_ERR) 
+                MSD_AE_READABLE, msd_master_recv_signal, master) == MSD_ERR) 
     {
         MSD_ERROR_LOG("Create file event failed");
         msd_ae_free_event_loop(master->m_ael);
@@ -139,6 +140,10 @@ int msd_master_cycle()
 
     MSD_INFO_LOG("Create Master Ae Success");
     msd_ae_main_loop(master->m_ael);
+
+    /* ae_main_loop退出，master开始销毁 */
+    //msd_master_destroy(master);
+    
     return MSD_OK;
 }
 
@@ -148,10 +153,13 @@ int msd_master_cycle()
  * 描述:
  *      1. 
  **/
-int msd_master_destroy()
+int msd_master_destroy(msd_master_t *master)
 {
-    //TODO
-    return 0;
+    master->status = M_STOP;
+    msd_vector_free(master->client_vec);
+    msd_ae_free_event_loop(master->m_ael);
+    MSD_INFO_LOG("Master destory!");
+    return MSD_OK;
 }
  
 /**
@@ -508,7 +516,12 @@ void msd_close_client(int client_idx, const char *info)
  **/
 static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate) 
 {
-    msd_master_t *master = (msd_master_t *)privdate;     
+    msd_master_t *master = (msd_master_t *)privdate;   
+    if(master->status != M_RUNNING)
+    {
+        MSD_INFO_LOG("Master status is not RUNNING, return");
+        return (1000 * master->poll_interval);
+    }
     //msd_vector_iter_t iter = msd_vector_iter_new(master->client_vec);
     msd_conn_client_t **pclient;
     msd_conn_client_t *client;
@@ -599,10 +612,11 @@ static void msd_master_recv_signal(msd_ae_event_loop *el, int fd,
 {
     char msg[128];
     int read_len;
+    msd_master_t *master = client_data;
     
     MSD_AE_NOTUSED(el);
     MSD_AE_NOTUSED(mask);
-    MSD_AE_NOTUSED(client_data);
+    
 
     memset(msg, 0, 128);
 
@@ -613,11 +627,12 @@ static void msd_master_recv_signal(msd_ae_event_loop *el, int fd,
         return;
     }
     
-    MSD_DEBUG_LOG("Master recv signal worker's notify: %s", msg);
+    MSD_INFO_LOG("Master recv signal worker's notify: %s", msg);
     if(strncmp(msg, "stop", 4) == 0)
     {
         //exit(0);
-        msd_shut_down();
+        master->status = M_STOPING;
+        msd_master_shut_down();
     }
     
     return;
@@ -628,11 +643,11 @@ static void msd_master_recv_signal(msd_ae_event_loop *el, int fd,
  * 描述:
  *      0. 关闭listen_fd，停止新的连接请求
  *      1. 向所有worker线程发出关闭指令，约定fd:-1
- *      2. 循环等待全部worker关闭连接(这步是最重要的，
- *         所有的工作都是为了它，让client能友好退出)
- *      3. 程序退出
+ *      2. 循环等待全部worker关闭连接，最重要的一步，
+ *         所有的工作都是为了它，让client能友好退出
+ *      3. AE loop退出
  **/
-static void msd_shut_down()
+static void msd_master_shut_down()
 {
     msd_master_t *master    = g_ins->master;
     msd_thread_pool_t *pool = g_ins->pool;
@@ -642,6 +657,16 @@ static void msd_shut_down()
     int master_client_cnt;
     int i, res, info;
 
+    /* 用户自定义析构回调 */
+    if (g_ins->so_func->handle_fini) 
+    {
+        /* 调用handle_init */
+        if (g_ins->so_func->handle_fini(g_ins->conf) != MSD_OK) 
+        {
+            MSD_ERROR_LOG("Invoke hook handle_fini in master");
+        }
+    }
+    
     /* 关闭listen_fd，停止新的连接请求 */
     msd_ae_delete_file_event(master->m_ael, master->listen_fd, MSD_AE_READABLE);
     close(master->listen_fd); 
@@ -665,11 +690,13 @@ static void msd_shut_down()
         }
     }
     MSD_LOCK_UNLOCK(g_ins->thread_woker_list_lock);  
+    
+    /* 休眠10毫秒，让出CPU时间片，留给各个woker线程shutdown */
+    msd_thread_usleep(10000);
 
     /* 循环等待所有的worker结束关闭 */
     do{
         /* 遍历client_vec，查看连接个数 */
-        printf("bbbbbbbbbbbbbbbbbbbbbb\n");
         master_client_cnt = 0;
         MSD_LOCK_LOCK(g_ins->client_conn_vec_lock);
         for( i=0; i < master->client_limit; i++)
@@ -689,14 +716,15 @@ static void msd_shut_down()
         }
         else
         {
-            printf("aaaaaaaaaaaaaaaaaa\n");
+            MSD_WARNING_LOG("Still not shutdown! (%d)", master_client_cnt);
             msd_thread_usleep(10000);/* 10毫秒 */
         }
     }while(1);
-    
-    /* 销毁线程池 */
-    msd_thread_pool_destroy(pool);
 
+    /* Ae退出 */
+    msd_ae_stop(master->m_ael);
+    
+    MSD_INFO_LOG("Master shut down!");
     return;
 }
 

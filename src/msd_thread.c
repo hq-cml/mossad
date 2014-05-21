@@ -113,6 +113,7 @@ static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task
     
     worker->pool                 = pool;
     worker->idx                  = idx;
+    worker->status               = W_STOP;
     pool->thread_worker_array[idx] = worker; /* 放入对应的位置 */
 
     /* 
@@ -201,6 +202,7 @@ int msd_thread_pool_destroy(msd_thread_pool_t *pool)
     MSD_LOCK_DESTROY(pool->thread_lock);
     free(pool->thread_worker_array);
     free(pool);
+    MSD_INFO_LOG("Destory the thread pool!");
     return MSD_OK;
 }
 
@@ -245,6 +247,8 @@ void* msd_thread_worker_cycle(void* arg)
 {
     msd_thread_worker_t *worker = (msd_thread_worker_t *)arg;
     MSD_INFO_LOG("Worker[%d] begin to work", worker->idx);
+
+    worker->status = W_RUNNING;
     
     if (msd_ae_create_file_event(worker->t_ael, worker->notify_read_fd, 
                 MSD_AE_READABLE, msd_thread_worker_process_notify, arg) == MSD_ERR) 
@@ -262,11 +266,12 @@ void* msd_thread_worker_cycle(void* arg)
     /* 无限循环 */
     msd_ae_main_loop(worker->t_ael);
 
-    /* 至此，线程的生命走到尽头 */
+    /* 退出了ae_main_loop，线程的生命走到尽头 */
     worker->tid = 0;
     worker->idx = -1;
     msd_dlist_destroy(worker->client_list);
     msd_ae_free_event_loop(worker->t_ael);
+    pthread_exit(0);
     return (void*)NULL;
 }
 
@@ -405,7 +410,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     if (client->recv_prot_len == 0) 
     {
         /* 每次读取的长度不定，所以recv_prot_len是一个变量，不断调整 */ 
-        client->recv_prot_len = g_ins->so_func->handle_input(client);
+        client->recv_prot_len = g_ins->so_func->handle_prot_len(client);
         MSD_DEBUG_LOG("Get the recv_prot_len %d", client->recv_prot_len);
     } 
 
@@ -436,12 +441,12 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
         /* 目前读取到的数据，已经足够拼出一个完整请求包，则调用handle_process */
         if(MSD_OK != g_ins->so_func->handle_process(client))
         {
-            MSD_ERROR_LOG("The handle_process failed. connection %s:%d", 
+            MSD_ERROR_LOG("The handle_process failed. Connection:%s:%d", 
                         client->remote_ip, client->remote_port);
         }
         else
         {
-            MSD_DEBUG_LOG("The handle_process success. connection %s:%d", 
+            MSD_DEBUG_LOG("The handle_process success. Connection:%s:%d", 
                         client->remote_ip, client->remote_port);
         }
 
@@ -521,7 +526,7 @@ static void msd_thread_worker_shut_down(msd_thread_worker_t *worker)
     msd_conn_client_t   *cli;
 
     MSD_INFO_LOG("Worker[%d] begin to shutdown! Client count:%d", worker->idx, worker->client_list->len);
-
+    worker->status = W_STOPING;
     /* 遍历 */
     msd_dlist_rewind(worker->client_list, &iter);
     while ((node = msd_dlist_next(&iter))) 

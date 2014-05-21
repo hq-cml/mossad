@@ -34,6 +34,7 @@ volatile msd_signal_t g_signals[] =
     {SIGBUS,  "SIGBUS"},
     {SIGFPE,  "SIGFPE"},
     {SIGILL,  "SIGILL"},
+    {SIGHUP,  "SIGHUP"},
     {0, NULL}
 };
 
@@ -209,7 +210,8 @@ int msd_init_public_signals()
 
     /* 阻塞公共信号 */    
     sigemptyset(&bset);    
-    sigaddset(&bset, SIGTERM);    
+    sigaddset(&bset, SIGTERM);   
+    sigaddset(&bset, SIGHUP); 
     sigaddset(&bset, SIGQUIT);
     sigaddset(&bset, SIGCHLD);
     sigaddset(&bset, SIGPIPE);
@@ -254,6 +256,7 @@ static void* msd_signal_thread_cycle(void *arg)
     sigaddset(&waitset, SIGCHLD);
     sigaddset(&waitset, SIGPIPE);
     sigaddset(&waitset, SIGINT);
+    sigaddset(&waitset, SIGHUP);
 
     /* 无线循环阻塞，等待信号到来 */
     while (1)  
@@ -305,6 +308,7 @@ static void msd_public_signal_handler(int signo, msd_thread_signal_t *sig_worker
             break;
         case SIGPIPE:
         case SIGCHLD:
+        case SIGHUP:
             /* do noting */
             break;
     }
@@ -317,11 +321,19 @@ static void msd_public_signal_handler(int signo, msd_thread_signal_t *sig_worker
             if(errno == EINTR)
             {
                 write(sig_worker->notify_write_fd, "stop", 4);
+                MSD_INFO_LOG("Worker[signal] exit!");
+                pthread_exit(0);
             }
             else
             {
                 MSD_ERROR_LOG("Pipe write error, errno:%d", errno);
             }
+        }
+        else
+        {
+            /* 发送完成之后，signal线程完成使命，退出 */
+            MSD_INFO_LOG("Worker[signal] exit!");
+            pthread_exit(0);
         }
     }
 }

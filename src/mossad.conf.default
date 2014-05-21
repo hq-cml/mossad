@@ -45,7 +45,7 @@ daemon    off
 ##############################################################
 stack_size   10485760 
 #worker_num   10       
-worker_num   1       
+worker_num   3       
 
 ##############################################################
 #  CONNECTION CONFIG
@@ -58,8 +58,8 @@ worker_num   1
 client_limit     100000
 #client_limit          3 
 client_timeout        120
-master_poll_interval  20
-worker_poll_interval  10
+master_poll_interval  180
+worker_poll_interval  60
 
 ##############################################################
 #  SO CONFIG

@@ -47,11 +47,18 @@
 typedef struct thread_pool   msd_thread_pool_t;
 typedef struct thread_worker msd_thread_worker_t;
 
+typedef enum msd_worker_stat{
+    W_RUNNING,
+    W_STOPING,
+    W_STOP
+}msd_worker_stat_t;
+
 struct thread_worker{
     int                idx;             /* 位于woker列表中的位置索引 */
     pthread_t          tid;             /* 线程id */
     int                notify_read_fd;  /* master和woker线程通信管道读取端 */
     int                notify_write_fd; /* master和woker线程通信管道写入端 */  
+    msd_worker_stat_t  status;          /* worker的状态 */
 
     msd_ae_event_loop  *t_ael;          /* worker线程ae句柄，用于监听管道和所负责的client fd */
     msd_thread_pool_t  *pool;           /* 依附于的线程池句柄 */

@@ -45,7 +45,7 @@ int msd_handle_init(void *conf);
  *       1. 可选函数
  *       2. 此函数内部可以做一些销毁工作
  **/
-void msd_handle_fini(void *cycle);
+int msd_handle_fini(void *cycle);
 
 /**
  * 功能: client连接被accept后，触发此回调
@@ -65,7 +65,7 @@ int msd_handle_open(msd_conn_client_t *client);
  *       1. 可选函数
  * 返回:成功:0; 失败:-x
  **/
-void msd_handle_close(msd_conn_client_t *client, const char *info);
+int msd_handle_close(msd_conn_client_t *client, const char *info);
 
 /**
  * 功能: 动态约定mossad和client之间的通信协议长度，即mossad应该读取多少数据，算作一次请求
@@ -76,7 +76,7 @@ void msd_handle_close(msd_conn_client_t *client, const char *info);
  *       3. 如果返回-1，mossad会认为出现错误，关闭此链接
  * 返回:成功:协议长度; 失败:
  **/
-int msd_handle_input(msd_conn_client_t *client);
+int msd_handle_prot_len(msd_conn_client_t *client);
 
 /**
  * 功能: 主要的用户逻辑
