@@ -66,6 +66,7 @@ worker_poll_interval  60
 #  
 #  so_file   :so 文件路径
 #  include   :将插件的配置文件引入
+#  pro_name  :包含在so_file中，指定程序名称
 ##############################################################
 include  echo.conf
 

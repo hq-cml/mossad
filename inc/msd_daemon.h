@@ -41,9 +41,8 @@
 */
 #define MSD_MAX_FD 32768
 
-char **msd_daemon_argv_dup(int argc, char *argv[]);
+char ** msd_set_program_name(int argc, char *argv[], const char *name);
 void msd_daemon_argv_free(char **daemon_argv);
-void msd_daemon_set_title(const char* fmt, ...);
 
 void msd_rlimit_reset();
 void msd_redirect_std();

@@ -516,3 +516,4 @@ int main(int argc, char *argv[])
 }
 
 #endif /* __MSD_SIGNAL_TEST_MAIN__ */
+

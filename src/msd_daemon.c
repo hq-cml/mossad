@@ -43,12 +43,15 @@ static char *arg_start;
 static char *arg_end;
 static char *env_start;
 
+static void msd_daemon_set_title(const char* fmt, ...);
+static char **msd_daemon_argv_dup(int argc, char *argv[]);
+
 /**
  * 功能: 备份出整个的argv二维数组
  * 参数: @argc, @argv
  * 返回: 成功，备份的地址, 失败，NULL
  **/
-char **msd_daemon_argv_dup(int argc, char *argv[]) 
+static char **msd_daemon_argv_dup(int argc, char *argv[]) 
 {
     arg_start = argv[0];
 
@@ -95,10 +98,13 @@ void msd_daemon_argv_free(char **daemon_argv)
  * 说明：
  *      1. 首先备份出整套的argv的二维数组，然后把title写入到原来的argv对应的空间中去
  *      2. 如果argv[]的空间还不足以容纳titile，则将紧随其后的environ也用上，仍需先备份
- *      3. Before invoke this function, you should call msd_daemon_argv_dup first.
+ * 注意:
+ *      Before invoke this function, you should call msd_daemon_argv_dup first.
+ *      Otherwise there will be a segment fault!
+ *
  * 返回: 成功，备份的地址, 失败，NULL
  **/
-void msd_daemon_set_title(const char* fmt, ...) 
+static void msd_daemon_set_title(const char* fmt, ...) 
 {
 	char title[128];
 	int i, tlen;
@@ -131,12 +137,30 @@ void msd_daemon_set_title(const char* fmt, ...)
     i = arg_end - arg_start;
     memset(arg_start, 0, i);
     strncpy(arg_start, title, i - 1);/* 篡改程序的名字 */
+
 #ifdef __linux__
     /* printf("the macro __linux__ is defined\n"); */
     /* 给线程命名 */
     prctl(PR_SET_NAME, title);
 #endif /* __linux__ */
 }
+
+
+/* 设置程序名称 */
+char ** msd_set_program_name(int argc, char *argv[], const char *name)
+{
+    char **saved_argv = msd_daemon_argv_dup(argc, argv);
+    if (!saved_argv) 
+    {
+        fprintf(stderr, "daemon_argv_dup failed\n");
+        exit(1);
+    }
+
+    msd_daemon_set_title(name);
+
+    return saved_argv;
+}
+
 
 /**
  * 功能: 重定向
@@ -430,3 +454,4 @@ int main(int argc, char *argv[])
     return 0;
 }
 #endif /* __MSD_DAEMON_TEST_MAIN__ */
+

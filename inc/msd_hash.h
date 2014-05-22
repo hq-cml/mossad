@@ -124,3 +124,4 @@ int msd_hash_iter_reset(msd_hash_iter_t *iter);
 void msd_hash_iter_free(msd_hash_iter_t *iter);
 
 #endif /* __MSD_HASH_H_INCLUDED__ */
+

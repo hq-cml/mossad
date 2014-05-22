@@ -77,3 +77,4 @@ msd_conf_block_t *msd_conf_get_block(msd_conf_t *conf, char *key);
 void msd_conf_free(msd_conf_t *conf);
 void msd_conf_dump(msd_conf_t *conf);
 #endif /* __MSD_CONF_H_INCLUDED__ */
+

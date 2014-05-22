@@ -153,7 +153,7 @@ static void msd_usage(int status)
     } 
     else 
     {
-        printf("Usage:./%6.6s [--config=<conf_file> | -c] [start|stop]\n"
+        printf("Usage:./%6.6s [--config=<conf_file> | -c] [start|stop|restart]\n"
                "%6.6s         [--version | -v]\n"
                "%6.6s         [--help | -h]\n", MSD_PROG_NAME, " ", " ");
     }
@@ -225,7 +225,9 @@ static void msd_get_options(int argc, char **argv)
 /*------------------------ Main -----------------------*/
 int main(int argc, char **argv)
 {
-    int pid;
+    int pid,i;
+    char **saved_argv;
+    
     g_ins = msd_create_instance();
     
     msd_get_options(argc, argv);
@@ -235,14 +237,16 @@ int main(int argc, char **argv)
     {
         if(!(g_ins->conf_path = msd_str_new("./mossad.conf")))
         {
-            MSD_BOOT_FAILED("Init conf_path faliled!");
+            MSD_ERROR_LOG("Init Conf_path Faliled!");
+            MSD_BOOT_FAILED("Init Conf_path Faliled!");
         }
     }    
     if(MSD_OK != msd_conf_init(g_ins->conf, g_ins->conf_path->buf))
     {
+        MSD_ERROR_LOG("Init Conf Faliled!");
         MSD_BOOT_FAILED("Init Conf Faliled!");
     }
-    MSD_BOOT_SUCCESS("Mossad Begin To Run");
+    MSD_BOOT_SUCCESS("Mossad Begin To Init");
     MSD_BOOT_SUCCESS("Init Configure File");
 
     /* 初始化log */
@@ -253,24 +257,27 @@ int main(int argc, char **argv)
             msd_conf_get_int_value(g_ins->conf, "log_num", MSD_LOG_FILE_NUM),
             msd_conf_get_int_value(g_ins->conf, "log_multi", MSD_LOG_MULTIMODE_NO)) < 0) 
     {
+        MSD_ERROR_LOG("Init Log Failed");
         MSD_BOOT_FAILED("Init Log Failed");
     }
     MSD_BOOT_SUCCESS("Init Log");
-    MSD_INFO_LOG("Mossad Begin To Run");
+    MSD_INFO_LOG("Mossad Begin To Init");
     MSD_INFO_LOG("Init Conf Success");
     MSD_INFO_LOG("Init log Success");  
 
     /* Daemon */
     if(msd_conf_get_int_value(g_ins->conf, "daemon", 1))
     {
-        msd_daemonize(0, 1);
-        fprintf(stderr, "Can you see me?\n");
+        //msd_daemonize(0, 1);
+        msd_daemonize(0, 0);
+        //fprintf(stderr, "Can you see me?\n");
     }
     
     /* 获取pid */
     g_ins->pid_file = msd_str_new(msd_conf_get_str_value(g_ins->conf, "pid_file", "/tmp/mossad.pid"));
     if((pid = msd_pid_file_running(g_ins->pid_file->buf)) == -1) 
     {
+        MSD_ERROR_LOG("Checking Running Daemon:%s", strerror(errno));
         MSD_BOOT_FAILED("Checking Running Daemon:%s", strerror(errno));
     }
     
@@ -282,11 +289,13 @@ int main(int argc, char **argv)
  
         if (pid > 0) 
         {
+            MSD_ERROR_LOG("The mossad have been running, pid=%u", (unsigned int)pid);
             MSD_BOOT_FAILED("The mossad have been running, pid=%u", (unsigned int)pid);
         }
     
         if ((msd_pid_file_create(g_ins->pid_file->buf)) != 0) 
         {
+            MSD_ERROR_LOG("Create pid file failed: %s", strerror(errno));
             MSD_BOOT_FAILED("Create pid file failed: %s", strerror(errno));
         }
         MSD_BOOT_SUCCESS("Create Pid File");
@@ -299,14 +308,14 @@ int main(int argc, char **argv)
         
         if (pid == 0) 
         {
+            MSD_ERROR_LOG("No mossad daemon running now");
             MSD_BOOT_FAILED("No mossad daemon running now");
         }
 
         /* 
-         * 根据pid_file文件记载的pid，发送SIGKILL信号，终止程序 
-         * SIGQUIT会使得接收进程产生coredump，为了防止误会，还是用SIGKILL
+         * 根据pid_file文件记载的pid，发送SIGTERM信号，终止程序 
          **/
-        if (kill(pid, SIGKILL) != 0) 
+        if (kill(pid, SIGTERM) != 0) 
         {
             fprintf(stderr, "kill %u failed\n", (unsigned int)pid);
             exit(1);
@@ -316,7 +325,38 @@ int main(int argc, char **argv)
     } 
     else if(g_start_mode == PROGRAM_RESTART)
     {
-        //TODO
+        /* 关闭 */
+        MSD_BOOT_SUCCESS("Begin To Restart");
+        MSD_INFO_LOG("Begin To Restart");
+        
+        if (pid == 0) 
+        {
+            MSD_ERROR_LOG("No mossad daemon running now");
+            MSD_BOOT_FAILED("No mossad daemon running now");
+        }
+        if (kill(pid, SIGTERM) != 0) 
+        {
+            fprintf(stderr, "kill %u failed\n", (unsigned int)pid);
+            exit(1);
+        }
+        MSD_BOOT_SUCCESS("The Mossad Process Stop! Pid:%u", (unsigned int)pid);
+
+        for(i=0; i<5; i++)
+        {
+            msd_thread_sleep(1);
+            write(1, ".", 1);
+        }
+        write(1, "\n", 1);
+        
+        /* 启动 */
+        if ((msd_pid_file_create(g_ins->pid_file->buf)) != 0) 
+        {
+            MSD_ERROR_LOG("Create pid file failed: %s", strerror(errno));
+            MSD_BOOT_FAILED("Create pid file failed: %s", strerror(errno));
+        }
+        MSD_BOOT_SUCCESS("Create Pid File");
+        MSD_INFO_LOG("Create Pid File");
+
     }
     else 
     {
@@ -328,6 +368,7 @@ int main(int argc, char **argv)
     g_ins->so_file = msd_str_new(msd_conf_get_str_value(g_ins->conf, "so_file", NULL));
     if (msd_load_so(&(g_ins->so_handle), syms, g_ins->so_file->buf) < 0) 
     {
+        MSD_ERROR_LOG("Load so file %s", g_ins->so_file->buf ? g_ins->so_file->buf : "(NULL)");
         MSD_BOOT_FAILED("Load so file %s", g_ins->so_file->buf ? g_ins->so_file->buf : "(NULL)");
     }
     g_ins->so_func = &g_so;
@@ -337,6 +378,7 @@ int main(int argc, char **argv)
         /* 调用handle_init */
         if (g_ins->so_func->handle_init(g_ins->conf) != MSD_OK) 
         {
+            MSD_ERROR_LOG("Invoke hook handle_init in master");
             MSD_BOOT_FAILED("Invoke hook handle_init in master");
         }
     }
@@ -351,6 +393,7 @@ int main(int argc, char **argv)
     /* 常用信号注册及初始化信号处理线程 */
     if(MSD_OK != msd_init_private_signals())
     {
+        MSD_ERROR_LOG("Init private signals failed");
         MSD_BOOT_FAILED("Init private signals failed");
     }
     MSD_BOOT_SUCCESS("Register Private Signals");
@@ -358,7 +401,8 @@ int main(int argc, char **argv)
     
     if(MSD_OK != msd_init_public_signals())
     {
-        MSD_BOOT_FAILED("Init Public Signals Failed");
+        MSD_ERROR_LOG("Init Public Signals Failed");
+        MSD_BOOT_FAILED("Init Public Signals Failed"); 
     }
     MSD_BOOT_SUCCESS("Start Public Signals Thread");
     MSD_INFO_LOG("Start Public Signals Thread Success");
@@ -368,39 +412,31 @@ int main(int argc, char **argv)
             msd_conf_get_int_value(g_ins->conf, "worker_num", 5),
             msd_conf_get_int_value(g_ins->conf, "stack_size", 10*1024*1024),
             msd_thread_worker_cycle)))
-    {        
+    {   
+        MSD_ERROR_LOG("Create threadpool failed");
         MSD_BOOT_FAILED("Create threadpool failed");
     }
     MSD_BOOT_SUCCESS("Create Threadpool");
     MSD_INFO_LOG("Create Threadpool Success");
 
     /* 修改进程的Title */
-    //TODO
+    saved_argv = msd_set_program_name(argc, argv, msd_conf_get_str_value(g_ins->conf, "pro_name", "Mossad"));
 
-
+    MSD_BOOT_SUCCESS("Mossad Begin To Run. Program name:%s", msd_conf_get_str_value(g_ins->conf, "pro_name", "Mossad"));
+    MSD_INFO_LOG("Mossad Begin To Run Program name:%s", msd_conf_get_str_value(g_ins->conf, "pro_name", "Mossad"));
+    /* 重定向STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO */
+    msd_redirect_std();
+    fprintf(stderr, "You will never see me!\n");
+    
     /* Master开始工作 */ 
     if(MSD_OK != msd_master_cycle())
     {
+        MSD_ERROR_LOG("Create Master Failed");
         MSD_BOOT_FAILED("Create Master Failed");
     }
-
+    
+    msd_daemon_argv_free(saved_argv);
     msd_destroy_instance(g_ins);
     return 0;
 }
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
 

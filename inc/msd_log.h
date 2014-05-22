@@ -125,7 +125,11 @@ typedef struct msd_log
  * 这时，##这个连接符号充当的作用就是当__VAR_ARGS__为空的时候，消除前面的那个逗号。那么此时的翻译过程如下：
  * myprintf(templt); ==> myprintf(stderr,templt);
  */
-#define MSD_BOOT_SUCCESS(fmt, args...) msd_boot_notify(0, fmt, ##args)
+#define MSD_BOOT_SUCCESS(fmt, args...) do{\
+    msd_thread_usleep(40000);\
+    msd_boot_notify(0, fmt, ##args);\
+}while(0)
+
 #define MSD_BOOT_FAILED(fmt, args...) do {\
     msd_boot_notify(-1, fmt, ##args); \
     exit(1);\

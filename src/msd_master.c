@@ -728,5 +728,3 @@ static void msd_master_shut_down()
     return;
 }
 
-
-

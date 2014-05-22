@@ -856,3 +856,4 @@ int main()
     return 0;
 }
 #endif /* __MSD_LOG_TEST_MAIN__ */
+

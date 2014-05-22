@@ -74,3 +74,4 @@ void msd_vector_iter_destroy(msd_vector_iter_t *iter);
 void msd_vector_iter_free(msd_vector_iter_t *iter);
 
 #endif /* __MSD_VECTOR_H_INCLUDED__ */
+

@@ -150,3 +150,4 @@ void msd_ae_set_before_sleep_proc(msd_ae_event_loop *el,
         msd_ae_before_sleep_proc *before_sleep);
  
 #endif /*__MSD_AE_H_INCLUDED__ */
+

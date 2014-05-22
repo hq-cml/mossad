@@ -65,3 +65,4 @@ int        msd_str_cmp(const char *s1, const char *s2);
 int        msd_str_explode(unsigned char *buf, unsigned char *field[], \
            int n, const unsigned char *ifs);
 #endif
+

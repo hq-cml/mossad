@@ -84,3 +84,4 @@ msd_dlist_node_t *msd_dlist_index(msd_dlist_t *dl, int index);
 void msd_dlist_rewind(msd_dlist_t *dl, msd_dlist_iter *iter);
 void msd_dlist_rewind_tail(msd_dlist_t *dl, msd_dlist_iter *iter);
 #endif /* __MSD_DLIST_H_INCLUDED__ */
+

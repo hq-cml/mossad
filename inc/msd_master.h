@@ -138,3 +138,4 @@ void msd_close_client(int client_idx, const char *info);
 int msd_master_destroy(msd_master_t *master);
 
 #endif
+

@@ -188,13 +188,13 @@ static msd_str_t* msd_str_expand_room(msd_str_t **pstr, size_t add_len)
     pstr_new = realloc(*pstr, sizeof(msd_str_t)+new_len+1);
     if(NULL == pstr_new)
     {
-        //TODO log
+        MSD_FATAL_LOG("Realloc Failed!");
         //danger: perhaps cause mem leak
         return NULL;
     }
     else if(pstr_new != *pstr)
     {
-        //TODO log
+        MSD_DEBUG_LOG("Address changed!");
     }
 
     pstr_new->free = new_len-cur_len;
@@ -803,3 +803,4 @@ int main()
     return 0;
 }
 #endif
+

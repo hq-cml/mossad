@@ -140,6 +140,5 @@ typedef struct _msd_instance_t{
     msd_lock_t          *thread_woker_list_lock; /* woker list Ëø */
     msd_lock_t          *client_conn_vec_lock;   /* client vector Ëø */
 }msd_instance_t;
-
-
 #endif
+

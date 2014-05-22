@@ -32,7 +32,7 @@ msd_signal.o: msd_log.c msd_lock.c
 .PHONY :clean install
 install:
 	install $(TARGET) ../bin/
-	install mossad.conf.default ../bin/mossad.conf
+	#install mossad.conf.default ../bin/mossad.conf
 
 clean:
 	rm -f *.o
