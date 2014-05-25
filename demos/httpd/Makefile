@@ -17,6 +17,7 @@ install:
 	cp index.html ../../bin/httpd/
 	cp -R css ../../bin/httpd/
 	cp -R js ../../bin/httpd/
+	cp -R img ../../bin/httpd/
 
 .c.o:
 	$(CC) $(CFLAGS) $< -c -o $@ $(INC)

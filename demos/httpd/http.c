@@ -226,10 +226,11 @@ int msd_handle_process(msd_conn_client_t *client)
     }
     *ptr = '\0';
     
-    msd_str_cat(&(client->sendbuf), buf);
+    //支持二进制文件
+    //msd_str_cat(&(client->sendbuf), buf);
+    msd_str_cat_len(&(client->sendbuf), buf, file_size);
     free(buf);
     close(fd);
-    
     /* 回写 */
     do{
         write_len = write(client->fd, client->sendbuf->buf, client->sendbuf->len);
