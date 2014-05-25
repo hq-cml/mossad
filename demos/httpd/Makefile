@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS  = -fPIC -Wall -pipe -DDEBUG -g -D_GNU_SOURCE -D_REENTRANT
 LIB 	= -ldl -lrt -rdynamic
 INC     = -I../../inc 
-OO	= echo.o
-TARGETS = libecho.so
+OO	= http.o
+TARGETS = libhttp.so
 
 all: $(TARGETS)
 
@@ -11,8 +11,12 @@ $(TARGETS): $(OO)
 	$(CC) $(CFLAGS) $(OO) -shared -o $@ $(LIBDIR) $(LIB)
 
 install:
-	install $(TARGETS) ../../bin/echo/
-	cp echo.conf ../../bin/echo/
+	install $(TARGETS) ../../bin/httpd/
+	cp http.conf ../../bin/httpd/
+	cp 404.html ../../bin/httpd/
+	cp index.html ../../bin/httpd/
+	cp -R css ../../bin/httpd/
+	cp -R js ../../bin/httpd/
 
 .c.o:
 	$(CC) $(CFLAGS) $< -c -o $@ $(INC)

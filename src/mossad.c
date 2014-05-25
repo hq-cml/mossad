@@ -341,9 +341,9 @@ int main(int argc, char **argv)
         }
         MSD_BOOT_SUCCESS("The Mossad Process Stop! Pid:%u", (unsigned int)pid);
 
-        for(i=0; i<5; i++)
+        for(i=0; i<20; i++)
         {
-            msd_thread_sleep(1);
+            //msd_thread_sleep(1);
             write(1, ".", 1);
         }
         write(1, "\n", 1);

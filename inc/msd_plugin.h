@@ -68,7 +68,8 @@ int msd_handle_open(msd_conn_client_t *client);
 int msd_handle_close(msd_conn_client_t *client, const char *info);
 
 /**
- * 功能: 动态约定mossad和client之间的通信协议长度，即mossad应该读取多少数据，算作一次请求
+ * 功能: 动态约定mossad和client之间的通信协议长度
+ *       即mossad应该从client->recvbuf中读取多少数据，算作一次完整请求
  * 参数: @client指针
  * 说明: 
  *       1. 必选函数!
@@ -85,7 +86,10 @@ int msd_handle_prot_len(msd_conn_client_t *client);
  *       1. 必选函数
  *       2. 每次从recvbuf中应该取得recv_prot_len长度的数据，作为一个完整请求
  *       3. 将处理完毕的结果，放入sendbuf，然后发送回去
- * 返回:成功:0; 失败:-x
+ * 返回:成功:MSD_OK, MSD_END; 失败:-x
+ *       MSD_OK: 成功，并保持连接继续
+ *       MSD_END:成功，不在继续，mossad关闭连接
+ *       MSD_ERR:失败，mossad关闭连接
  **/
 int msd_handle_process(msd_conn_client_t *client);
 

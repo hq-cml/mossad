@@ -451,6 +451,8 @@ void msd_str_trim(msd_str_t *pstr, const char *cset)
  *      memcpy(buf, pstr->buf, buflen);
  *      msd_str_range(pstr, buflen, msd_str_len(pstr)-1);
  *      ....handle buf...
+ * 注意:
+ *      调用的时候应该判断返回值，如果返回NONEED，应该考虑clear字符串
  * 返回:
  *      成功，0；失败，-1；
  **/

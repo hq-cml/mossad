@@ -367,6 +367,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     char buf[MSD_IOBUF_SIZE];
     MSD_AE_NOTUSED(el);  /* 不使用，啥也不干 */
     MSD_AE_NOTUSED(mask);
+    int ret;
     
     MSD_DEBUG_LOG("Read from client %s:%d", client->remote_ip, client->remote_port);
     
@@ -439,15 +440,28 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
         //各个分支都走一遍，光用一个echo不够
         
         /* 目前读取到的数据，已经足够拼出一个完整请求包，则调用handle_process */
-        if(MSD_OK != g_ins->so_func->handle_process(client))
+        ret = g_ins->so_func->handle_process(client);
+        if(MSD_OK == ret)
         {
-            MSD_ERROR_LOG("The handle_process failed. Connection:%s:%d", 
+            /* 返回O，表示成功并继续 */
+            MSD_INFO_LOG("The handle_process success. Continue. Connection:%s:%d", 
                         client->remote_ip, client->remote_port);
+        }
+        else if(MSD_END == ret)
+        {
+            /* 返回MSD_END，表示成功但不继续 */
+            MSD_INFO_LOG("The handle_process success. End. Connection:%s:%d", 
+                        client->remote_ip, client->remote_port);
+            msd_close_client(client->idx, NULL);
+            return;
         }
         else
         {
-            MSD_DEBUG_LOG("The handle_process success. Connection:%s:%d", 
+            /* 返回O，表示成功但不继续 */
+            MSD_ERROR_LOG("The handle_process failed. End. Connection:%s:%d", 
                         client->remote_ip, client->remote_port);
+            msd_close_client(client->idx, NULL);
+            return;
         }
 
         /* 每次只读取recv_prot_len数据长度，如果recvbuf里面还有剩余数据，则应该截出来保留 */
