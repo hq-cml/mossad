@@ -41,12 +41,13 @@ int msd_handle_init(void *conf)
  *       2. 一般可以写一些欢迎信息到client上去 
  * 返回:成功:0; 失败:-x
  **/
+/*
 int msd_handle_open(msd_conn_client_t *client) 
 {
     int write_len;
     char buf[1024];
     sprintf(buf, "Hello, %s:%d, welcom to mossad!\n", client->remote_ip, client->remote_port);
-    /* 欢迎信息写入sendbuf */
+    // 欢迎信息写入sendbuf 
     msd_str_cpy(&(client->sendbuf), buf);
     
     if((write_len = write(client->fd, client->sendbuf->buf, client->sendbuf->len))
@@ -58,7 +59,7 @@ int msd_handle_open(msd_conn_client_t *client)
     }
     return MSD_OK;
 }
-
+*/
 /**
  * 功能: mossad断开client连接的时候，触发此回调
  * 参数: @client指针
