@@ -277,15 +277,16 @@ static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
     
     msd_client_clear(client);
     /* 初始化cli结构 */
-    client->magic = MSD_MAGIC_DEBUG;  /* 初始化魔幻数 */
-    client->fd = cli_fd;
-    client->close_conn = 0;
+    client->magic         = MSD_MAGIC_DEBUG;  /* 初始化魔幻数 */
+    client->fd            = cli_fd;
+    client->status        = C_COMMING;
+    client->close_conn    = 0;
     client->recv_prot_len = 0;
-    client->remote_ip = strdup(cli_ip);
-    client->remote_port = cli_port;
-    client->recvbuf = msd_str_new_empty(); 
-    client->sendbuf = msd_str_new_empty(); 
-    client->access_time = time(NULL);    
+    client->remote_ip     = strdup(cli_ip);
+    client->remote_port   = cli_port;
+    client->recvbuf       = msd_str_new_empty(); 
+    client->sendbuf       = msd_str_new_empty(); 
+    client->access_time   = time(NULL);    
     client->idx = idx;
 
     return idx;
@@ -389,7 +390,8 @@ static int msd_thread_worker_dispatch(int client_idx)
     {
         return MSD_ERR;
     }
-
+    //TODO client->status=C_DISPATCHING
+    
     worker = *(worker_pool->thread_worker_array+ worker_id);
     /* 任务分配写入通知! */
     res = write(worker->notify_write_fd, &client_idx, sizeof(int));
@@ -455,7 +457,9 @@ void msd_close_client(int client_idx, const char *info)
     MSD_LOCK_LOCK(g_ins->client_conn_vec_lock);
     pclient = (msd_conn_client_t **)msd_vector_get_at(g_ins->master->client_vec,client_idx);
     client  = *pclient;
-
+    
+    client->status = C_CLOSING;
+    
     /* 调用handle_close */
     if (g_ins->so_func->handle_close) 
     {
@@ -532,11 +536,13 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
     int i;
     int master_client_cnt = 0;
     int worker_client_cnt = 0;
+
+    int m_c_comm_disp_cnt = 0; /* Master中处于COMMING和DISPATCHING状态的client个数 */
     
     MSD_INFO_LOG("Master cron begin!");
     /* 遍历client_vec */
     MSD_LOCK_LOCK(g_ins->client_conn_vec_lock);
-    
+    MSD_LOCK_LOCK(g_ins->thread_woker_list_lock);
     for( i=0; i < master->client_limit; i++)
     {
         pclient = (msd_conn_client_t **)msd_vector_get_at(master->client_vec, i);
@@ -545,6 +551,11 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
         if( client && 0 != client->access_time )
         {
             master_client_cnt++;
+        }
+
+        if( client && (C_COMMING == client->status || C_DISPATCHING == client->status))
+        {
+            m_c_comm_disp_cnt++;
         }
     }
     /*
@@ -559,10 +570,10 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
         }
     } while (msd_vector_iter_next(iter) == 0);
     */
-    MSD_LOCK_UNLOCK(g_ins->client_conn_vec_lock);
+    
     
     /* 遍历所有的worker中的client_list */
-    MSD_LOCK_LOCK(g_ins->thread_woker_list_lock);
+    
     for (i = 0; i < pool->thread_worker_num; i++)
     {
         if (*(pool->thread_worker_array + i) && (*(pool->thread_worker_array + i))->tid)
@@ -580,19 +591,51 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
             
         }
     }
-    MSD_LOCK_UNLOCK(g_ins->thread_woker_list_lock);    
-    
-    if(master->total_clients == master_client_cnt && master_client_cnt == worker_client_cnt )
+
+    /* Master的client数，需要减去尚未完成分配的，与worker中相等 */
+    if(master->total_clients == master_client_cnt 
+        && (master_client_cnt - m_c_comm_disp_cnt) == worker_client_cnt )
     {
-        MSD_INFO_LOG("Master cron end! Total_clients:%d, Master_client_cnt:%d, Worker_client_cnt:%d", 
-            master->total_clients, master_client_cnt, worker_client_cnt);
+        MSD_INFO_LOG("Master cron end! Total_clients:%d, Master_client_cnt:%d, Master comm_disp_cnt:%d, worker_client_cnt:%d", 
+            master->total_clients, master_client_cnt, m_c_comm_disp_cnt, worker_client_cnt);
     }
     else
     {
-        //TODO 更加详细的任务信息!
-        MSD_FATAL_LOG("Master cron end! Fatal Error!. Total_clients:%d, Master_client_cnt:%d, Worker_client_cnt:%d", 
-            master->total_clients, master_client_cnt, worker_client_cnt);        
+        //更加详细的任务信息!
+        for( i=0; i < master->client_limit; i++)
+        {
+            pclient = (msd_conn_client_t **)msd_vector_get_at(master->client_vec, i);
+            //printf("%p,             %p\n", pclient, *pclient);
+            client  = *pclient;
+            if( client && 0 != client->access_time )
+            {
+                MSD_FATAL_LOG("Master client_vec member. IP:%s, Port:%d, Status:%d", client->remote_ip, client->remote_port, client->status);        
+            }
+        }
+
+        for (i = 0; i < pool->thread_worker_num; i++)
+        {
+            if (*(pool->thread_worker_array + i) && (*(pool->thread_worker_array + i))->tid)
+            {
+                worker = *(pool->thread_worker_array+i);
+                msd_dlist_rewind(worker->client_list, &dlist_iter);
+                while ((node = msd_dlist_next(&dlist_iter))) 
+                {
+                    client = node->value;
+                    if(client && 0 != client->access_time)
+                    {
+                        MSD_FATAL_LOG("Worker client_list member. IP:%s, Port:%d, Status:%d", client->remote_ip, client->remote_port, client->status);    
+                    }
+                }
+                
+            }
+        }
+
+        MSD_FATAL_LOG("Master cron end! Fatal Error!. Total_clients:%d, Master_client_cnt:%d, Master comm_disp_cnt:%d, Worker_client_cnt:%d", 
+            master->total_clients, master_client_cnt, m_c_comm_disp_cnt, worker_client_cnt);        
     }
+    MSD_LOCK_UNLOCK(g_ins->thread_woker_list_lock);    
+    MSD_LOCK_UNLOCK(g_ins->client_conn_vec_lock);
     
     return (1000 * master->poll_interval);
 }

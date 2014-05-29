@@ -427,6 +427,7 @@ static int msd_anet_tcp_generic_connect(char *err, char *addr, int port, int fla
 
     if ((sockfd = msd_anet_create_socket(err, AF_INET)) == MSD_ERR) 
     {
+        MSD_ERROR_LOG("Msd_anet_create_socket failed:%s", err);
         return MSD_ERR;
     }
 
@@ -439,6 +440,7 @@ static int msd_anet_tcp_generic_connect(char *err, char *addr, int port, int fla
         if (he == NULL) 
         {
             msd_anet_set_error(err, "resolve %s failed: %s", addr, hstrerror(h_errno));
+            MSD_ERROR_LOG("Gethostbyname failed:%s", err);
             close(sockfd);
             return MSD_ERR;
         }
@@ -463,6 +465,7 @@ static int msd_anet_tcp_generic_connect(char *err, char *addr, int port, int fla
             return sockfd;
         }
         msd_anet_set_error(err, "connect %s failed: %s", addr, strerror(errno));
+        MSD_ERROR_LOG("Connect failed:%s", err);
         close(sockfd);
         return MSD_ERR;
     }

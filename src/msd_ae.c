@@ -225,6 +225,7 @@ int msd_ae_create_file_event(msd_ae_event_loop *el, int fd, int mask,
 {
     if (fd >= MSD_AE_SETSIZE) 
     {
+        MSD_ERROR_LOG("fd:%d, MSD_AE_SETSIZE:%d", fd, MSD_AE_SETSIZE);
         return MSD_ERR;
     } 
     msd_ae_file_event *fe = &el->events[fd];

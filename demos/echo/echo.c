@@ -68,12 +68,13 @@ int msd_handle_open(msd_conn_client_t *client)
  *       1. 可选函数
  * 返回:成功:0; 失败:-x
  **/
+/*
 int msd_handle_close(msd_conn_client_t *client, const char *info) 
 {
     int write_len;
     char buf[1024];
     sprintf(buf, "Mossad close the connection! Reason:%s\n", info);
-    /* 欢迎信息写入sendbuf */
+    //欢送信息写入sendbuf 
     msd_str_cpy(&(client->sendbuf), buf);
     
     if((write_len = write(client->fd, client->sendbuf->buf, client->sendbuf->len))
@@ -85,7 +86,7 @@ int msd_handle_close(msd_conn_client_t *client, const char *info)
     }
     return MSD_OK;
 }
-
+*/
 /**
  * 功能: 动态约定mossad和client之间的通信协议长度，即mossad应该读取多少数据，算作一次请求
  * 参数: @client指针

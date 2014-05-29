@@ -43,7 +43,7 @@
 */
 
 #ifdef MSD_EPOLL_MODE
-#define MSD_AE_SETSIZE     (1024 * 10)     /* Max number of fd supported */
+#define MSD_AE_SETSIZE     (1024 * 100)    /* Max number of fd supported 因为所有线程都是同一个进程，所以此数值决定了mossad的最大连接数量 */
 #else
 #define MSD_AE_SETSIZE     1024            /* select 最多监听1024个fd */
 #endif

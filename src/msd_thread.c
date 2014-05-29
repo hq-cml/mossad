@@ -326,6 +326,7 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
 
     /* 将worker_id写入client结构 */
     client->worker_id = worker->idx;
+    client->status    = C_WAITING;
     
     /* 向worker->client_list追加client */
     msd_dlist_add_node_tail(worker->client_list, client);
@@ -382,6 +383,13 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
                      client->remote_ip, client->remote_port, strerror(errno));
             nread = 0;
             return;
+        }
+        else if (errno == EINTR) 
+        {
+            MSD_WARNING_LOG("Read connection %s:%d interrupt: %s",
+                     client->remote_ip, client->remote_port, strerror(errno));
+            nread = 0;
+            return;
         } 
         else 
         {
@@ -431,6 +439,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
          */
         MSD_INFO_LOG("Unkonw the accurate protocal lenght, do noting!. connection %s:%d", 
                         client->remote_ip, client->remote_port);
+        client->status = C_RECEIVING;
         return;
     } 
 
@@ -438,9 +447,11 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     {
         //TODO 这个地方还需要多一些例子测测，比如http，transfer等，
         //各个分支都走一遍，光用一个echo不够
-        
+
+        client->status = C_PROCESSING;
         /* 目前读取到的数据，已经足够拼出一个完整请求包，则调用handle_process */
         ret = g_ins->so_func->handle_process(client);
+        
         if(MSD_OK == ret)
         {
             /* 返回O，表示成功并继续 */
@@ -474,6 +485,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
         /* 将协议长度清0，因为每次请求都是独立的，请求的协议长度是可能发生变化，比如http服务器 
          * 需要由handle_input函数去实时计算 */
         client->recv_prot_len = 0; 
+        client->status        = C_WAITING;
                               
     }
     else

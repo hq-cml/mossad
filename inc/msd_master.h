@@ -30,6 +30,16 @@ typedef enum msd_master_stat{
     M_STOP
 }msd_master_stat_t;
 
+typedef enum msd_client_stat{
+    C_COMMING,                  /* 连接刚来到 */
+    C_DISPATCHING,              /* 连接正在分配中 */
+    C_WAITING,                  /* 连接已经分配到了具体woker中，等待request到来 */
+    C_RECEIVING,                /* request到来，但是未凑足一个完整的协议包，继续等待 */
+    C_PROCESSING,               /* request长度足够完整，开始处理 */
+    C_CLOSING                   /* 连接关闭中 */
+}msd_client_stat_t;
+
+
 typedef struct msd_master
 {
     int                 listen_fd;
@@ -91,7 +101,7 @@ typedef struct msd_conn_client
     msd_str_t  *sendbuf;      /* 发送缓冲 */
     msd_str_t  *recvbuf;      /* 接收缓冲 */
     time_t  access_time;   /* client最近一次来临时间，包括:创建连接、读取、写入 */
-
+    msd_client_stat_t status; /* client的状态 */
 
 
     int     idx;           /* 位于client_vec中的位置 */

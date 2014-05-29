@@ -110,7 +110,7 @@ static void read_handler(msd_ae_event_loop *el, int fd, void *priv, int mask)
     client_t *c = (client_t *)priv;
     int nread;
     char buffer[4096];
-
+    memset(buffer, 0, 4096);
     nread = read(fd, buffer, 4096);
     if (nread == -1) 
     {
@@ -127,15 +127,14 @@ static void read_handler(msd_ae_event_loop *el, int fd, void *priv, int mask)
         fprintf(stderr, "Error: %s\n", "Server close connection.");
         exit(1);
     }
-
     c->read += nread;
     /* 当读取到的数据，和写出去的数据相等时，算是完成了一次请求 */
-    if (c->read == c->obuf->len) 
+    if (c->read == c->obuf->len && 0==memcmp(buffer, c->obuf->buf, c->obuf->len)) 
     {
         c->latency = ustime() - c->start;
         ++g_conf.requests_finished;
-        client_done(c);
     }
+    client_done(c);
 }
 
 /* 写回调函数(发送请求)
@@ -151,6 +150,7 @@ static void write_handler(msd_ae_event_loop *el, int fd, void *priv, int mask)
         if (g_conf.requests_issued++ >= g_conf.requests) 
         {
             free_client(c);
+            msd_ae_stop(g_conf.el);
             return;
         }
 
@@ -188,8 +188,9 @@ static void write_handler(msd_ae_event_loop *el, int fd, void *priv, int mask)
 /* 创建第一个client */
 static client_t *create_client(const char *content) 
 {
+    char buf[2048];
     client_t *c = (client_t *)malloc(sizeof(*c));
-    c->fd = msd_anet_tcp_nonblock_connect(NULL, g_conf.hostip, g_conf.hostport);
+    c->fd = msd_anet_tcp_nonblock_connect(buf, g_conf.hostip, g_conf.hostport);
     if (c->fd == MSD_ERR) 
     {
         fprintf(stderr, "Connect to %s:%d failed\n", g_conf.hostip, g_conf.hostport);
@@ -282,7 +283,7 @@ static void show_latency_report(void)
         printf("========== %s ==========\n", g_conf.title);
         printf(" All %d requests has send\n", g_conf.requests);        
         printf(" All %d requests completed\n", g_conf.requests_finished);
-        printf(" Complete percent:%.2f\n", 100*(float)(g_conf.requests_finished/g_conf.requests));
+        printf(" Complete:%.8f%%\n", 100*((float)g_conf.requests_finished/(float)g_conf.requests));
         printf(" Use time %.2f seconds\n", (float)g_conf.total_latency/1000);
         printf(" Parallel %d clients\n", g_conf.num_clients);
         printf(" keep alive: %d\n", g_conf.keep_alive);
@@ -322,7 +323,7 @@ static int show_throughput(msd_ae_event_loop *el, long long id, void *priv)
     float dt = (float)(mstime() - g_conf.start) / 1000.0;
     float rps = (float)g_conf.requests_finished / dt;
     printf("%s: %.2f\n", g_conf.title, rps);
-    return 250; /* every 250ms */
+    return 3000; /* every 250ms */
 }
 
 static void usage(int status) 
@@ -392,7 +393,7 @@ int main(int argc, char **argv)
     g_conf.loop = 0;
     g_conf.quiet = 0;
     g_conf.el = msd_ae_create_event_loop();
-    //msd_ae_create_time_event(g_conf.el, 1, show_throughput, NULL, NULL);
+    msd_ae_create_time_event(g_conf.el, 3000, show_throughput, NULL, NULL);
     g_conf.clients = msd_dlist_init();
     g_conf.hostip = "127.0.0.1";
     g_conf.hostport = 9527;

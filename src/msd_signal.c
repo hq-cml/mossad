@@ -291,11 +291,11 @@ static void msd_public_signal_handler(int signo, msd_thread_signal_t *sig_worker
     int to_stop = 0;
     if(!(sig_name = msd_get_sig_name(signo)))
     {
-        MSD_INFO_LOG("Thread[%lu] receive signal: %d", pthread_self(), signo);
+        MSD_WARNING_LOG("Thread[%lu] receive signal: %d", pthread_self(), signo);
     }
     else
     {
-        MSD_INFO_LOG("Thread[%lu] receive signal: %s", pthread_self(), sig_name);
+        MSD_WARNING_LOG("Thread[%lu] receive signal: %s", pthread_self(), sig_name);
     } 
     
     switch (signo) 

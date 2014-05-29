@@ -446,8 +446,8 @@ int main(int argc, char *argv[])
     }
     msd_daemon_argv_free(saved_argv);
 
-    msd_pid_file_create("/tmp/qbench.pid");
-    msd_pid_file_running("/tmp/qbench.pid");
+    msd_pid_file_create("/tmp/mossad.pid");
+    msd_pid_file_running("/tmp/mossad.pid");
     sleep(5);
     printf("\nif the msd_daemonize's seconde argument is 1, you will not see the line\n");
     sleep(20);
