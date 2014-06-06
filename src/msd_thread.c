@@ -356,7 +356,7 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
 
 /**
  * 功能: client可读时的回调函数。
- * 参数: @arg: 线程函数，通常来说，都是线程自身句柄的指针
+ * 参数: @privdata，回调函数的入参
  * 说明: 
  *       1.  
  * 返回:成功:0; 失败:-x
@@ -366,7 +366,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     msd_conn_client_t *client = (msd_conn_client_t *)privdata;
     int nread;
     char buf[MSD_IOBUF_SIZE];
-    MSD_AE_NOTUSED(el);  /* 不使用，啥也不干 */
+    //MSD_AE_NOTUSED(el);
     MSD_AE_NOTUSED(mask);
     int ret;
     
@@ -463,12 +463,14 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
             /* 返回MSD_END，表示成功但不继续 */
             MSD_INFO_LOG("The handle_process success. End. Connection:%s:%d", 
                         client->remote_ip, client->remote_port);
-            msd_close_client(client->idx, NULL);
-            return;
+            //msd_close_client(client->idx, NULL);
+            //return;
+            client->close_conn = 1; /* response成功之后，自动关闭连接 */
+            msd_ae_delete_file_event(el, fd, MSD_AE_READABLE);
         }
         else
         {
-            /* 返回O，表示成功但不继续 */
+            /* 处理失败，直接关闭client */
             MSD_ERROR_LOG("The handle_process failed. End. Connection:%s:%d", 
                         client->remote_ip, client->remote_port);
             msd_close_client(client->idx, NULL);
@@ -493,6 +495,65 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
         /* 目前读取到的数据还不够组装成需要的请求，则继续等待读取 */
         MSD_DEBUG_LOG("The data lenght not enough, do noting!. connection %s:%d", 
                         client->remote_ip, client->remote_port);
+    }
+    return;
+}
+
+/**
+ * 功能: 向client回写response
+ * 参数: @privdata，回调函数的入参
+ * 说明: 
+ *       1.  
+ * 返回:成功:0; 失败:-x
+ **/
+void msd_write_to_client(msd_ae_event_loop *el, int fd, void *privdata, int mask) 
+{
+    msd_conn_client_t *client = (msd_conn_client_t *)privdata;
+    int nwrite;
+    MSD_AE_NOTUSED(mask);
+    
+    MSD_DEBUG_LOG("Write to client %s:%d", client->remote_ip, client->remote_port);
+
+    nwrite = write(fd, client->sendbuf->buf, client->sendbuf->len);
+    client->access_time = time(NULL);
+    if (nwrite < 0) 
+    {
+        if (errno == EAGAIN) /* 非阻塞fd写入，可能暂不可用 */
+        {
+            MSD_WARNING_LOG("Write to client temporarily unavailable! IP:%s, Port:%d.", client->remote_ip, client->remote_port);
+            nwrite = 0;
+        } 
+        else if(errno==EINTR)/* 遭遇中断 */
+        {  
+            MSD_WARNING_LOG("Handle process was interupted! IP:%s, Port:%d. Error:%s.", client->remote_ip, client->remote_port, strerror(errno));
+            nwrite = 0; 
+        } 
+        else 
+        {
+            MSD_ERROR_LOG("Write to client %s:%d failed:%s", client->remote_ip, client->remote_port, strerror(errno));
+            msd_close_client(client->idx, NULL);
+            return;
+        }
+    }
+    MSD_INFO_LOG("Write to client! IP:%s, Port:%d. Write_len:%d", client->remote_ip, client->remote_port, nwrite);
+
+    /* 将已经写完的数据，从sendbuf中裁剪掉 */
+    if(MSD_OK != msd_str_range(client->sendbuf, nwrite, client->sendbuf->len-1))
+    {
+        /* 如果已经写完了,则write_len == client->sendbuf->len。则msd_str_range返回NONEED */
+        msd_str_clear(client->sendbuf);
+    }
+
+     /* 水平触发，如果sendbuf已经为空，则删除写事件，否则会不断触发
+       * 注册写事件有so中的handle_process去完成 */
+    if(client->sendbuf->len == 0)
+    {
+        msd_ae_delete_file_event(el, fd, MSD_AE_WRITABLE);
+
+        if (client->close_conn) 
+        {
+            msd_close_client(client->idx, NULL);
+        }
     }
     return;
 }
@@ -568,6 +629,24 @@ static void msd_thread_worker_shut_down(msd_thread_worker_t *worker)
     close(worker->notify_read_fd);
     close(worker->notify_write_fd);    
 }
+
+/**
+ * 功能: 根据worker的id，获得worker句柄
+ * 返回: 成功:worker句柄; 失败:-x
+ **/
+msd_thread_worker_t * msd_get_worker(int worker_id)
+{
+    msd_thread_worker_t *worker;
+
+    if(worker_id < 0 || worker_id > g_ins->pool->thread_worker_num-1)
+    {
+        return (msd_thread_worker_t *)MSD_ERR;
+    }
+    
+    worker = *(g_ins->pool->thread_worker_array+ worker_id);  
+    return worker;
+}
+
 
 #ifdef __MSD_THREAD_TEST_MAIN__
 

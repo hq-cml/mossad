@@ -151,7 +151,7 @@ int msd_handle_prot_len(msd_conn_client_t *client)
  *              response-body.....
  * 返回:成功:0; 失败:-x
  *       MSD_OK: 成功，并保持连接继续
- *       MSD_END:成功，不在继续，mossad关闭连接
+ *       MSD_END:成功，不在继续，mossad将response写回client后，自动关闭连接
  *       MSD_ERR:失败，mossad关闭连接
  **/
 int msd_handle_process(msd_conn_client_t *client) 
@@ -164,6 +164,7 @@ int msd_handle_process(msd_conn_client_t *client)
     char file[512] = {};
     char *buf;
     int fd, write_len=0;
+    msd_thread_worker_t *worker; 
     
     if (!strncmp(ptr, "GET", 3)) 
     {  
@@ -231,7 +232,8 @@ int msd_handle_process(msd_conn_client_t *client)
     msd_str_cat_len(&(client->sendbuf), buf, file_size);
     free(buf);
     close(fd);
-    /* 回写 */
+    
+    /* 回写 
     do{
         write_len = write(client->fd, client->sendbuf->buf, client->sendbuf->len);
         if(write_len<0)
@@ -241,13 +243,13 @@ int msd_handle_process(msd_conn_client_t *client)
                 MSD_WARNING_LOG("Handle process was interupted! IP:%s, Port:%d. Error:%s.", client->remote_ip, client->remote_port, strerror(errno));
                 continue;  
             }  
-            else if(errno==EAGAIN) /* EAGAIN : Resource temporarily unavailable*/   
+            else if(errno==EAGAIN) // EAGAIN : Resource temporarily unavailable   
             {  
                 MSD_WARNING_LOG("Handle process was temporarily unavailable! IP:%s, Port:%d. Error:%s.", client->remote_ip, client->remote_port, strerror(errno));
                 msd_thread_usleep(1);
                 continue;  
             }  
-            else /* 其他错误 没有办法,只好退了*/   
+            else // 其他错误 没有办法,只好退了  
             {  
                 MSD_ERROR_LOG("Handle process error! IP:%s, Port:%d. Error:%s. Write_len:%d", client->remote_ip, client->remote_port, strerror(errno), write_len);
                 return MSD_ERR;  
@@ -260,7 +262,17 @@ int msd_handle_process(msd_conn_client_t *client)
             msd_str_clear(client->sendbuf);
         }
     }while(client->sendbuf->len != 0);
+    */
     
+    worker = msd_get_worker(client->worker_id);
+    /* 注册回写事件 */
+    if (msd_ae_create_file_event(worker->t_ael, client->fd, MSD_AE_WRITABLE,
+                msd_write_to_client, client) == MSD_ERR) 
+    {
+        msd_close_client(client->idx, "create file event failed");
+        MSD_ERROR_LOG("Create write file event failed for connection:%s:%d", client->remote_ip, client->remote_port);
+        return MSD_ERR;
+    }    
     return MSD_END;
 }
 

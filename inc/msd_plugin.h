@@ -85,10 +85,10 @@ int msd_handle_prot_len(msd_conn_client_t *client);
  * 说明: 
  *       1. 必选函数
  *       2. 每次从recvbuf中应该取得recv_prot_len长度的数据，作为一个完整请求
- *       3. 将处理完毕的结果，放入sendbuf，然后发送回去
+ *       3. 将处理完毕的结果，放入sendbuf，然后发送回去(注册ae写函数，由框架发送回去为宜)
  * 返回:成功:MSD_OK, MSD_END; 失败:-x
  *       MSD_OK: 成功，并保持连接继续
- *       MSD_END:成功，不在继续，mossad关闭连接
+ *       MSD_END:成功，不在继续，mossad将response写回client之后，自动关闭连接
  *       MSD_ERR:失败，mossad关闭连接
  **/
 int msd_handle_process(msd_conn_client_t *client);

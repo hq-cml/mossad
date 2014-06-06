@@ -64,13 +64,6 @@ struct thread_worker{
     msd_thread_pool_t  *pool;           /* 依附于的线程池句柄 */
     msd_dlist_t        *client_list;    /* 本线程负责的client，组成的队列 */
     
-    //struct event_base *ev_base;
-    //struct event ev_notify;
-    //struct event ev_cleantimeout;
-
-    //std::set<int> conn_set;
-    //ares_channel dns_channel;
-    //gkoAlloc mem;
     //void * userData;
 };
 
@@ -83,13 +76,6 @@ struct thread_pool{
     
     int                   client_timeout;         /* client超时时间 */
     int                   poll_interval;          /* worker线程Cron频率 */
-    //pthread_cond_t      cond;
-    //pthread_cond_t      exit_cond;
-    //dqueue_t            task_queue;
-    //int                 exit;
-    //int                 threads_idle;
-    //
-    //int                 threads_max;
 };
  
 msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void* (*worker_task)(void *arg));
@@ -97,6 +83,9 @@ int msd_thread_pool_destroy(msd_thread_pool_t *pool);
 void* msd_thread_worker_cycle(void* arg);
 void msd_thread_sleep(int s);
 void msd_thread_usleep(int s);
+msd_thread_worker_t * msd_get_worker(int worker_id);
+void msd_write_to_client(msd_ae_event_loop *el, int fd, void *privdata, int mask);
+
 
 #endif /* __MSD_THREAD_H_INCLUDED__ */
 

@@ -106,14 +106,17 @@ int msd_handle_prot_len(msd_conn_client_t *client)
  *       1. 必选函数
  *       2. 每次从recvbuf中应该取得recv_prot_len长度的数据，作为一个完整请求
  * 返回:成功:0; 失败:-x
+ *       MSD_OK: 成功，并保持连接继续
+ *       MSD_END:成功，不在继续，mossad将response写回client后，自动关闭连接
+ *       MSD_ERR:失败，mossad关闭连接
  **/
 int msd_handle_process(msd_conn_client_t *client) 
 {
-    int write_len;
-    //TODO 参考qbench是怎么write的
+    msd_thread_worker_t *worker; 
     /* 回显信息写入sendbuf */
     msd_str_cpy_len(&(client->sendbuf), client->recvbuf->buf, client->recv_prot_len);
-
+    
+    /*
     if((write_len = write(client->fd, client->sendbuf->buf, client->sendbuf->len))
         != client->sendbuf->len)
     {
@@ -121,7 +124,17 @@ int msd_handle_process(msd_conn_client_t *client)
         //TODO，将write加入ae_loop
         return MSD_ERR;
     }
-    return 0;
+    */
+    worker = msd_get_worker(client->worker_id);
+    /* 注册回写事件 */
+    if (msd_ae_create_file_event(worker->t_ael, client->fd, MSD_AE_WRITABLE,
+                msd_write_to_client, client) == MSD_ERR) 
+    {
+        msd_close_client(client->idx, "create file event failed");
+        MSD_ERROR_LOG("Create write file event failed for connection:%s:%d", client->remote_ip, client->remote_port);
+        return MSD_ERR;
+    } 
+    return MSD_OK;
 }
 
 /**

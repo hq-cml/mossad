@@ -418,6 +418,7 @@ int msd_anet_peer_tostring(char *err, int fd, char *ip, int *port)
 /**
  * 功能: 通用连接
  * 参数: @err, addr, port, flags
+ * 说明: 默认是非阻塞的
  * 返回: 成功，新的fd；失败，-x
  **/
 static int msd_anet_tcp_generic_connect(char *err, char *addr, int port, int flags) 

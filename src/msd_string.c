@@ -454,7 +454,7 @@ void msd_str_trim(msd_str_t *pstr, const char *cset)
  * 注意:
  *      调用的时候应该判断返回值，如果返回NONEED，应该考虑clear字符串
  * 返回:
- *      成功，0；失败，-1；
+ *      成功，0；失败，-1；没必要，-3
  **/
 int msd_str_range(msd_str_t *pstr, int start, int end)
 {

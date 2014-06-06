@@ -570,8 +570,7 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
         }
     } while (msd_vector_iter_next(iter) == 0);
     */
-    
-    
+
     /* 遍历所有的worker中的client_list */
     
     for (i = 0; i < pool->thread_worker_num; i++)
