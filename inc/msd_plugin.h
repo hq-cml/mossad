@@ -39,6 +39,18 @@ __BEGIN_DECLS
 int msd_handle_init(void *conf);
 
 /**
+ * 功能: worker线程初始化回调
+ * 参数: @worker
+ * 说明: 
+ *       1. 可选函数
+ *       2. worker线程初始化阶段，调用此函数，可以做一些初始化工作
+ *       3. 通常用于初始化worker的priv_data域
+ *       3. 如果此函数失败，mossad会直接退出
+ * 返回:成功:0; 失败:-x
+ **/
+int msd_handle_worker_init(void *conf, void *worker);
+
+/**
  * 功能: mossad关闭的时候，触发此回调
  * 参数: @cycle
  * 说明: 

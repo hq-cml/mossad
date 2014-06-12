@@ -114,6 +114,7 @@ static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task
     worker->pool                 = pool;
     worker->idx                  = idx;
     worker->status               = W_STOP;
+    worker->priv_data            = NULL;
     pool->thread_worker_array[idx] = worker; /* 放入对应的位置 */
 
     /* 
@@ -249,6 +250,17 @@ void* msd_thread_worker_cycle(void* arg)
     MSD_INFO_LOG("Worker[%d] begin to work", worker->idx);
 
     worker->status = W_RUNNING;
+
+    /* worker线程初始化函数 */
+    if (g_ins->so_func->handle_worker_init) 
+    {
+        if (g_ins->so_func->handle_worker_init(g_ins->conf, worker) != MSD_OK) 
+        {
+            MSD_ERROR_LOG("Invoke hook handle_worker_init failed");
+            MSD_BOOT_FAILED("Invoke hook handle_worker_init failed");
+        }
+    }
+
     
     if (msd_ae_create_file_event(worker->t_ael, worker->notify_read_fd, 
                 MSD_AE_READABLE, msd_thread_worker_process_notify, arg) == MSD_ERR) 
@@ -416,86 +428,87 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
      * 需要多次read才能将读取内容拼装成一个完整的请求 */
     msd_str_cat(&(client->recvbuf), buf);
 
-    if (client->recv_prot_len == 0) 
-    {
-        /* 每次读取的长度不定，所以recv_prot_len是一个变量，不断调整 */ 
-        client->recv_prot_len = g_ins->so_func->handle_prot_len(client);
-        MSD_DEBUG_LOG("Get the recv_prot_len %d", client->recv_prot_len);
-    } 
-
-    if (client->recv_prot_len < 0 || client->recv_prot_len > MSD_MAX_PROT_LEN) 
-    {
-        MSD_ERROR_LOG("Invalid protocol length:%d for connection %s:%d", 
-                 client->recv_prot_len, client->remote_ip, client->remote_port);
-        msd_close_client(client->idx, "Wrong recv_port_len!");
-        return;
-    } 
-
-    if (client->recv_prot_len == 0) 
-    {
-        /* 当处理一个比较大型的请求包的时候(或者客户端是telnet，每一次回车都会触发一个TCP包发送)
-         * 一个请求可能会由多个TCP包发送过来andle_input暂时还无法判断出整个请求的长度，则返回0，
-         * 表示需要继续读取数据，直到handle_input能够判断出请求长度为止
-         */
-        MSD_INFO_LOG("Unkonw the accurate protocal lenght, do noting!. connection %s:%d", 
-                        client->remote_ip, client->remote_port);
-        client->status = C_RECEIVING;
-        return;
-    } 
-
-    if ( client->recvbuf->len >= client->recv_prot_len) 
-    {
-        //TODO 这个地方还需要多一些例子测测，比如http，transfer等，
-        //各个分支都走一遍，光用一个echo不够
-
-        client->status = C_PROCESSING;
-        /* 目前读取到的数据，已经足够拼出一个完整请求包，则调用handle_process */
-        ret = g_ins->so_func->handle_process(client);
-        
-        if(MSD_OK == ret)
+    /* 一次接受的内容可能是多个完整的协议包 */
+    do{
+        if (client->recv_prot_len == 0) 
         {
-            /* 返回O，表示成功并继续 */
-            MSD_INFO_LOG("The handle_process success. Continue. Connection:%s:%d", 
-                        client->remote_ip, client->remote_port);
-        }
-        else if(MSD_END == ret)
+            /* 每次读取的长度不定，所以recv_prot_len是一个变量，不断调整 */ 
+            client->recv_prot_len = g_ins->so_func->handle_prot_len(client);
+            MSD_DEBUG_LOG("Get the recv_prot_len %d", client->recv_prot_len);
+        } 
+
+        if (client->recv_prot_len < 0 || client->recv_prot_len > MSD_MAX_PROT_LEN) 
         {
-            /* 返回MSD_END，表示成功但不继续 */
-            MSD_INFO_LOG("The handle_process success. End. Connection:%s:%d", 
-                        client->remote_ip, client->remote_port);
-            //msd_close_client(client->idx, NULL);
-            //return;
-            client->close_conn = 1; /* response成功之后，自动关闭连接 */
-            msd_ae_delete_file_event(el, fd, MSD_AE_READABLE);
+            MSD_ERROR_LOG("Invalid protocol length:%d for connection %s:%d", 
+                     client->recv_prot_len, client->remote_ip, client->remote_port);
+            msd_close_client(client->idx, "Wrong recv_port_len!");
+            return;
+        } 
+
+        if (client->recv_prot_len == 0) 
+        {
+            /* 当处理一个比较大型的请求包的时候(或者客户端是telnet，每一次回车都会触发一个TCP包发送)
+             * 一个请求可能会由多个TCP包发送过来andle_input暂时还无法判断出整个请求的长度，则返回0，
+             * 表示需要继续读取数据，直到handle_input能够判断出请求长度为止
+             */
+            MSD_INFO_LOG("Unkonw the accurate protocal lenght, do noting!. connection %s:%d", 
+                            client->remote_ip, client->remote_port);
+            client->status = C_RECEIVING;
+            return;
+        } 
+
+        if ( client->recvbuf->len >= client->recv_prot_len) 
+        {
+            client->status = C_PROCESSING;
+            /* 目前读取到的数据，已经足够拼出一个完整请求包，则调用handle_process */
+            ret = g_ins->so_func->handle_process(client);
+            
+            if(MSD_OK == ret)
+            {
+                /* 返回O，表示成功并继续 */
+                MSD_INFO_LOG("The handle_process success. Continue. Connection:%s:%d", 
+                            client->remote_ip, client->remote_port);
+            }
+            else if(MSD_END == ret)
+            {
+                /* 返回MSD_END，表示成功但不继续 */
+                MSD_INFO_LOG("The handle_process success. End. Connection:%s:%d", 
+                            client->remote_ip, client->remote_port);
+                //msd_close_client(client->idx, NULL);
+                //return;
+                client->close_conn = 1; /* response成功之后，自动关闭连接 */
+                msd_ae_delete_file_event(el, fd, MSD_AE_READABLE);
+            }
+            else
+            {
+                /* 处理失败，直接关闭client */
+                MSD_ERROR_LOG("The handle_process failed. End. Connection:%s:%d", 
+                            client->remote_ip, client->remote_port);
+                msd_close_client(client->idx, NULL);
+                return;
+            }
+
+            /* 每次只读取recv_prot_len数据长度，如果recvbuf里面还有剩余数据，则应该截出来保留 */
+            if(MSD_OK != msd_str_range(client->recvbuf, client->recv_prot_len,  client->recvbuf->len - 1))
+            {
+                /* 当recv_prot_len==recvbuf->len的时候，range()返回错误，直接清空缓冲区 */
+                msd_str_clear(client->recvbuf);
+            }
+                
+            /* 将协议长度清0，因为每次请求都是独立的，请求的协议长度是可能发生变化，比如http服务器 
+               * 需要由handle_input函数去实时计算 */
+            client->recv_prot_len = 0; 
+            client->status        = C_WAITING;
+                                  
         }
         else
         {
-            /* 处理失败，直接关闭client */
-            MSD_ERROR_LOG("The handle_process failed. End. Connection:%s:%d", 
-                        client->remote_ip, client->remote_port);
-            msd_close_client(client->idx, NULL);
+            /* 目前读取到的数据还不够组装成需要的请求，则继续等待读取 */
+            MSD_DEBUG_LOG("The data lenght not enough, do noting!. connection %s:%d", 
+                            client->remote_ip, client->remote_port);
             return;
         }
-
-        /* 每次只读取recv_prot_len数据长度，如果recvbuf里面还有剩余数据，则应该截出来保留 */
-        if(MSD_OK != msd_str_range(client->recvbuf, client->recv_prot_len,  client->recvbuf->len - 1))
-        {
-            /* 当recv_prot_len==recvbuf->len的时候，range()返回错误，直接清空缓冲区 */
-            msd_str_clear(client->recvbuf);
-        }
-            
-        /* 将协议长度清0，因为每次请求都是独立的，请求的协议长度是可能发生变化，比如http服务器 
-         * 需要由handle_input函数去实时计算 */
-        client->recv_prot_len = 0; 
-        client->status        = C_WAITING;
-                              
-    }
-    else
-    {
-        /* 目前读取到的数据还不够组装成需要的请求，则继续等待读取 */
-        MSD_DEBUG_LOG("The data lenght not enough, do noting!. connection %s:%d", 
-                        client->remote_ip, client->remote_port);
-    }
+    }while(1);
     return;
 }
 
@@ -571,7 +584,7 @@ void msd_write_to_client(msd_ae_event_loop *el, int fd, void *privdata, int mask
 static int msd_thread_worker_cron(msd_ae_event_loop *el, long long id, void *privdate) 
 {
     msd_thread_worker_t *worker = (msd_thread_worker_t *)privdate;
-    msd_dlist_iter      iter;
+    msd_dlist_iter_t    iter;
     msd_dlist_node_t    *node;
     msd_conn_client_t   *cli;
     time_t              unix_clock = time(NULL);
@@ -608,7 +621,7 @@ static int msd_thread_worker_cron(msd_ae_event_loop *el, long long id, void *pri
  **/
 static void msd_thread_worker_shut_down(msd_thread_worker_t *worker)
 {
-    msd_dlist_iter      iter;
+    msd_dlist_iter_t    iter;
     msd_dlist_node_t    *node;
     msd_conn_client_t   *cli;
 

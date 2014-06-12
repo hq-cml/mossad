@@ -247,9 +247,9 @@ void msd_dlist_delete_node(msd_dlist_t *dl, msd_dlist_node_t *node)
  *      1. 
  * 返回: 成功，iter结构指针，失败，NULL
  **/
-msd_dlist_iter *msd_dlist_get_iterator(msd_dlist_t *dl, int direction) 
+msd_dlist_iter_t *msd_dlist_get_iterator(msd_dlist_t *dl, int direction) 
 {
-    msd_dlist_iter *iter;
+    msd_dlist_iter_t *iter;
     if ((iter = malloc(sizeof(*iter))) == NULL)
         return NULL;
 
@@ -265,7 +265,7 @@ msd_dlist_iter *msd_dlist_get_iterator(msd_dlist_t *dl, int direction)
 /**
  * 功能: Release the iterator memory.
  **/
-void msd_dlist_destroy_iterator(msd_dlist_iter *iter) 
+void msd_dlist_destroy_iterator(msd_dlist_iter_t *iter) 
 {
     if (iter) 
         free(iter);
@@ -274,7 +274,7 @@ void msd_dlist_destroy_iterator(msd_dlist_iter *iter)
 /**
  * 功能: Create an iterator in the list iterator structure.
  **/
-void msd_dlist_rewind(msd_dlist_t *dl, msd_dlist_iter *iter) 
+void msd_dlist_rewind(msd_dlist_t *dl, msd_dlist_iter_t *iter) 
 {
     iter->node = dl->head;
     iter->direction = MSD_DLIST_START_HEAD;
@@ -283,7 +283,7 @@ void msd_dlist_rewind(msd_dlist_t *dl, msd_dlist_iter *iter)
 /**
  * 功能: Create an iterator in the list iterator structure.
  **/
-void msd_dlist_rewind_tail(msd_dlist_t *dl, msd_dlist_iter *iter) 
+void msd_dlist_rewind_tail(msd_dlist_t *dl, msd_dlist_iter_t *iter) 
 {
     iter->node = dl->tail;
     iter->direction = MSD_DLIST_START_TAIL;
@@ -301,7 +301,7 @@ void msd_dlist_rewind_tail(msd_dlist_t *dl, msd_dlist_iter *iter)
  *      }
  * 返回: 成功，node结构指针，失败，NULL
  **/
-msd_dlist_node_t *msd_dlist_next(msd_dlist_iter *iter) 
+msd_dlist_node_t *msd_dlist_next(msd_dlist_iter_t *iter) 
 {
     msd_dlist_node_t *curr = iter->node;
     if (curr != NULL) 
@@ -323,7 +323,7 @@ msd_dlist_node_t *msd_dlist_next(msd_dlist_iter *iter)
  **/
 msd_dlist_node_t *msd_dlist_search_key(msd_dlist_t *dl, void *key) 
 {
-    msd_dlist_iter *iter = NULL;
+    msd_dlist_iter_t *iter = NULL;
     msd_dlist_node_t *node = NULL;
     iter = msd_dlist_get_iterator(dl, MSD_DLIST_START_HEAD);
     while ((node = msd_dlist_next(iter)) != NULL) 
@@ -361,7 +361,7 @@ msd_dlist_node_t *msd_dlist_search_key(msd_dlist_t *dl, void *key)
 msd_dlist_t *msd_dlist_dup(msd_dlist_t *orig) 
 {
     msd_dlist_t *copy;
-    msd_dlist_iter *iter;
+    msd_dlist_iter_t *iter;
     msd_dlist_node_t *node;
 
     if ((copy = msd_dlist_init()) == NULL) 

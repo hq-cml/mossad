@@ -531,7 +531,7 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
     msd_conn_client_t *client;
     msd_thread_pool_t *pool = g_ins->pool;
     msd_thread_worker_t *worker;
-    msd_dlist_iter    dlist_iter;
+    msd_dlist_iter_t    dlist_iter;
     msd_dlist_node_t  *node;
     int i;
     int master_client_cnt = 0;

@@ -48,7 +48,7 @@ typedef struct msd_dlist_iter
 {
     msd_dlist_node_t *node; /* 该迭代器对应的元素的地址 */
     int direction;
-} msd_dlist_iter;
+} msd_dlist_iter_t;
 
 /* Functions implemented as macros */
 #define msd_dlist_length(l)     ((l)->len)
@@ -74,14 +74,14 @@ msd_dlist_t *msd_dlist_add_node_tail(msd_dlist_t *dl, void *value);
 msd_dlist_t *msd_dlist_insert_node(msd_dlist_t *dl, msd_dlist_node_t *ponode, 
         void *value, int after);
 void msd_dlist_delete_node(msd_dlist_t *dl, msd_dlist_node_t *pnode);
-msd_dlist_iter *msd_dlist_get_iterator(msd_dlist_t *dl, int direction);
-msd_dlist_node_t *msd_dlist_next(msd_dlist_iter *iter);
-void msd_dlist_destroy_iterator(msd_dlist_iter *iter);
+msd_dlist_iter_t *msd_dlist_get_iterator(msd_dlist_t *dl, int direction);
+msd_dlist_node_t *msd_dlist_next(msd_dlist_iter_t *iter);
+void msd_dlist_destroy_iterator(msd_dlist_iter_t *iter);
 msd_dlist_t *msd_dlist_dup(msd_dlist_t *orig);
 msd_dlist_node_t *msd_dlist_search_key(msd_dlist_t *dl, void *key);
 msd_dlist_node_t *msd_dlist_index(msd_dlist_t *dl, int index);
  
-void msd_dlist_rewind(msd_dlist_t *dl, msd_dlist_iter *iter);
-void msd_dlist_rewind_tail(msd_dlist_t *dl, msd_dlist_iter *iter);
+void msd_dlist_rewind(msd_dlist_t *dl, msd_dlist_iter_t *iter);
+void msd_dlist_rewind_tail(msd_dlist_t *dl, msd_dlist_iter_t *iter);
 #endif /* __MSD_DLIST_H_INCLUDED__ */
 

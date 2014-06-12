@@ -63,8 +63,7 @@ struct thread_worker{
     msd_ae_event_loop  *t_ael;          /* worker线程ae句柄，用于监听管道和所负责的client fd */
     msd_thread_pool_t  *pool;           /* 依附于的线程池句柄 */
     msd_dlist_t        *client_list;    /* 本线程负责的client，组成的队列 */
-    
-    //void * userData;
+    void               *priv_data;      /* worker自身数据，此数据的生成和释放，需要交给so函数去完成 */
 };
 
 struct thread_pool{
