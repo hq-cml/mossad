@@ -1,7 +1,7 @@
-/**
+/*
  *  __  __  ___  ____ ____    _    ____  
- * |  \/  |/ _ \/ ___/ ___|  / \  |  _ \ 
- * | |\/| | | | \___ \___ \ / _ \ | | | |
+ * |  \/  |/ _ \/ ___/ ___|  /_\  |  _ \ 
+ * | |\/| | | | \___ \___ \ //_\\ | | | |
  * | |  | | |_| |___) |__) / ___ \| |_| |
  * |_|  |_|\___/|____/____/_/   \_\____/ 
  *
@@ -13,11 +13,9 @@
  *
  *                #define MSD_EPOLL_MODE
  *
- *     Created :  Apr 7, 2012 
  *     Version :  0.0.1 
  * 
  *      Author :  HQ 
- *     Company :  Qh 
  *
  **/
 #include "msd_core.h"
@@ -239,13 +237,16 @@ int msd_ae_create_file_event(msd_ae_event_loop *el, int fd, int mask,
     if (mask & MSD_AE_READABLE) 
     {
         fe->r_file_proc = proc;
+        fe->read_client_data = client_data;
     }
 
     if (mask & MSD_AE_WRITABLE) 
     {
         fe->w_file_proc = proc;
+        fe->write_client_data = client_data;
     } 
-    fe->client_data = client_data;
+    /* Ae bug. 读写事件用同一个参数，不合理 */
+    //fe->client_data = client_data;
     
     /* Once one file event has been registered, the el->maxfd
        no longer is -1. */
@@ -800,7 +801,7 @@ int msd_ae_process_events(msd_ae_event_loop *el, int flags)
             if (fe->mask & mask & MSD_AE_READABLE) 
             {
                 rfired = 1;
-                fe->r_file_proc(el, fd, fe->client_data, mask);
+                fe->r_file_proc(el, fd, fe->read_client_data, mask);
             } 
 
             if (fe->mask & mask & MSD_AE_WRITABLE) 
@@ -808,7 +809,7 @@ int msd_ae_process_events(msd_ae_event_loop *el, int flags)
                 /* 确保如果读和写是同一个函数的时候，不会重复执行 */
                 if (!rfired || fe->w_file_proc != fe->r_file_proc) 
                 {
-                    fe->w_file_proc(el, fd, fe->client_data, mask);
+                    fe->w_file_proc(el, fd, fe->write_client_data, mask);
                 }
             }
 

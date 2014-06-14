@@ -1,7 +1,7 @@
-/**
+/*
  *  __  __  ___  ____ ____    _    ____  
- * |  \/  |/ _ \/ ___/ ___|  / \  |  _ \ 
- * | |\/| | | | \___ \___ \ / _ \ | | | |
+ * |  \/  |/ _ \/ ___/ ___|  /_\  |  _ \ 
+ * | |\/| | | | \___ \___ \ //_\\ | | | |
  * | |  | | |_| |___) |__) / ___ \| |_| |
  * |_|  |_|\___/|____/____/_/   \_\____/ 
  *
@@ -21,11 +21,9 @@
  *                进程：MSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE/MSD_FCNTL_LOCK_MODE
  *                线程：MSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE
  *
- *     Created :  Apr 5, 2012
  *     Version :  0.0.1 
  * 
  *      Author :  HQ 
- *     Company :  Qh 
  *
  **/
 #include "msd_core.h"

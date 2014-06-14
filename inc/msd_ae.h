@@ -1,7 +1,7 @@
 /**
  *  __  __  ___  ____ ____    _    ____  
- * |  \/  |/ _ \/ ___/ ___|  / \  |  _ \ 
- * | |\/| | | | \___ \___ \ / _ \ | | | |
+ * |  \/  |/ _ \/ ___/ ___|  /_\  |  _ \ 
+ * | |\/| | | | \___ \___ \ //_\\ | | | |
  * | |  | | |_| |___) |__) / ___ \| |_| |
  * |_|  |_|\___/|____/____/_/   \_\____/ 
  *
@@ -13,11 +13,9 @@
  *
  *                #define MSD_EPOLL_MODE
  *
- *     Created :  Apr 7, 2012 
  *     Version :  0.0.1 
  * 
  *      Author :  HQ 
- *     Company :  Qh 
  *
  **/
 #ifndef __MSD_AE_H_INCLUDED__
@@ -78,7 +76,11 @@ typedef struct msd_ae_file_event {
     int                  mask; /* one of AE_(READABLE|WRITABLE) */
     msd_ae_file_proc    *r_file_proc;
     msd_ae_file_proc    *w_file_proc;
-    void *client_data;
+    /* Ae bug， 读写函数用同一个参数，会出现覆盖 */
+    //void                 *client_data;
+    void                *read_client_data;
+    void                *write_client_data;
+    
 } msd_ae_file_event;
 
 /* Time event structure */

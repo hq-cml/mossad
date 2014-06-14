@@ -1,7 +1,7 @@
-/**
+/*
  *  __  __  ___  ____ ____    _    ____  
- * |  \/  |/ _ \/ ___/ ___|  / \  |  _ \ 
- * | |\/| | | | \___ \___ \ / _ \ | | | |
+ * |  \/  |/ _ \/ ___/ ___|  /_\  |  _ \ 
+ * | |\/| | | | \___ \___ \ //_\\ | | | |
  * | |  | | |_| |___) |__) / ___ \| |_| |
  * |_|  |_|\___/|____/____/_/   \_\____/ 
  *
@@ -14,11 +14,9 @@
  *                #define MSD_LOG_MODE_THREAD(默认)
  *                #define MSD_LOG_MODE_PROCESS
  *
- *     Created :  Mar 6, 2012 
  *     Version :  0.0.1 
  * 
  *      Author :  HQ 
- *     Company :  Qh 
  *
  **/
 #include "msd_core.h"
@@ -442,7 +440,18 @@ int msd_log_write(int level, const char *fmt, ...)
     va_start(ap, fmt);
     end = vsnprintf(log_buffer+pos, MSD_LOG_BUFFER_SIZE-pos, fmt, ap);
     va_end(ap);
-    log_buffer[pos+end] = '\n';
+
+    /* 越界处理 */
+    if(end >= (MSD_LOG_BUFFER_SIZE-pos))
+    {
+        log_buffer[MSD_LOG_BUFFER_SIZE-1] = '\n';
+        memset(log_buffer+MSD_LOG_BUFFER_SIZE-4, '.', 3);
+        end = MSD_LOG_BUFFER_SIZE-pos-1;
+    }
+    else
+    {
+        log_buffer[pos+end] = '\n';
+    }    
 
     index = g_log.msd_log_multi? level:0;
 
@@ -655,7 +664,18 @@ int msd_log_write(int level, const char *fmt, ...)
     va_start(ap, fmt);
     end = vsnprintf(log_buffer+pos, MSD_LOG_BUFFER_SIZE-pos, fmt, ap);
     va_end(ap);
-    log_buffer[pos+end] = '\n';
+
+    /* 越界处理 */
+    if(end >= (MSD_LOG_BUFFER_SIZE-pos))
+    {
+        log_buffer[MSD_LOG_BUFFER_SIZE-1] = '\n';
+        memset(log_buffer+MSD_LOG_BUFFER_SIZE-4, '.', 3);
+        end = MSD_LOG_BUFFER_SIZE-pos-1;
+    }
+    else
+    {
+        log_buffer[pos+end] = '\n';
+    }    
 
     index = g_log.msd_log_multi? level:0;
 

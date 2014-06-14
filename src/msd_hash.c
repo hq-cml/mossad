@@ -1,7 +1,7 @@
-/**
+/*
  *  __  __  ___  ____ ____    _    ____  
- * |  \/  |/ _ \/ ___/ ___|  / \  |  _ \ 
- * | |\/| | | | \___ \___ \ / _ \ | | | |
+ * |  \/  |/ _ \/ ___/ ___|  /_\  |  _ \ 
+ * | |\/| | | | \___ \___ \ //_\\ | | | |
  * | |  | | |_| |___) |__) / ___ \| |_| |
  * |_|  |_|\___/|____/____/_/   \_\____/ 
  *
@@ -10,11 +10,9 @@
  * Description :  Msd_hash, a simple hash library. 
  *                Maybe it's not complex than redis's dict, but is enough.
  * 
- *     Created :  Mar 29, 2012 
  *     Version :  0.0.1 
  *      
  *      Author :  HQ 
- *     Company :  Qh 
  *
  **/
 

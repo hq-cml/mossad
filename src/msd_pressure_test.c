@@ -1,7 +1,7 @@
-/**
+/*
  *  __  __  ___  ____ ____    _    ____  
- * |  \/  |/ _ \/ ___/ ___|  / \  |  _ \ 
- * | |\/| | | | \___ \___ \ / _ \ | | | |
+ * |  \/  |/ _ \/ ___/ ___|  /_\  |  _ \ 
+ * | |\/| | | | \___ \___ \ //_\\ | | | |
  * | |  | | |_| |___) |__) / ___ \| |_| |
  * |_|  |_|\___/|____/____/_/   \_\____/ 
  *
@@ -9,11 +9,9 @@
  * 
  *  Description:  Mossad —π¡¶≤‚ ‘π§æﬂ. 
  * 
- *      Created:  May 26, 2014 
  *      Version:  0.0.1 
  * 
  *       Author:  HQ 
- *      Company:  Qihoo 
  *
  **/
 
@@ -415,7 +413,13 @@ int main(int argc, char **argv)
     }
 
     do {
-        benchmark("Mossad QPS benchmark", "hello mossad");
+        /* —π≤‚Echo */
+        //benchmark("Mossad QPS benchmark", "hello mossad");
+        /* —π≤‚tosser */
+        char buf[256] = {0};
+        snprintf(buf, 256, "0000000106{\"type\": \"0\", \"host\": \"hq_test\", \"data\": [[\"999\", \"999\", \"1\"], [\"888\", \"888\", \"1\"]], \"time\": \"%d\"}", (int)time(NULL));
+        //printf("strlen:%d, %s\n", strlen(buf), buf);
+        benchmark("Mossad QPS benchmark", buf);
     } while (g_conf.loop);
 
     exit(0);
