@@ -18,7 +18,22 @@
 
 //#include "msd_hash.h"
 #include "msd_core.h"
- 
+
+/**
+ * 功能: 默认set函数
+ **/
+void *msd_hash_def_set(const void *key){    return strdup((char *)key); }
+
+/**
+ * 功能: 默认free函数
+ **/
+void msd_hash_def_free(void *key){ if(!key) free(key); }
+
+/**
+ * 功能: 默认cmp函数
+ **/
+int msd_hash_def_cmp(const void *key1, const void *key2) { return strcmp((char *)key1, (char *)key2) == 0; }
+
 /**
  * 功能: get the minimun 2'n which is biger than size
  * 参数: @size:初始给定大小 

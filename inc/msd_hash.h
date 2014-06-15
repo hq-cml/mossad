@@ -120,6 +120,9 @@ int msd_hash_iter_move_next(msd_hash_iter_t *iter);
 int msd_hash_iter_move_prev(msd_hash_iter_t *iter);
 int msd_hash_iter_reset(msd_hash_iter_t *iter);
 void msd_hash_iter_free(msd_hash_iter_t *iter);
+void *msd_hash_def_set(const void *key);
+void msd_hash_def_free(void *key);
+int msd_hash_def_cmp(const void *key1, const void *key2);
 
 #endif /* __MSD_HASH_H_INCLUDED__ */
 

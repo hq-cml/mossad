@@ -162,10 +162,13 @@ char ** msd_set_program_name(int argc, char *argv[], const char *name)
 
 /**
  * 功能: 重定向
+ * 返回: 备份的标准输出
  **/
-void msd_redirect_std() 
+int msd_redirect_std() 
 {
     int fd;
+    int org_fd;
+    org_fd = dup(STDOUT_FILENO); /* 保存一份标准输出 */
     if ((fd = open("/dev/null", O_RDWR, 0)) != -1) 
     {
         /*
@@ -181,6 +184,7 @@ void msd_redirect_std()
             close(fd);
         }
     }
+    return org_fd;
 }
 
 /**

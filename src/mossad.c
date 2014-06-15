@@ -294,7 +294,7 @@ int main(int argc, char **argv)
     
         if ((msd_pid_file_create(g_ins->pid_file->buf)) != 0) 
         {
-            MSD_ERROR_LOG("Create pid file failed: %s", strerror(errno));
+            MSD_ERROR_LOG("Create pid file failed: %s.Path:%s", strerror(errno), g_ins->pid_file->buf);
             MSD_BOOT_FAILED("Create pid file failed: %s", strerror(errno));
         }
         MSD_BOOT_SUCCESS("Create Pid File");
@@ -424,12 +424,14 @@ int main(int argc, char **argv)
     MSD_BOOT_SUCCESS("Mossad Begin To Run. Program name:%s", msd_conf_get_str_value(g_ins->conf, "pro_name", "Mossad"));
     MSD_INFO_LOG("Mossad Begin To Run Program name:%s", msd_conf_get_str_value(g_ins->conf, "pro_name", "Mossad"));
     /* 重定向STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO */
-    msd_redirect_std();
+    int org_fd = msd_redirect_std();
     fprintf(stderr, "You will never see me!\n");
     
     /* Master开始工作 */ 
     if(MSD_OK != msd_master_cycle())
     {
+        /* 恢复标准输出 */
+        dup2(org_fd, STDOUT_FILENO);
         MSD_ERROR_LOG("Create Master Failed");
         MSD_BOOT_FAILED("Create Master Failed");
     }

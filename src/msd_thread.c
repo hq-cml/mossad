@@ -497,7 +497,12 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
                * 需要由handle_input函数去实时计算 */
             client->recv_prot_len = 0; 
             client->status        = C_WAITING;
-                                  
+
+            /* 杜绝空转 */
+            if(client->recvbuf->len <= 0)
+            {
+                return;
+            }                     
         }
         else
         {

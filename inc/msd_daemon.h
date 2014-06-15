@@ -43,7 +43,7 @@ char ** msd_set_program_name(int argc, char *argv[], const char *name);
 void msd_daemon_argv_free(char **daemon_argv);
 
 void msd_rlimit_reset();
-void msd_redirect_std();
+int  msd_redirect_std();
 void msd_daemonize();
 
 pid_t msd_pid_file_running(char *pid_file);
