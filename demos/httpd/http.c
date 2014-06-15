@@ -10,11 +10,9 @@
  * Description :  Mossad框架Http服务器示例
  *                实现msd_plugin.h中的函数，即可将用户逻辑嵌入mossad框架
  * 
- *     Created :  May 6, 2012 
  *     Version :  0.0.1 
  * 
  *      Author :  HQ 
- *     Company :  Qh 
  *
  **/
 #include "msd_core.h"
