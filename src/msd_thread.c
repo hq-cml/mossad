@@ -379,6 +379,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     //MSD_AE_NOTUSED(el);
     MSD_AE_NOTUSED(mask);
     int ret;
+    msd_thread_worker_t *worker;
     
     MSD_DEBUG_LOG("Read from client %s:%d", client->remote_ip, client->remote_port);
     
@@ -389,21 +390,21 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
         /* 非阻塞的fd，读取不会阻塞，如果无内容可读，则errno==EAGAIN */
         if (errno == EAGAIN) 
         {
-            MSD_WARNING_LOG("Read connection %s:%d eagain: %s",
+            MSD_WARNING_LOG("Read connection [%s:%d] eagain: %s",
                      client->remote_ip, client->remote_port, strerror(errno));
             nread = 0;
             return;
         }
         else if (errno == EINTR) 
         {
-            MSD_WARNING_LOG("Read connection %s:%d interrupt: %s",
+            MSD_WARNING_LOG("Read connection [%s:%d] interrupt: %s",
                      client->remote_ip, client->remote_port, strerror(errno));
             nread = 0;
             return;
         } 
         else 
         {
-            MSD_ERROR_LOG("Read connection %s:%d failed: %s",
+            MSD_ERROR_LOG("Read connection [%s:%d] failed: %s",
                      client->remote_ip, client->remote_port, strerror(errno));
 
             msd_close_client(client->idx, "Read data failed!");
@@ -412,14 +413,14 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     } 
     else if (nread == 0) 
     {
-        MSD_INFO_LOG("Client close connection %s:%d",client->remote_ip, client->remote_port);
+        MSD_INFO_LOG("Client close connection. IP:%s, Port%d",client->remote_ip, client->remote_port);
         msd_close_client(client->idx, NULL);
         return;
     }
     buf[nread] = '\0';
 
     //printf("%d %d  %d  %d\n", buf[nread-3], buf[nread-2], buf[nread-1], buf[nread]);
-    MSD_INFO_LOG("Read from client %s:%d. Length:%d, Content:%s", 
+    MSD_INFO_LOG("Read from client. IP:%s, Port%d. Length:%d, Content:%s", 
                     client->remote_ip, client->remote_port, nread, buf);
 
     /* 将读出的内容拼接到recvbuf上面，这里是拼接，因为可能请求的包很大
@@ -437,7 +438,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
 
         if (client->recv_prot_len < 0 || client->recv_prot_len > MSD_MAX_PROT_LEN) 
         {
-            MSD_ERROR_LOG("Invalid protocol length:%d for connection %s:%d", 
+            MSD_ERROR_LOG("Invalid protocol length:%d for connection. IP:%s, Port:%d", 
                      client->recv_prot_len, client->remote_ip, client->remote_port);
             msd_close_client(client->idx, "Wrong recv_port_len!");
             return;
@@ -449,7 +450,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
              * 一个请求可能会由多个TCP包发送过来andle_input暂时还无法判断出整个请求的长度，则返回0，
              * 表示需要继续读取数据，直到handle_input能够判断出请求长度为止
              */
-            MSD_INFO_LOG("Unkonw the accurate protocal lenght, do noting!. connection %s:%d", 
+            MSD_INFO_LOG("Unkonw the accurate protocal lenght, do noting!. Connection. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
             client->status = C_RECEIVING;
             return;
@@ -464,13 +465,13 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
             if(MSD_OK == ret)
             {
                 /* 返回O，表示成功并继续 */
-                MSD_INFO_LOG("The handle_process success. Continue. Connection:%s:%d", 
+                MSD_INFO_LOG("The handle_process success. Continue. Connection. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
             }
             else if(MSD_END == ret)
             {
                 /* 返回MSD_END，表示成功但不继续 */
-                MSD_INFO_LOG("The handle_process success. End. Connection:%s:%d", 
+                MSD_INFO_LOG("The handle_process success. End. Connection. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
                 //msd_close_client(client->idx, NULL);
                 //return;
@@ -480,7 +481,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
             else
             {
                 /* 处理失败，直接关闭client */
-                MSD_ERROR_LOG("The handle_process failed. End. Connection:%s:%d", 
+                MSD_ERROR_LOG("The handle_process failed. End. Connection. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
                 msd_close_client(client->idx, NULL);
                 return;
@@ -498,6 +499,19 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
             client->recv_prot_len = 0; 
             client->status        = C_WAITING;
 
+            /* 如果sendbuf不为空，则注册Client写回事件 */
+            if(client->sendbuf->len > 0)
+            {
+                worker = msd_get_worker(client->worker_id);
+                if (msd_ae_create_file_event(worker->t_ael, client->fd, MSD_AE_WRITABLE,
+                            msd_write_to_client, client) == MSD_ERR) 
+                {
+                    msd_close_client(client->idx, "create file event failed");
+                    MSD_ERROR_LOG("Create write file event failed. Connection. IP:%s, Port:%d", client->remote_ip, client->remote_port);
+                    return;
+                }
+            }
+            
             /* 杜绝空转 */
             if(client->recvbuf->len <= 0)
             {
@@ -507,7 +521,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
         else
         {
             /* 目前读取到的数据还不够组装成需要的请求，则继续等待读取 */
-            MSD_DEBUG_LOG("The data lenght not enough, do noting!. connection %s:%d", 
+            MSD_DEBUG_LOG("The data lenght not enough, do noting!. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
             return;
         }
@@ -528,7 +542,7 @@ void msd_write_to_client(msd_ae_event_loop *el, int fd, void *privdata, int mask
     int nwrite;
     MSD_AE_NOTUSED(mask);
     
-    MSD_DEBUG_LOG("Write to client %s:%d", client->remote_ip, client->remote_port);
+    MSD_DEBUG_LOG("Write to client. IP:%s, Port:%d", client->remote_ip, client->remote_port);
 
     nwrite = write(fd, client->sendbuf->buf, client->sendbuf->len);
     client->access_time = time(NULL);
@@ -656,7 +670,7 @@ msd_thread_worker_t * msd_get_worker(int worker_id)
 
     if(worker_id < 0 || worker_id > g_ins->pool->thread_worker_num-1)
     {
-        return (msd_thread_worker_t *)MSD_ERR;
+        return NULL;
     }
     
     worker = *(g_ins->pool->thread_worker_array+ worker_id);  

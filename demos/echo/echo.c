@@ -1,7 +1,7 @@
 /**
  *  __  __  ___  ____ ____    _    ____  
- * |  \/  |/ _ \/ ___/ ___|  / \  |  _ \ 
- * | |\/| | | | \___ \___ \ / _ \ | | | |
+ * |  \/  |/ _ \/ ___/ ___|  /_\  |  _ \ 
+ * | |\/| | | | \___ \___ \ //_\\ | | | |
  * | |  | | |_| |___) |__) / ___ \| |_| |
  * |_|  |_|\___/|____/____/_/   \_\____/ 
  *
@@ -110,9 +110,9 @@ int msd_handle_prot_len(msd_conn_client_t *client)
  **/
 int msd_handle_process(msd_conn_client_t *client) 
 {
-    msd_thread_worker_t *worker; 
+    //msd_thread_worker_t *worker; 
     /* 回显信息写入sendbuf */
-    msd_str_cpy_len(&(client->sendbuf), client->recvbuf->buf, client->recv_prot_len);
+    msd_str_cat_len(&(client->sendbuf), client->recvbuf->buf, client->recv_prot_len);
     
     /*
     if((write_len = write(client->fd, client->sendbuf->buf, client->sendbuf->len))
@@ -123,15 +123,18 @@ int msd_handle_process(msd_conn_client_t *client)
         return MSD_ERR;
     }
     */
+    
+    /*
     worker = msd_get_worker(client->worker_id);
-    /* 注册回写事件 */
+    // 注册回写事件，交由框架处理
     if (msd_ae_create_file_event(worker->t_ael, client->fd, MSD_AE_WRITABLE,
                 msd_write_to_client, client) == MSD_ERR) 
     {
         msd_close_client(client->idx, "create file event failed");
         MSD_ERROR_LOG("Create write file event failed for connection:%s:%d", client->remote_ip, client->remote_port);
         return MSD_ERR;
-    } 
+    }
+    */
     return MSD_OK;
 }
 

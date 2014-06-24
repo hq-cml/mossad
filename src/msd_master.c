@@ -593,8 +593,8 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
     if(master->total_clients == master_client_cnt 
         && (master_client_cnt - m_c_comm_disp_cnt) == worker_client_cnt )
     {
-        MSD_INFO_LOG("Master cron end! Total_clients:%d, Master_client_cnt:%d, Master comm_disp_cnt:%d, worker_client_cnt:%d", 
-            master->total_clients, master_client_cnt, m_c_comm_disp_cnt, worker_client_cnt);
+        MSD_INFO_LOG("Master cron end! Total_clients:%d, Master_client_cnt:%d, worker_client_cnt:%d, Master comm_disp_cnt:%d ", 
+            master->total_clients, master_client_cnt, worker_client_cnt, m_c_comm_disp_cnt);
     }
     else
     {
