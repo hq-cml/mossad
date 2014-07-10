@@ -1,7 +1,33 @@
-
  ____    ____    ___      ______     ______        _       ______    
 |_   \  /   _| .'   `.  .' ____ \  .' ____ \      / \     |_   _ `.  
   |   \/   |  /  .-.  \ | (___ \_| | (___ \_|    / _ \      | | `. \ 
   | |\  /| |  | |   | | \_.____`.  \_.____`.    / ___ \     | |  | | 
  _| |_\/_| |_ \  `-'  / \-\____) | \-\____) | _/ /   \ \_  _| |_.' / 
 |_____||_____| `.___.'   \______.'  \______.'|____| |____||______.'  
+
+========================== Description ============================
+    Mossad is a async multithread TCP server framework that you can 
+customize your logical business code and not to care about networking 
+processing and event process. Mossad is responsible for them.
+    
+    In demos directory, there are some demos which baseed on mossad. 
+You can refer them to write your business code.
+    
+    Mossad refer to gko_pool, verben, server_bench, reids .etc
+
+============================= Notes ===============================
+
+
+
+
+
+
+=========================== Requires ==============================
+    There are two modes to process the event,Libevent and AE_POOL
+(derived from redis). If you choose the the first one, The libev-
+ent is needed. 
+
+========================== Installation ===========================
+
+
+
