@@ -13,19 +13,12 @@ processing and event process. Mossad is responsible for them.
     In demos directory, there are some demos which baseed on mossad. 
 You can refer them to write your business code.
     
-    Mossad refer to gko_pool, verben, server_bench, reids .etc
+    Mossad refer to reids, nginx, gko_pool, verben .etc
 
 ============================= Notes ===============================
 
 
 
-
-
-
-=========================== Requires ==============================
-    There are two modes to process the event,Libevent and AE_POOL
-(derived from redis). If you choose the the first one, The libev-
-ent is needed. 
 
 ========================== Installation ===========================
 
