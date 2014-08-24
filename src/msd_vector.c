@@ -124,7 +124,7 @@ int msd_vector_set_at(msd_vector_t *vec, unsigned int index, void *data)
  **/  
 int msd_vector_push(msd_vector_t *vec, void *data) 
 {
-    if (vec->count == (vec->slots - 1)) 
+    if (vec->count == (vec->slots)) 
     {
         if (msd_vector_resize(vec) != MSD_OK) 
         {
