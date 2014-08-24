@@ -32,7 +32,7 @@
 
 typedef struct msd_vector
 {
-    unsigned int  count; /* vector中元素个数，Vector的索引从0开始，即count<=slots-1 
+    unsigned int  count; /* vector中元素个数，Vector的索引从0开始. count<=slots 
                           * 注意!这个值是有问题的!Vector不能确认准确的元素个数!
                           */
     unsigned int  slots; /* data数组槽位数量，即可容纳元素的最大个数 */
