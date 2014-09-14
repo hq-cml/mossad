@@ -21,6 +21,7 @@ You can refer them to write your business code.
 
 
 ========================== Installation ===========================
-
-
+#cd src
+#make
+#make install
 
