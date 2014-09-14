@@ -56,8 +56,6 @@ int msd_vector_set_at(msd_vector_t *v, unsigned int index, void *data);
 
 void *msd_vector_get_at(msd_vector_t *v, unsigned int index);
 
-void msd_vector_destroy(msd_vector_t *v);
-
 void msd_vector_free(msd_vector_t *v);
  
 msd_vector_iter_t *msd_vector_iter_new(msd_vector_t *vec);
