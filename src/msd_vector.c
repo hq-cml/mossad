@@ -14,6 +14,8 @@
  * 
  *      Author :  HQ 
  *
+ *    Modified :  去除了存在bug的iter
+ *
  **/
 
 #include "msd_core.h"
@@ -174,47 +176,6 @@ void msd_vector_free(msd_vector_t *vec)
 {
     msd_vector_destroy(vec);
     free(vec);
-}
- 
-/**
- * 功能: init vector
- * 参数: @iter
- *       @vec
- * 描述:
- *      1. 初始化完成后，将iter指向起始元素
- * 返回: 成功 0 失败 -x
- **/  
-static int msd_vector_iter_init(msd_vector_iter_t *iter, msd_vector_t *vec) 
-{
-    iter->pos = 0;
-    iter->vec = vec;
-    iter->data = NULL;
-    /* 指向起始位置 */
-    return msd_vector_iter_next(iter);
-}
-
-/**
- * 功能: new vector
- * 参数: @vec
- * 返回: 成功 iter指针 失败 NULL
- **/ 
-msd_vector_iter_t *msd_vector_iter_new(msd_vector_t *vec) 
-{
-    msd_vector_iter_t *iter;
-    
-    iter = (msd_vector_iter_t *)calloc(1, sizeof(*iter));
-    if (!iter) 
-    {
-        return NULL;
-    }
-    
-    if (msd_vector_iter_init(iter, vec) != MSD_OK) 
-    {
-        free(iter);
-        return NULL;
-    }
-    
-    return iter;
 }
 
 /**
