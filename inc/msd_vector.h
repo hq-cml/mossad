@@ -48,12 +48,16 @@ typedef struct msd_vector
 typedef int (*msd_vector_cmp_t)(const void *, const void *); 
 typedef int (*msd_vector_each_t)(void *, void *);
 
-static int msd_vector_init(msd_vector_t *vec, unsigned int slots, unsigned int size);
-msd_vector_t *msd_vector_new(unsigned int slots, unsigned int size);
-int msd_vector_push(msd_vector_t *v, void *elem);
-int msd_vector_set_at(msd_vector_t *v, unsigned int index, void *data);
-void *msd_vector_get_at(msd_vector_t *v, unsigned int index);
-void msd_vector_free(msd_vector_t *v);
+static int    msd_vector_init     (msd_vector_t *vec, unsigned int slots, unsigned int size);
+msd_vector_t *msd_vector_new    (unsigned int slots, unsigned int size);
+int           msd_vector_push   (msd_vector_t *v, void *elem);
+int           msd_vector_set_at (msd_vector_t *v, unsigned int index, void *data);
+void         *msd_vector_get_at (msd_vector_t *v, unsigned int index);
+void          msd_vector_free     (msd_vector_t *v);
+void         *msd_vector_pop     (msd_vector_t *vec);
+void         *msd_vector_top      (msd_vector_t *vec); 
+int           msd_vector_sort    (msd_vector_t *vec, msd_vector_cmp_t cmp);
+int           msd_vector_each   (msd_vector_t *vec, msd_vector_each_t func, void *data);
 
 #endif /* __MSD_VECTOR_H_INCLUDED__ */
 
