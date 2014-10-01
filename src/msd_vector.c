@@ -177,56 +177,6 @@ void msd_vector_free(msd_vector_t *vec)
     msd_vector_destroy(vec);
     free(vec);
 }
-
-/**
- * 功能: iter move next
- * 参数: @iter
- * 描述:
- *      1. 指针前移，pos自减，data移动到前一个元素的开始位置
- *      2. 这个函数不能用!，因为它依赖count!
- * 返回: 成功 0 失败 -x
- **/
-int msd_vector_iter_prev(msd_vector_iter_t *iter) 
-{
-    if ((!iter->pos) ? 1 : 0) 
-    {
-        /* 处于开头 */
-        return MSD_ERR;
-    }
-    
-    --iter->pos;
-    iter->data = (char *)iter->vec->data + (iter->pos * iter->vec->size);
-    return 0;
-}
-
-/**
- * 功能: destroy iter
- **/
-void msd_vector_iter_destroy(msd_vector_iter_t *iter) 
-{
-    iter->pos = 0;
-    iter->data = NULL;
-    iter->vec = NULL;
-}
-
-/**
- * 功能: free
- **/
-void msd_vector_iter_free(msd_vector_iter_t *iter) 
-{
-    msd_vector_iter_destroy(iter);
-    free(iter);
-}
-
-/**
- * 功能: free
- **/
-void msd_vector_iter_reset(msd_vector_iter_t *iter) 
-{
-    msd_vector_t *tmp = iter->vec;
-    msd_vector_iter_destroy(iter);
-    msd_vector_iter_init(iter, tmp);
-}
  
 #ifdef __MSD_VECTOR_TEST_MAIN__
 #define COUNT       100
