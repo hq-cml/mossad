@@ -182,36 +182,6 @@ void msd_vector_free(msd_vector_t *vec)
  * 功能: iter move next
  * 参数: @iter
  * 描述:
- *      1. 指针后移，pos自增，data移动到后一个元素的开始位置
- *      2. 这个函数不能用!，因为它依赖count!
- * 返回: 成功 0 失败 -x
- **/
-int msd_vector_iter_next(msd_vector_iter_t *iter) 
-{        
-    if (iter->pos == (iter->vec->count - 1)) 
-    {
-        /* 达到末尾 */
-        return MSD_ERR;
-    }
-
-    if (!iter->data && !iter->pos) 
-    {
-        /* run for the first time */
-        iter->data = iter->vec->data;
-        return MSD_OK;
-    } 
-    else 
-    {
-        ++iter->pos;
-        iter->data = (char *)iter->vec->data + (iter->pos * iter->vec->size);
-        return MSD_OK;
-    }
-}
-
-/**
- * 功能: iter move next
- * 参数: @iter
- * 描述:
  *      1. 指针前移，pos自减，data移动到前一个元素的开始位置
  *      2. 这个函数不能用!，因为它依赖count!
  * 返回: 成功 0 失败 -x
