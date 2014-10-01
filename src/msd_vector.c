@@ -8,7 +8,7 @@
  *    Filename :  Msd_vector.c
  * 
  * Description :  Msd_vector, a vector based on array. Support any type.
- *                åœ¨ä¸€æ•´ç‰‡(size*slots)è¿ç»­çš„å†…å­˜ä¸­ï¼Œæ¨¡æ‹Ÿå‡ºæ•°ç»„çš„è¡Œä¸ºã€‚
+ *                ÔÚÒ»ÕûÆ¬(size*slots)Á¬ĞøµÄÄÚ´æÖĞ£¬Ä£Äâ³öÊı×éµÄĞĞÎª¡£
  * 
  *     Version :  0.0.1 
  * 
@@ -19,11 +19,11 @@
 #include "msd_core.h"
 
 /**
- * åŠŸèƒ½: init vector
- * å‚æ•°: @vec, @slots, @size
- * æè¿°:
- *      1. åœ¨ä¸€æ•´ç‰‡è¿ç»­çš„å†…å­˜ä¸­ï¼Œæ¨¡æ‹Ÿå‡ºæ•°ç»„çš„è¡Œä¸º
- * è¿”å›: æˆåŠŸ 0ï¼Œ å¤±è´¥ï¼Œ-x
+ * ¹¦ÄÜ: init vector
+ * ²ÎÊı: @vec, @slots, @size
+ * ÃèÊö:
+ *      1. ÔÚÒ»ÕûÆ¬Á¬ĞøµÄÄÚ´æÖĞ£¬Ä£Äâ³öÊı×éµÄĞĞÎª
+ * ·µ»Ø: ³É¹¦ 0£¬ Ê§°Ü£¬-x
  **/ 
 static int msd_vector_init(msd_vector_t *vec, unsigned int slots, unsigned int size) 
 {
@@ -45,12 +45,12 @@ static int msd_vector_init(msd_vector_t *vec, unsigned int slots, unsigned int s
 }
 
 /**
- * åŠŸèƒ½: Create a vector, and init it
- * å‚æ•°: @slots, vectorå…ƒç´ ä¸ªæ•°
- *       @size, æ¯ä¸ªå…ƒç´ çš„å¤§å°
- * æè¿°:
+ * ¹¦ÄÜ: Create a vector, and init it
+ * ²ÎÊı: @slots, vectorÔªËØ¸öÊı
+ *       @size, Ã¿¸öÔªËØµÄ´óĞ¡
+ * ÃèÊö:
  *      1. 
- * è¿”å›: æˆåŠŸï¼Œvectorç»“æ„åœ°å€ï¼Œå¤±è´¥ï¼ŒNULL
+ * ·µ»Ø: ³É¹¦£¬vector½á¹¹µØÖ·£¬Ê§°Ü£¬NULL
  **/
 msd_vector_t *msd_vector_new(unsigned int slots, unsigned int size) 
 {
@@ -68,11 +68,11 @@ msd_vector_t *msd_vector_new(unsigned int slots, unsigned int size)
 }
 
 /**
- * åŠŸèƒ½: double the number of the slots available to a vector
- * å‚æ•°: @vec
- * æè¿°:
- *      1. reallocï¼Œä¸éœ€è¦é‡Šæ”¾åŸæ¥çš„åœ°å€
- * è¿”å›: æˆåŠŸ 0 å¤±è´¥ -x
+ * ¹¦ÄÜ: double the number of the slots available to a vector
+ * ²ÎÊı: @vec
+ * ÃèÊö:
+ *      1. realloc£¬²»ĞèÒªÊÍ·ÅÔ­À´µÄµØÖ·
+ * ·µ»Ø: ³É¹¦ 0 Ê§°Ü -x
  **/ 
 static int msd_vector_resize(msd_vector_t *vec) 
 {
@@ -90,11 +90,11 @@ static int msd_vector_resize(msd_vector_t *vec)
 }
 
 /**
- * åŠŸèƒ½: vector set at
- * å‚æ•°: @vec, @index, @data
- * æ³¨æ„:
- *       æœ¬å‡½æ•°å¯¹countçš„å¤„ç†æ—¶å­˜åœ¨é—®é¢˜çš„ï¼Œset_atæœ‰å¯èƒ½æ˜¯åœ¨æ¸…ç©º!
- * è¿”å›: æˆåŠŸ 0 å¤±è´¥ -x
+ * ¹¦ÄÜ: vector set at
+ * ²ÎÊı: @vec, @index, @data
+ * ×¢Òâ:
+ *       ±¾º¯Êı¶ÔcountµÄ´¦ÀíÊ±´æÔÚÎÊÌâµÄ£¬set_atÓĞ¿ÉÄÜÊÇÔÚÇå¿Õ!
+ * ·µ»Ø: ³É¹¦ 0 Ê§°Ü -x
  **/
 int msd_vector_set_at(msd_vector_t *vec, unsigned int index, void *data) 
 {
@@ -109,18 +109,18 @@ int msd_vector_set_at(msd_vector_t *vec, unsigned int index, void *data)
     }
     
     memcpy((char *)vec->data + (index * vec->size), data, vec->size);
-    ++vec->count; /* é”™è¯¯! */
+    ++vec->count; /* ´íÎó! */
     return MSD_OK;
 } 
  
 /**
- * åŠŸèƒ½: åœ¨vectorå°¾éƒ¨æ·»åŠ ä¸€ä¸ªå…ƒç´ 
- * å‚æ•°: @
+ * ¹¦ÄÜ: ÔÚvectorÎ²²¿Ìí¼ÓÒ»¸öÔªËØ
+ * ²ÎÊı: @
  *       @
- * æè¿°:
- *      1. vectorç´¢å¼•ä»0å¼€å§‹
- *      2. è¿™ä¸ªå‡½æ•°ä¸èƒ½ç”¨!ï¼Œå› ä¸ºå®ƒä¾èµ–count!
- * è¿”å›: æˆåŠŸ 0 å¤±è´¥ -x
+ * ÃèÊö:
+ *      1. vectorË÷Òı´Ó0¿ªÊ¼
+ *      2. Õâ¸öº¯Êı²»ÄÜÓÃ!£¬ÒòÎªËüÒÀÀµcount!
+ * ·µ»Ø: ³É¹¦ 0 Ê§°Ü -x
  **/  
 int msd_vector_push(msd_vector_t *vec, void *data) 
 {
@@ -136,8 +136,8 @@ int msd_vector_push(msd_vector_t *vec, void *data)
 }
 
  /**
- * åŠŸèƒ½: get a value random
- * å‚æ•°: @vec , @index
+ * ¹¦ÄÜ: get a value random
+ * ²ÎÊı: @vec , @index
  **/
 void *msd_vector_get_at(msd_vector_t *vec, unsigned int index) 
 {
@@ -148,10 +148,10 @@ void *msd_vector_get_at(msd_vector_t *vec, unsigned int index)
 }
 
 /**
- * åŠŸèƒ½: destroy the vector
- * å‚æ•°: @vec
- * æè¿°:
- *      1. ä»…é‡Šæ”¾dataï¼Œvecæœ¬èº«ç»“æ„ä¸é‡Šæ”¾
+ * ¹¦ÄÜ: destroy the vector
+ * ²ÎÊı: @vec
+ * ÃèÊö:
+ *      1. ½öÊÍ·Ådata£¬vec±¾Éí½á¹¹²»ÊÍ·Å
  **/
 static void msd_vector_destroy(msd_vector_t *vec) 
 {
@@ -165,10 +165,10 @@ static void msd_vector_destroy(msd_vector_t *vec)
 }
 
 /**
- * åŠŸèƒ½: destroy the vector
- * å‚æ•°: @vec
- * æè¿°:
- *      1. é‡Šæ”¾dataï¼Œç„¶åé‡Šæ”¾vecæœ¬èº«
+ * ¹¦ÄÜ: destroy the vector
+ * ²ÎÊı: @vec
+ * ÃèÊö:
+ *      1. ÊÍ·Ådata£¬È»ºóÊÍ·Åvec±¾Éí
  **/
 void msd_vector_free(msd_vector_t *vec) 
 {
@@ -177,26 +177,26 @@ void msd_vector_free(msd_vector_t *vec)
 }
  
 /**
- * åŠŸèƒ½: init vector
- * å‚æ•°: @iter
+ * ¹¦ÄÜ: init vector
+ * ²ÎÊı: @iter
  *       @vec
- * æè¿°:
- *      1. åˆå§‹åŒ–å®Œæˆåï¼Œå°†iteræŒ‡å‘èµ·å§‹å…ƒç´ 
- * è¿”å›: æˆåŠŸ 0 å¤±è´¥ -x
+ * ÃèÊö:
+ *      1. ³õÊ¼»¯Íê³Éºó£¬½«iterÖ¸ÏòÆğÊ¼ÔªËØ
+ * ·µ»Ø: ³É¹¦ 0 Ê§°Ü -x
  **/  
 static int msd_vector_iter_init(msd_vector_iter_t *iter, msd_vector_t *vec) 
 {
     iter->pos = 0;
     iter->vec = vec;
     iter->data = NULL;
-    /* æŒ‡å‘èµ·å§‹ä½ç½® */
+    /* Ö¸ÏòÆğÊ¼Î»ÖÃ */
     return msd_vector_iter_next(iter);
 }
 
 /**
- * åŠŸèƒ½: new vector
- * å‚æ•°: @vec
- * è¿”å›: æˆåŠŸ iteræŒ‡é’ˆ å¤±è´¥ NULL
+ * ¹¦ÄÜ: new vector
+ * ²ÎÊı: @vec
+ * ·µ»Ø: ³É¹¦ iterÖ¸Õë Ê§°Ü NULL
  **/ 
 msd_vector_iter_t *msd_vector_iter_new(msd_vector_t *vec) 
 {
@@ -218,18 +218,18 @@ msd_vector_iter_t *msd_vector_iter_new(msd_vector_t *vec)
 }
 
 /**
- * åŠŸèƒ½: iter move next
- * å‚æ•°: @iter
- * æè¿°:
- *      1. æŒ‡é’ˆåç§»ï¼Œposè‡ªå¢ï¼Œdataç§»åŠ¨åˆ°åä¸€ä¸ªå…ƒç´ çš„å¼€å§‹ä½ç½®
- *      2. è¿™ä¸ªå‡½æ•°ä¸èƒ½ç”¨!ï¼Œå› ä¸ºå®ƒä¾èµ–count!
- * è¿”å›: æˆåŠŸ 0 å¤±è´¥ -x
+ * ¹¦ÄÜ: iter move next
+ * ²ÎÊı: @iter
+ * ÃèÊö:
+ *      1. Ö¸ÕëºóÒÆ£¬pos×ÔÔö£¬dataÒÆ¶¯µ½ºóÒ»¸öÔªËØµÄ¿ªÊ¼Î»ÖÃ
+ *      2. Õâ¸öº¯Êı²»ÄÜÓÃ!£¬ÒòÎªËüÒÀÀµcount!
+ * ·µ»Ø: ³É¹¦ 0 Ê§°Ü -x
  **/
 int msd_vector_iter_next(msd_vector_iter_t *iter) 
 {        
     if (iter->pos == (iter->vec->count - 1)) 
     {
-        /* è¾¾åˆ°æœ«å°¾ */
+        /* ´ïµ½Ä©Î² */
         return MSD_ERR;
     }
 
@@ -248,18 +248,18 @@ int msd_vector_iter_next(msd_vector_iter_t *iter)
 }
 
 /**
- * åŠŸèƒ½: iter move next
- * å‚æ•°: @iter
- * æè¿°:
- *      1. æŒ‡é’ˆå‰ç§»ï¼Œposè‡ªå‡ï¼Œdataç§»åŠ¨åˆ°å‰ä¸€ä¸ªå…ƒç´ çš„å¼€å§‹ä½ç½®
- *      2. è¿™ä¸ªå‡½æ•°ä¸èƒ½ç”¨!ï¼Œå› ä¸ºå®ƒä¾èµ–count!
- * è¿”å›: æˆåŠŸ 0 å¤±è´¥ -x
+ * ¹¦ÄÜ: iter move next
+ * ²ÎÊı: @iter
+ * ÃèÊö:
+ *      1. Ö¸ÕëÇ°ÒÆ£¬pos×Ô¼õ£¬dataÒÆ¶¯µ½Ç°Ò»¸öÔªËØµÄ¿ªÊ¼Î»ÖÃ
+ *      2. Õâ¸öº¯Êı²»ÄÜÓÃ!£¬ÒòÎªËüÒÀÀµcount!
+ * ·µ»Ø: ³É¹¦ 0 Ê§°Ü -x
  **/
 int msd_vector_iter_prev(msd_vector_iter_t *iter) 
 {
     if ((!iter->pos) ? 1 : 0) 
     {
-        /* å¤„äºå¼€å¤´ */
+        /* ´¦ÓÚ¿ªÍ· */
         return MSD_ERR;
     }
     
@@ -269,7 +269,7 @@ int msd_vector_iter_prev(msd_vector_iter_t *iter)
 }
 
 /**
- * åŠŸèƒ½: destroy iter
+ * ¹¦ÄÜ: destroy iter
  **/
 void msd_vector_iter_destroy(msd_vector_iter_t *iter) 
 {
@@ -279,7 +279,7 @@ void msd_vector_iter_destroy(msd_vector_iter_t *iter)
 }
 
 /**
- * åŠŸèƒ½: free
+ * ¹¦ÄÜ: free
  **/
 void msd_vector_iter_free(msd_vector_iter_t *iter) 
 {
@@ -288,7 +288,7 @@ void msd_vector_iter_free(msd_vector_iter_t *iter)
 }
 
 /**
- * åŠŸèƒ½: free
+ * ¹¦ÄÜ: free
  **/
 void msd_vector_iter_reset(msd_vector_iter_t *iter) 
 {

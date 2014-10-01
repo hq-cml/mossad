@@ -8,7 +8,7 @@
  *    Filename :  Msd_vector.h
  * 
  * Description :  Msd_vector, a vector based on array. Support any type.
- *                åœ¨ä¸€æ•´ç‰‡(size*slots)è¿žç»­çš„å†…å­˜ä¸­ï¼Œæ¨¡æ‹Ÿå‡ºæ•°ç»„çš„è¡Œä¸ºã€‚
+ *                ÔÚÒ»ÕûÆ¬(size*slots)Á¬ÐøµÄÄÚ´æÖÐ£¬Ä£Äâ³öÊý×éµÄÐÐÎª¡£
  * 
  *     Created :  Apr 4, 2012
  *     Version :  0.0.1 
@@ -32,19 +32,19 @@
 
 typedef struct msd_vector
 {
-    unsigned int  count; /* vectorä¸­å…ƒç´ ä¸ªæ•°ï¼ŒVectorçš„ç´¢å¼•ä»Ž0å¼€å§‹. count<=slots 
-                          * æ³¨æ„!è¿™ä¸ªå€¼æ˜¯æœ‰é—®é¢˜çš„!Vectorä¸èƒ½ç¡®è®¤å‡†ç¡®çš„å…ƒç´ ä¸ªæ•°!
+    unsigned int  count; /* vectorÖÐÔªËØ¸öÊý£¬VectorµÄË÷Òý´Ó0¿ªÊ¼. count<=slots 
+                          * ×¢Òâ!Õâ¸öÖµÊÇÓÐÎÊÌâµÄ!Vector²»ÄÜÈ·ÈÏ×¼È·µÄÔªËØ¸öÊý!
                           */
-    unsigned int  slots; /* dataæ•°ç»„æ§½ä½æ•°é‡ï¼Œå³å¯å®¹çº³å…ƒç´ çš„æœ€å¤§ä¸ªæ•° */
-    unsigned int  size;  /* the size of a memberï¼Œæ¯ä¸ªå…ƒç´ çš„å¤§å° */
-    void         *data;  /* å…ƒç´ æ•°ç»„ */
+    unsigned int  slots; /* dataÊý×é²ÛÎ»ÊýÁ¿£¬¼´¿ÉÈÝÄÉÔªËØµÄ×î´ó¸öÊý */
+    unsigned int  size;  /* the size of a member£¬Ã¿¸öÔªËØµÄ´óÐ¡ */
+    void         *data;  /* ÔªËØÊý×é */
 }msd_vector_t;
 
 typedef struct msd_vector_iter
 {
-    unsigned int  pos;  /* åœ¨æ•°ç»„ä¸­çš„ç´¢å¼•ï¼Œæ•´åž‹ */
-    msd_vector_t *vec;  /* æ‰€ä¾é™„çš„vector */
-    void         *data; /* posæ‰€å¯¹åº”çš„å…ƒç´ çš„èµ·å§‹åœ°å€ */
+    unsigned int  pos;  /* ÔÚÊý×éÖÐµÄË÷Òý£¬ÕûÐÍ */
+    msd_vector_t *vec;  /* ËùÒÀ¸½µÄvector */
+    void         *data; /* posËù¶ÔÓ¦µÄÔªËØµÄÆðÊ¼µØÖ· */
 }msd_vector_iter_t;
 
 
