@@ -49,7 +49,7 @@ typedef struct msd_vector_iter
     void         *data; /* pos所对应的元素的起始地址 */
 }msd_vector_iter_t;
 
-
+static int msd_vector_init(msd_vector_t *vec, unsigned int slots, unsigned int size);
 msd_vector_t *msd_vector_new(unsigned int slots, unsigned int size);
 int msd_vector_push(msd_vector_t *v, void *data);
 int msd_vector_set_at(msd_vector_t *v, unsigned int index, void *data);

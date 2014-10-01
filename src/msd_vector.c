@@ -60,7 +60,7 @@ msd_vector_t *msd_vector_new(unsigned int slots, unsigned int size)
     if (!vec) 
         return NULL;
         
-    if (msd_vector_init(vec, slots, size) < 0) 
+    if (msd_vector_init(vec, slots, size) != MSD_OK) 
     {
         free(vec);
         return NULL;
@@ -207,14 +207,6 @@ int main(int argc, char **argv)
     printf("slots:%d\n", vec->slots);
     printf("count:%d\n", vec->count);
 
-    msd_vector_iter_t *iter = msd_vector_iter_new(vec);
-    
-    do {
-        value = (test_t*)(iter->data);
-        printf("%p, value.a=%d, value.b=%d \n", value, value->a, value->b);
-    } while (msd_vector_iter_next(iter) == 0);
-    
-    msd_vector_iter_free(iter);
     msd_vector_free(vec);
 
     return 0;
