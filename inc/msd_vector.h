@@ -48,7 +48,6 @@ typedef struct msd_vector
 typedef int (*msd_vector_cmp_t)(const void *, const void *); 
 typedef int (*msd_vector_each_t)(void *, void *);
 
-static int    msd_vector_init     (msd_vector_t *vec, unsigned int slots, unsigned int size);
 msd_vector_t *msd_vector_new    (unsigned int slots, unsigned int size);
 int           msd_vector_push   (msd_vector_t *v, void *elem);
 int           msd_vector_set_at (msd_vector_t *v, unsigned int index, void *data);

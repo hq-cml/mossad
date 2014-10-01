@@ -12,7 +12,7 @@ port    9527
 # 
 # log_name : 日志名称
 # log_path : 日志存储路径
-# log_level: 日志等级,默认4
+# log_level: 日志等级,默认4[日志等级在高并发下，对性能影响较大]
 #            0,Fatal; 1,Error; 2,Warning; 3,Info; 4,Debug
 # log_size : 每个日志文件的大小,默认1G
 # log_num  : 日志总个数,默认10个
