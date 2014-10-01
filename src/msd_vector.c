@@ -98,6 +98,43 @@ void msd_vector_free(msd_vector_t *vec)
     free(vec);
 }
 
+/**
+ * 功能: 给出一个元素的地址，获得此元素在vector中的索引
+ * 参数: @vec, @elem元素地址
+ * 返回: 成功，索引，失败，-1
+ **/
+uint32_t msd_vector_idx(msd_vector_t *vec, void *elem)
+{
+    uint8_t   *p, *q;    //内存按字节编址
+#if __WORDSIZE == 32
+    uint32_t   off, idx;
+#else
+    uint64_t   off, idx;
+#endif
+    
+    if(elem < vec->data){
+        return MSD_ERR;
+    }
+
+    p = vec->data;
+    q = elem;
+    
+#if __WORDSIZE == 32
+    off = (uint32_t)(q - p);
+    if(off % (uint32_t)vec->size != 0){
+        return MSD_ERR;
+    }
+    idx = off / (uint32_t)vec->size;
+#else
+    off = (uint64_t)(q - p);
+    if(off % (uint64_t)vec->size != 0){
+        return MSD_ERR;
+    }
+    idx = off / (uint64_t)vec->size;
+#endif
+
+    return idx;
+}
 
 /**
  * 功能: double the number of the slots available to a vector
