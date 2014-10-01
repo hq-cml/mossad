@@ -70,6 +70,36 @@ msd_vector_t *msd_vector_new(unsigned int slots, unsigned int size)
 }
 
 /**
+ * 功能: destroy the vector
+ * 参数: @vec
+ * 描述:
+ *      1. 仅释放data，vec本身结构不释放
+ **/
+static void msd_vector_destroy(msd_vector_t *vec) 
+{
+    if (vec->data) 
+        free(vec->data);
+    
+    vec->slots = 0;
+    vec->count = 0;
+    vec->size = 0;
+    vec->data = NULL;
+}
+
+/**
+ * 功能: destroy the vector
+ * 参数: @vec
+ * 描述:
+ *      1. 释放data，然后释放vec本身
+ **/
+void msd_vector_free(msd_vector_t *vec) 
+{
+    msd_vector_destroy(vec);
+    free(vec);
+}
+
+
+/**
  * 功能: double the number of the slots available to a vector
  * 参数: @vec
  * 描述:
@@ -147,35 +177,6 @@ void *msd_vector_get_at(msd_vector_t *vec, unsigned int index)
         return NULL;
 
     return (char *)vec->data + (index * vec->size);
-}
-
-/**
- * 功能: destroy the vector
- * 参数: @vec
- * 描述:
- *      1. 仅释放data，vec本身结构不释放
- **/
-static void msd_vector_destroy(msd_vector_t *vec) 
-{
-    if (vec->data) 
-        free(vec->data);
-    
-    vec->slots = 0;
-    vec->count = 0;
-    vec->size = 0;
-    vec->data = NULL;
-}
-
-/**
- * 功能: destroy the vector
- * 参数: @vec
- * 描述:
- *      1. 释放data，然后释放vec本身
- **/
-void msd_vector_free(msd_vector_t *vec) 
-{
-    msd_vector_destroy(vec);
-    free(vec);
 }
  
 #ifdef __MSD_VECTOR_TEST_MAIN__
