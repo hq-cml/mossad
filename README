@@ -25,3 +25,7 @@ You can refer them to write your business code.
 #make
 #make install
 
+#cd demos/one_demo
+#make
+#make install
+
