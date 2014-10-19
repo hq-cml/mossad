@@ -52,9 +52,7 @@ static inline size_t msd_str_avail(const msd_str_t *pstr)
 }
 
 /*
- * 功能: 获得字符串结构一共分配的空间 
- * 注意: 仅仅对正常状态的字符串有效，
- *       对于被释放的字串将返回错误的值
+ * 功能: 获得字符串结构一共分配的空间
  **/
 static inline size_t msd_str_alloc_size(const msd_str_t *pstr)
 {
