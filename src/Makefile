@@ -21,7 +21,7 @@ all: $(TARGET) $(TARG_PRES)
 
 press: $(TARG_PRES) 
 
-#不关心头文件，每次均执行make clean
+#涓嶅叧蹇冨ご鏂囦欢锛屾瘡娆″潎鎵цmake clean
 #$(OBJECT): %.o:%.c $(INC_DIR)%.h
 $(OBJECT): %.o:%.c 
 	$(CC) $(CFLAGS) $(INC) $< -c -o $@
@@ -42,8 +42,8 @@ msd_signal.o: msd_log.c msd_lock.c
 .PHONY :clean install
 install:
 	install $(TARGET) ../bin/echo/
-	install $(TARG_PRES) ../tool/pressure_test/
-	#install mossad.conf.default ../bin/mossad.conf
+	#install $(TARG_PRES) ../tool/pressure_test/
+	install mossad.conf.default ../bin/echo/mossad.conf
 
 clean:
 	rm -f *.o
