@@ -82,7 +82,7 @@ int msd_master_cycle()
     );
     if (listen_fd == MSD_ERR) 
     {
-        MSD_ERROR_LOG("Create Server failed");
+        MSD_ERROR_LOG("Create Server failed%s", error_buf);
         msd_ae_free_event_loop(master->m_ael);
         free(master);
         return MSD_ERR;
