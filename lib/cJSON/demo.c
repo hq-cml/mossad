@@ -1,10 +1,58 @@
 //cJson demos
 #include <stdio.h>
 #include <math.h>
-
-int json_decode()
+#include <stdlib.h>
+#include <string.h>
+#include "cJSON.h"
+static int recursive_parse(cJSON *p_root, char *prefix);
+int recursive_parse(cJSON *p_root, char *prefix)
 {
     int i;
+    int data_count;
+    cJSON *p_item;
+    
+    //拼接前面的空格
+    char pre[100] = {0};
+    strcpy(pre, prefix);
+    strcat(pre, "    ");
+    
+    
+    int type = p_root->type;
+    switch(type)
+    {
+        case cJSON_False:
+        case cJSON_NULL:
+        case cJSON_True:
+            return -1;
+            break;
+            
+        case cJSON_Number:
+            if(p_root->string)
+                printf("%s%s:%d(%f)\n", pre, p_root->string, p_root->valueint, p_root->valuedouble);
+            else
+                printf("%s%d(%f)\n", pre, p_root->valueint, p_root->valuedouble);
+            break;            
+        case cJSON_String:
+            if(p_root->string)
+                printf("%s%s:%s\n", pre, p_root->string, p_root->valuestring);
+            else
+                printf("%s%s\n", pre, p_root->valuestring);
+            break;
+            
+        case cJSON_Array:
+        case cJSON_Object:
+            data_count = cJSON_GetArraySize(p_root);
+            for(i=0; i<data_count; i++)
+            {
+                p_item = cJSON_GetArrayItem(p_root, i);
+                if(!p_item)
+                    return -1;
+                recursive_parse(p_item, pre);
+            }
+            break;            
+    }
+    return 0;
+}
     cJSON *p_root;
     cJSON *p_item1;
     cJSON *p_item2;
