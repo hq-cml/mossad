@@ -42,11 +42,12 @@
 #include "msd_lock.h"
 */
 
+/*
 #define MSD_OK       0
 #define MSD_ERR     -1
 #define MSD_FAILED  -2
 #define MSD_NONEED  -3
-
+*/
 /* log level */
 #define MSD_LOG_LEVEL_FATAL     0    
 #define MSD_LOG_LEVEL_ERROR     1    
