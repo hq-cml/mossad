@@ -40,7 +40,10 @@ int recursive_parse(cJSON *p_root, char *prefix)
             break;
             
         case cJSON_Array:
-        case cJSON_Object:
+            if(p_root->string)
+                printf("%s%s:[\n", pre, p_root->string);
+            else
+                printf("%s[\n", pre);
             data_count = cJSON_GetArraySize(p_root);
             for(i=0; i<data_count; i++)
             {
@@ -49,6 +52,25 @@ int recursive_parse(cJSON *p_root, char *prefix)
                     return -1;
                 recursive_parse(p_item, pre);
             }
+            printf("%s]\n", pre);
+            
+            break; 
+        case cJSON_Object:
+            if(p_root->string)
+                printf("%s%s:{\n", pre, p_root->string);
+            else
+                printf("%s{\n", pre);
+            data_count = cJSON_GetArraySize(p_root);
+            data_count = cJSON_GetArraySize(p_root);
+            for(i=0; i<data_count; i++)
+            {
+                p_item = cJSON_GetArrayItem(p_root, i);
+                if(!p_item)
+                    return -1;
+                recursive_parse(p_item, pre);
+            }
+            printf("%s}\n", pre);
+           
             break;            
     }
     return 0;
