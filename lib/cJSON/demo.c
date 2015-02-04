@@ -40,20 +40,20 @@ int recursive_parse(cJSON *p_root, char *prefix)
             
         case cJSON_Number:
             if(p_root->string)
-                printf("%s%s=>%d(%f)\n", pre, p_root->string, p_root->valueint, p_root->valuedouble);
+                printf("%s%s => %d(%f)\n", pre, p_root->string, p_root->valueint, p_root->valuedouble);
             else
                 printf("%s%d(%f)\n", pre, p_root->valueint, p_root->valuedouble);
             break;            
         case cJSON_String:
             if(p_root->string)
-                printf("%s%s=>%s\n", pre, p_root->string, p_root->valuestring);
+                printf("%s%s => %s\n", pre, p_root->string, p_root->valuestring);
             else
                 printf("%s%s\n", pre, p_root->valuestring);
             break;
             
         case cJSON_Array:
             if(p_root->string)
-                printf("%s%s=>[\n", pre, p_root->string);
+                printf("%s%s => [\n", pre, p_root->string);
             else
                 printf("%s[\n", pre);
             data_count = cJSON_GetArraySize(p_root);
@@ -96,7 +96,8 @@ int json_decode(const char *str)
     
     content_buff = calloc(1, 4096);
     strcpy(content_buff, str);
-
+    
+    printf("\njson decode:\n");
     /* 苦逼的json解析，只需要cJSON_Parse的返回对象需要释放，内部会循环释放 */
     p_root = cJSON_Parse(content_buff);
     if(!p_root) goto json_null;
