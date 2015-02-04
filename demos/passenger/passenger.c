@@ -135,10 +135,8 @@ int msd_handle_prot_len(msd_conn_client_t *client)
     /* At here, try to find the end of the http request. */
     int head_len = 10;
     int content_len;
-    char *content_len_buf[15];
+    char content_len_buf[15] = {0};
     char *err=NULL;
-    
-    memset(content_len_buf, 0, 15);
     
     if(client->recvbuf->len <= head_len)
     {
