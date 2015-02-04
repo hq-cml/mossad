@@ -185,7 +185,9 @@ char* json_encode()
 
 int main()
 {
-    char *str = "{\"abc\":\"aaa\",\"bbb\":\"ccc\",\"arr0\":[123,456,789.888],\"arr1\":{\"a\":\"aa\",\"b\":9111}}";
+    //char *str = "{\"abc\":\"aaa\",\"bbb\":\"ccc\",\"arr0\":[123,456,789.888],\"arr1\":{\"a\":\"aa\",\"b\":9111}}";
+    char *str = json_encode();
     json_decode(str);
+	free(str);
     return 0;
 }
