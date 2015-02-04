@@ -450,7 +450,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
              * 一个请求可能会由多个TCP包发送过来andle_input暂时还无法判断出整个请求的长度，则返回0，
              * 表示需要继续读取数据，直到handle_input能够判断出请求长度为止
              */
-            MSD_INFO_LOG("Unkonw the accurate protocal lenght, do noting!. Connection. IP:%s, Port:%d", 
+            MSD_INFO_LOG("Unkonw the accurate protocal length, do noting!. Connection. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
             client->status = C_RECEIVING;
             return;
