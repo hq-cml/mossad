@@ -260,7 +260,7 @@ int msd_handle_process(msd_conn_client_t *client)
         //MSD_INFO_LOG("item_id:%s\n", p_item_id);
         //MSD_INFO_LOG("value:%s\n", p_value);
 
-        //TODO ¥ÌŒÛ¥¶¿Ì
+        //¥Ê¥¢
         if(MSD_OK != mongo_save(col, p_hostname, p_item_id, p_time, p_value)){
             goto json_null;
         }
