@@ -19,7 +19,7 @@ port    9527
 # log_multi: 是否将不同级别的日志，定向到不同的文件,默认off
 ##############################################################
 log_name   mossad.log
-log_path   ./
+log_path   ./logs/
 log_level  4
 log_size   1073741824 #1G 
 log_num    3

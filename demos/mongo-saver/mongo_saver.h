@@ -26,7 +26,7 @@
 #include <mongoc.h>
   
 /* workerË½ÓĞÊı¾İ */
-typedef struct saver_worker_data{
+typedef struct saver_worker_data{ 
     msd_str_t           *mongo_ip; 
     msd_str_t           *mongo_port;
     msd_str_t           *mongo_db; 
