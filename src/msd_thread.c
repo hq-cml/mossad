@@ -420,7 +420,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     buf[nread] = '\0';
 
     //printf("%d %d  %d  %d\n", buf[nread-3], buf[nread-2], buf[nread-1], buf[nread]);
-    MSD_INFO_LOG("Read from client. IP:%s, Port%d. Length:%d, Content:%s", 
+    MSD_INFO_LOG("Read from client. IP:%s, Port:%d. Length:%d, Content:%s", 
                     client->remote_ip, client->remote_port, nread, buf);
 
     /* 将读出的内容拼接到recvbuf上面，这里是拼接，因为可能请求的包很大
