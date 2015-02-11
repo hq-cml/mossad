@@ -413,7 +413,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     } 
     else if (nread == 0) 
     {
-        MSD_INFO_LOG("Client close connection. IP:%s, Port%d",client->remote_ip, client->remote_port);
+        MSD_INFO_LOG("Client close connection. IP:%s, Port:%d",client->remote_ip, client->remote_port);
         msd_close_client(client->idx, NULL);
         return;
     }
