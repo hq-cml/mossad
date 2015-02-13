@@ -16,6 +16,32 @@
  **/
 
 #include "redis_saver.h"
+
+static int redis_connect(void *worker_data, redisContext **c);
+
+
+/**
+ * 功能: 连接redis
+ * 参数: @data:woker私有数据
+ * 返回:成功:0, 失败:-x
+ **/
+int redis_connect(void *data, redisContext **c)
+{
+    int port;
+    saver_worker_data_t *worker_data = (saver_worker_data_t *)data;
+    
+    //连接Redis服务器，同时获取与Redis连接的上下文对象。    
+    //该对象将用于其后所有与Redis操作的函数。    
+    port = atoi(worker_data->redis_port->buf);
+    *c = redisConnect(worker_data->redis_ip->buf, port);    
+    if (c->err) {
+        MSD_ERROR_LOG("Connect error: %s", c->errstr);         
+        redisFree(c);        
+        return MSD_FAILED;    
+    }
+
+    return MSD_OK;
+}
 /**
  * 功能: 单个线程初始化回调
  * 参数: @worker
