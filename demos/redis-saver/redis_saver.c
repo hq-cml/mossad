@@ -154,3 +154,41 @@ int msd_handle_worker_init(void *conf, void *arg)
  
     return MSD_OK;
 }
+
+/**
+ * 功能: 动态约定mossad和client之间的通信协议长度，即mossad应该读取多少数据，算作一次请求
+ * 参数: @client指针
+ * 说明: 
+ *       1. 必选函数
+ * 返回:成功:协议长度; 失败:
+ **/
+int msd_handle_prot_len(msd_conn_client_t *client) 
+{
+    /* At here, try to find the end of the http request. */
+    int head_len = 10;
+    int content_len;
+    char content_len_buf[15] = {0};
+    char *err=NULL;
+    
+    if(client->recvbuf->len <= head_len)
+    {
+        MSD_INFO_LOG("Msd_handle_prot_len return 0. Client:%s:%d. Buf:%s", client->remote_ip, client->remote_port, client->recvbuf->buf);
+        return 0;
+    }
+    
+    memcpy(content_len_buf, client->recvbuf->buf, head_len);
+    content_len = strtol((const char *)content_len_buf, &err, 10);
+    if(*err)
+    {
+        MSD_ERROR_LOG("Wrong format:%s. content_len_buf:%s. recvbuf:%s", err, content_len_buf, client->recvbuf->buf);
+        MSD_ERROR_LOG("Wrong format:%d, %d. %p. content_len:%d", err[0], err[1], err, content_len);
+        return MSD_ERR;
+    }
+    if(head_len + content_len > client->recvbuf->len)
+    {
+        MSD_INFO_LOG("Msd_handle_prot_len return 0. Client:%s:%d. head_len:%d, content_len:%d, recvbuf_len:%d. buf:%s", 
+            client->remote_ip, client->remote_port, head_len, content_len, client->recvbuf->len, client->recvbuf->buf);
+        return 0;
+    }
+    return head_len+content_len;
+}
