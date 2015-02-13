@@ -28,17 +28,34 @@ static int redis_connect(void *worker_data, redisContext **c);
 int redis_connect(void *data, redisContext **c)
 {
     int port;
+    int db;
+    redisReply* r=NULL;
+    char cmd[100] = {0};
+    
     saver_worker_data_t *worker_data = (saver_worker_data_t *)data;
+    port = atoi(worker_data->redis_port->buf);
+    db   = atoi(worker_data->redis_db->buf);
     
     //连接Redis服务器，同时获取与Redis连接的上下文对象。    
     //该对象将用于其后所有与Redis操作的函数。    
-    port = atoi(worker_data->redis_port->buf);
     *c = redisConnect(worker_data->redis_ip->buf, port);    
     if (c->err) {
         MSD_ERROR_LOG("Connect error: %s", c->errstr);         
         redisFree(c);        
         return MSD_FAILED;    
     }
+
+    //选择库
+    snprintf(cmd, 100, "select %d", db);    
+    r = (redisReply*)redisCommand(c, cmd);    
+    if (r == NULL) {        
+        MSD_ERROR_LOG("Select error: %s", c->errstr); 
+        redisFree(c);        
+        return;    
+    }    
+
+    //由于后面重复使用该变量，所以需要提前释放，否则内存泄漏。    
+    freeReplyObject(r);
 
     return MSD_OK;
 }
