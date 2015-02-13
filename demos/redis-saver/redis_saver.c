@@ -61,6 +61,7 @@ int redis_connect(void *data, redisContext **c)
 
     return MSD_OK;
 }
+
 /**
  * 功能: redis的存储函数
  * 参数: @conf
@@ -92,6 +93,27 @@ int redis_save(redisContext *c, const char* hostname, const char* item_id, const
 
     return MSD_OK;
 }
+
+int redis_destroy(redisContext *c)
+{
+    redisFree(c); 
+    return MSD_OK;
+}
+
+
+/**
+ * 功能: 初始化回调，初始化Back_end
+ * 参数: @conf
+ * 说明: 
+ *       1. 可选函数
+ * 返回:成功:0; 失败:-x
+ **/
+int msd_handle_init(void *conf) 
+{
+    MSD_INFO_LOG("Msd_handle_init is called!");
+    return MSD_OK;
+}
+
 /**
  * 功能: 单个线程初始化回调
  * 参数: @worker
