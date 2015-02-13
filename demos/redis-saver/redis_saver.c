@@ -192,3 +192,104 @@ int msd_handle_prot_len(msd_conn_client_t *client)
     }
     return head_len+content_len;
 }
+
+/**
+ * 功能: 主要的用户逻辑
+ * 参数: @client指针
+ * 说明: 
+ *       1. 必选函数
+ *       2. 每次从recvbuf中应该取得recv_prot_len长度的数据，作为一个完整请求
+ * 返回:成功:0; 失败:-x
+ *       MSD_OK: 成功，并保持连接继续
+ *       MSD_END:成功，不在继续，mossad将response写回client后，自动关闭连接
+ *       MSD_ERR:失败，mossad关闭连接
+ **/
+int msd_handle_process(msd_conn_client_t *client) 
+{
+    // 回显信息写入sendbuf 
+    msd_str_cat_len(&(client->sendbuf), "ok\n", 3);
+
+    msd_thread_worker_t *worker; 
+    int i;
+    cJSON *p_item1;
+    cJSON *p_item2;
+    cJSON *p_item3;
+    cJSON *p_array;
+
+    char *p_hostname;
+    char *p_time;
+    char *p_item_id;
+    char *p_value;
+    char *content_buff;
+
+    redisContext *c;
+
+    worker = msd_get_worker(client->worker_id);
+    redis_connect(worker->priv_data, &c);
+    
+    content_buff = calloc(1, client->recv_prot_len+1);
+    // The functions snprintf() write at most size bytes (including the trailing null byte ('\0')) to str./
+    snprintf(content_buff, client->recv_prot_len+1, "%s", client->recvbuf->buf);
+    
+    //MSD_INFO_LOG("The Full Packet:%s.Len:%d", content_buff, client->recv_prot_len);
+    
+    // 苦逼的json解析，就目前看，只有cJSON_Parse的返回对象需要释放 //
+    cJSON *p_root = cJSON_Parse(content_buff+10);
+    if(!p_root) 
+        goto json_null;
+    
+    p_item1 = cJSON_GetObjectItem(p_root, "host");
+    if(!p_item1) 
+        goto json_null;
+    p_hostname = p_item1->valuestring;
+    //MSD_INFO_LOG("Hostname:%s", p_item1->valuestring);
+ 
+    p_item1 = cJSON_GetObjectItem(p_root, "time");
+    if(!p_item1) 
+        goto json_null;
+    p_time = p_item1->valuestring;
+    //MSD_INFO_LOG("time:%s\n", p_item1->valuestring);
+    
+    p_array = cJSON_GetObjectItem(p_root, "data");
+    if(!p_array) 
+        goto json_null;
+    
+    int data_count = cJSON_GetArraySize(p_array);
+    for(i=0; i<data_count; i++)
+    {
+        p_item1 = cJSON_GetArrayItem(p_array, i);
+        if(!p_item1) goto json_null;
+
+        p_item2 = cJSON_GetArrayItem(p_item1, 0);
+        p_item3 = cJSON_GetArrayItem(p_item1, 1);
+        if(!p_item2) 
+            goto json_null;
+        if(!p_item3) 
+            goto json_null;
+        
+        p_item_id = p_item2->valuestring;
+        p_value   = p_item3->valuestring;
+
+        //MSD_INFO_LOG("item_id:%s\n", p_item_id);
+        //MSD_INFO_LOG("value:%s\n", p_value);
+
+        //存储
+        if(MSD_OK != redis_save(c, p_hostname, p_item_id, p_time, p_value)){
+            goto json_null;
+        }
+
+        
+    }   
+    free(content_buff);
+    redis_destroy(c);
+    cJSON_Delete(p_root);
+    return MSD_OK;
+    
+json_null:
+    MSD_ERROR_LOG("Invalidate json:%s! Client:%s:%d", content_buff, client->remote_ip, client->remote_port);
+    free(content_buff);
+    redis_destroy(c);
+    cJSON_Delete(p_root);
+    // 仍旧返回OK, 不关闭连接
+    return MSD_OK; 
+}
