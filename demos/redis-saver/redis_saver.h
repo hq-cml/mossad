@@ -24,12 +24,12 @@
 
 #include <hiredis.h>
   
-/* worker私有数据 */
+/* worker绉佹湁鏁版嵁 */
 typedef struct saver_worker_data{ 
     msd_str_t           *redis_ip; 
     msd_str_t           *redis_port;
     msd_str_t           *redis_db; 
-    msd_thread_worker_t *worker;              /* worker_data所依附的worker句柄 */
+    msd_thread_worker_t *worker;              /* worker_data鎵�渚濋檮鐨剋orker鍙ユ焺 */
 }saver_worker_data_t;
 
 #endif
