@@ -18,6 +18,8 @@
 #include "redis_saver.h"
 
 static int redis_connect(void *worker_data, redisContext **c);
+static int redis_save(redisContext *c, const char* hostname, const char* item_id, const char* value);
+static int redis_destroy(redisContext *c);
 
 
 /**
@@ -41,7 +43,7 @@ int redis_connect(void *data, redisContext **c)
     *c = redisConnect(worker_data->redis_ip->buf, port);    
     if (c->err) {
         MSD_ERROR_LOG("Connect error: %s", c->errstr);         
-        redisFree(c);        
+        //redisFree(c);        
         return MSD_FAILED;    
     }
 
@@ -50,12 +52,43 @@ int redis_connect(void *data, redisContext **c)
     r = (redisReply*)redisCommand(c, cmd);    
     if (r == NULL) {        
         MSD_ERROR_LOG("Select error: %s", c->errstr); 
-        redisFree(c);        
+        //redisFree(c);        
         return;    
     }    
 
     //由于后面重复使用该变量，所以需要提前释放，否则内存泄漏。    
     freeReplyObject(r);
+
+    return MSD_OK;
+}
+/**
+ * 功能: redis的存储函数
+ * 参数: @conf
+ * 说明: 
+ *       1. 可选函数
+ * 返回:成功:0; 失败:-x
+ **/
+int redis_save(redisContext *c, const char* hostname, const char* item_id, const char* value)
+{
+    redisReply* r=NULL;
+    char cmd[4096] = {0};
+
+    snprint(cmd, 4096, "hset %s %s %s", hostname, item_id, value);    
+    r = (redisReply*)redisCommand(c,cmd);        
+    if (NULL == r) {        
+        MSD_ERROR_LOG("Hset Error: %s\n", c->errstr);        
+        //redisFree(c);        
+        return MSD_FAILED;    
+    }    
+
+    if (!(strcasecmp(r->str,"OK") == 0)) {        
+        MSD_ERROR_LOG("Error: %s\n", c->errstr);        
+        MSD_ERROR_LOG("Failed to execute command[%s]",cmd);        
+        freeReplyObject(r);        
+        //redisFree(c);        
+        return MSD_FAILED;    
+    }
+
 
     return MSD_OK;
 }
