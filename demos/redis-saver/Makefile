@@ -13,7 +13,7 @@ $(TARGETS): $(OO)
 	$(CC) $(MONGO) $(CFLAGS) $(OO) -shared -o $@ $(LIBDIR) $(LIB) 
 
 install:
-	install $(TARGETS) ../../bin/mongo_saver/
+	install $(TARGETS) ../../bin/redis_saver/
 	cp redis_saver.conf ../../bin/mongo_saver/
 
 .c.o:
