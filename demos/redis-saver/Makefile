@@ -4,8 +4,8 @@ LIB     = -ldl -lrt -lm -lcurl -rdynamic -lcJSON -L.
 INC     = -I../../inc -I../../lib/cJSON/
 MONGO   = $(shell /usr/bin/pkg-config --cflags --libs libmongoc-1.0)
 
-OO  = mongo_saver.o
-TARGETS = libmongo_saver.so
+OO  = redis_saver.o
+TARGETS = libredis_saver.so
 
 all: $(TARGETS)
 
