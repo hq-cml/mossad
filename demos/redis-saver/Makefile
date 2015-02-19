@@ -14,7 +14,7 @@ $(TARGETS): $(OO)
 
 install:
 	install $(TARGETS) ../../bin/redis_saver/
-	cp redis_saver.conf ../../bin/mongo_saver/
+	cp redis_saver.conf ../../bin/redis_saver/
 
 .c.o:
 	$(CC) $(MONGO) $(CFLAGS) $< -c -o $@ $(INC) 
