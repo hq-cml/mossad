@@ -14,7 +14,7 @@ $(TARGETS): $(OO)
 
 install:
 	install $(TARGETS) ../../bin/mongo_saver/
-	cp mongo_saver.conf ../../bin/mongo_saver/
+	cp redis_saver.conf ../../bin/mongo_saver/
 
 .c.o:
 	$(CC) $(MONGO) $(CFLAGS) $< -c -o $@ $(INC) 
