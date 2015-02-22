@@ -74,7 +74,7 @@ int redis_save(redisContext *c, const char* hostname, const char* item_id, const
     redisReply* r=NULL;
     char cmd[4096] = {0};
 
-    snprint(cmd, 4096, "hset %s %s %s", hostname, item_id, value);    
+    snprintf(cmd, 4096, "hset %s %s %s", hostname, item_id, value);    
     r = (redisReply*)redisCommand(c,cmd);        
     if (NULL == r) {        
         MSD_ERROR_LOG("Hset Error: %s\n", c->errstr);        
