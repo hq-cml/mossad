@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS  = -fPIC -Wall -pipe -DDEBUG -g -D_GNU_SOURCE -D_REENTRANT
-LIB     = -ldl -lrt -lm -lcurl -rdynamic -lcJSON -L.
+LIB     = -ldl -lrt -lm -lcurl -rdynamic -lcJSON -L../../lib/cJSON/
 INC     = -I../../inc -I../../lib/cJSON/
 ## export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/:$PKG_CONFIG_PATH
 ## REDIS   = $(shell /usr/bin/pkg-config --cflags --libs hiredis)
