@@ -217,7 +217,7 @@ int msd_handle_process(msd_conn_client_t *client)
     cJSON *p_array;
 
     char *p_hostname;
-    char *p_time;
+    //char *p_time;
     char *p_item_id;
     char *p_value;
     char *content_buff;
@@ -243,12 +243,14 @@ int msd_handle_process(msd_conn_client_t *client)
         goto json_null;
     p_hostname = p_item1->valuestring;
     //MSD_INFO_LOG("Hostname:%s", p_item1->valuestring);
- 
+
+    /*
     p_item1 = cJSON_GetObjectItem(p_root, "time");
     if(!p_item1) 
         goto json_null;
     p_time = p_item1->valuestring;
     //MSD_INFO_LOG("time:%s\n", p_item1->valuestring);
+    */
     
     p_array = cJSON_GetObjectItem(p_root, "data");
     if(!p_array) 
@@ -274,7 +276,7 @@ int msd_handle_process(msd_conn_client_t *client)
         //MSD_INFO_LOG("value:%s\n", p_value);
 
         //´æ´¢
-        if(MSD_OK != redis_save(c, p_hostname, p_item_id, p_time, p_value)){
+        if(MSD_OK != redis_save(c, p_hostname, p_item_id, p_value)){
             goto json_null;
         }
 
