@@ -41,9 +41,9 @@ msd_signal.o: msd_log.c msd_lock.c
 
 .PHONY :clean install
 install:
-	install $(TARGET) ../bin/echo/
+	install $(TARGET) ../bin/redis_saver/
 	#install $(TARG_PRES) ../tool/pressure_test/
-	install mossad.conf.default ../bin/echo/mossad.conf
+	install mossad.conf.default ../bin/redis_saver/mossad.conf
 
 clean:
 	rm -f *.o
