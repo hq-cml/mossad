@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS  = -fPIC -Wall -pipe -DDEBUG -g -D_GNU_SOURCE -D_REENTRANT
 LIB     = -ldl -lrt -lm -lcurl -rdynamic -lcJSON -L.
 INC     = -I../../inc -I../../lib/cJSON/
-REDIS   = $(shell /usr/bin/pkg-config --cflags --libs libmongoc-1.0)
+REDIS   = $(shell /usr/bin/pkg-config --cflags --libs libredis)
 
 OO  = redis_saver.o
 TARGETS = libredis_saver.so
