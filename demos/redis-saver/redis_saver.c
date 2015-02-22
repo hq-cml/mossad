@@ -41,19 +41,19 @@ int redis_connect(void *data, redisContext **c)
     //连接Redis服务器，同时获取与Redis连接的上下文对象。    
     //该对象将用于其后所有与Redis操作的函数。    
     *c = redisConnect(worker_data->redis_ip->buf, port);    
-    if (c->err) {
-        MSD_ERROR_LOG("Connect error: %s", c->errstr);         
+    if ((*c)->err) {
+        MSD_ERROR_LOG("Connect error: %s", (*c)->errstr);         
         //redisFree(c);        
         return MSD_FAILED;    
     }
 
     //选择库
     snprintf(cmd, 100, "select %d", db);    
-    r = (redisReply*)redisCommand(c, cmd);    
+    r = (redisReply*)redisCommand((*c), cmd);    
     if (r == NULL) {        
-        MSD_ERROR_LOG("Select error: %s", c->errstr); 
+        MSD_ERROR_LOG("Select error: %s", (*c)->errstr); 
         //redisFree(c);        
-        return;    
+        return MSD_FAILED;    
     }    
 
     //由于后面重复使用该变量，所以需要提前释放，否则内存泄漏。    
