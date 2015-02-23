@@ -1,0 +1,4 @@
+动态库支持
+# vim /etc/ld.so.conf
+# add /usr/local/lib
+# ldconfig
