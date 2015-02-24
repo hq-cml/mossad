@@ -43,7 +43,7 @@ msd_signal.o: msd_log.c msd_lock.c
 install:
 	install $(TARGET) ../bin/redis_saver/
 	#install $(TARG_PRES) ../tool/pressure_test/
-	install mossad.conf.default ../bin/redis_saver/mossad.conf
+	#install mossad.conf.default ../bin/redis_saver/mossad.conf
 
 clean:
 	rm -f *.o
