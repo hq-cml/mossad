@@ -173,7 +173,7 @@ int msd_handle_prot_len(msd_conn_client_t *client)
     int content_len;
     char content_len_buf[15] = {0};
     char *err=NULL;
-    
+
     if(client->recvbuf->len <= head_len)
     {
         MSD_INFO_LOG("Msd_handle_prot_len return 0. Client:%s:%d. Buf:%s", client->remote_ip, client->remote_port, client->recvbuf->buf);
@@ -215,6 +215,8 @@ int msd_handle_process(msd_conn_client_t *client)
 
     msd_thread_worker_t *worker; 
     int i;
+    time_t now_time;
+    char   now_time_str[20] = {0};
     cJSON *p_item1;
     cJSON *p_item2;
     cJSON *p_item3;
@@ -235,7 +237,7 @@ int msd_handle_process(msd_conn_client_t *client)
     // The functions snprintf() write at most size bytes (including the trailing null byte ('\0')) to str./
     snprintf(content_buff, client->recv_prot_len+1, "%s", client->recvbuf->buf);
     
-    //MSD_INFO_LOG("The Full Packet:%s.Len:%d", content_buff, client->recv_prot_len);
+    MSD_INFO_LOG("The Full Packet:%s.Len:%d", content_buff, client->recv_prot_len);
     
     // 苦逼的json解析，就目前看，只有cJSON_Parse的返回对象需要释放 //
     cJSON *p_root = cJSON_Parse(content_buff+10);
@@ -283,10 +285,16 @@ int msd_handle_process(msd_conn_client_t *client)
         if(MSD_OK != redis_save(c, p_hostname, p_item_id, p_value)){
             goto json_null;
         }
-
-        
     }   
     free(content_buff);
+    
+    //存储 local_time
+    now_time = time(NULL);
+    snprintf(now_time_str, 20, "%ld", now_time);
+    if(MSD_OK != redis_save(c, p_hostname, "local_time", now_time_str)){
+        goto json_null;
+    }
+        
     redis_destroy(c);
     cJSON_Delete(p_root);
     return MSD_OK;
