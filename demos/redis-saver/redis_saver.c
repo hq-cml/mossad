@@ -73,23 +73,27 @@ int redis_save(redisContext *c, const char* hostname, const char* item_id, const
 {
     redisReply* r=NULL;
     char cmd[4096] = {0};
-
     snprintf(cmd, 4096, "hset %s %s %s", hostname, item_id, value);    
-    r = (redisReply*)redisCommand(c,cmd);        
-    if (NULL == r) {        
-        MSD_ERROR_LOG("Hset Error: %s\n", c->errstr);        
+
+    r = (redisReply*)redisCommand(c,cmd);    
+    if (NULL == r) {   
+        MSD_ERROR_LOG("Hset Error: %s\n", c->errstr); 
+        freeReplyObject(r);
         //redisFree(c);        
         return MSD_FAILED;    
     }    
 
-    if (!(strcasecmp(r->str,"OK") == 0)) {        
+    /*
+    # SegmentFault
+    if (!(strcasecmp(r->str,"OK") == 0)) { 
         MSD_ERROR_LOG("Error: %s\n", c->errstr);        
         MSD_ERROR_LOG("Failed to execute command[%s]",cmd);        
         freeReplyObject(r);        
         //redisFree(c);        
         return MSD_FAILED;    
     }
-
+    */
+    MSD_INFO_LOG("Success exec cmd: %s\n", cmd); 
 
     return MSD_OK;
 }
