@@ -10,7 +10,7 @@
  * Description :  Msd_hash, a simple hash library. 
  *                Maybe it's not complex than redis's dict, but is enough.
  * 
- *     Version :  0.0.1 
+ *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
