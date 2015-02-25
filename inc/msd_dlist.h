@@ -9,7 +9,7 @@
  * 
  * Description :  Msd_dlist, a generic doubly linked list implementation.
  * 
- *     Version :  0.0.1 
+ *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
