@@ -9,7 +9,7 @@
  * 
  * Description :  接收数组存储于Redis
  * 
- *     Version :  0.0.1 
+ *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
