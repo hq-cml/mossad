@@ -11,7 +11,7 @@
  *                在一整片(size*slots)连续的内存中，模拟出数组的行为。
  * 
  *     Created :  Apr 4, 2012
- *     Version :  0.0.1 
+ *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
