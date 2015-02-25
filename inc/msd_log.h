@@ -14,7 +14,7 @@
  *                #define MSD_LOG_MODE_THREAD(д╛хо)
  *                #define MSD_LOG_MODE_PROCESS
  *
- *     Version :  0.0.1 
+ *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
