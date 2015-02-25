@@ -9,7 +9,7 @@
  * 
  * Description :  Msd_anet, Basic TCP socket stuff. Derived from redis.
  * 
- *     Version :  0.0.1 
+ *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
