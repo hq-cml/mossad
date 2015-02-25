@@ -9,7 +9,7 @@
  * 
  * Description :  Msd_thread, 工作线程相关实现.
  * 
- *     Version :  0.0.1 
+ *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
