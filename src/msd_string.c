@@ -15,7 +15,7 @@
  *                g_instance->conf_path = msd_str_cpy(g_instance->conf_path,
  *                                                    "./mossad.conf");
  * 
- *     Version :  0.0.1 
+ *     Version :  1.0.0
  *      
  *      Author :  HQ 
  *
