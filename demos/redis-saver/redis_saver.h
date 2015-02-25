@@ -9,7 +9,7 @@
  * 
  * Description :  redis_saver
  * 
- *     Version :  0.0.1 
+ *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
