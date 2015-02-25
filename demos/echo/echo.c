@@ -10,7 +10,7 @@
  * Description :  Mossad框架回显示例
  *                实现msd_plugin.h中的函数，即可将用户逻辑嵌入mossad框架
  * 
- *     Version :  0.0.1 
+ *     Version :  1.0.0 
  * 
  *      Author :  HQ 
  *
