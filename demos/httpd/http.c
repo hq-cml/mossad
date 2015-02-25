@@ -5,12 +5,12 @@
  * | |  | | |_| |___) |__) / ___ \| |_| |
  * |_|  |_|\___/|____/____/_/   \_\____/ 
  *
- *    Filename :  echo.c
+ *    Filename :  http.c
  * 
  * Description :  Mossad框架Http服务器示例
  *                实现msd_plugin.h中的函数，即可将用户逻辑嵌入mossad框架
  * 
- *     Version :  0.0.1 
+ *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
@@ -114,8 +114,8 @@ int msd_handle_prot_len(msd_conn_client_t *client)
     }
     header_end += 4;
     
-    /* find content-length header */
-	/* Http请求头如果没有content-length字段，则长度就是请求行和请求头以及后面的两个回车换行的长度之后 
+    /* find content-length header 
+	 * Http请求头如果没有content-length字段，则长度就是请求行和请求头以及后面的两个回车换行的长度之后 
 	 * 否则就再加上content-length字段
 	 */
     if ((ptr = strstr(client->recvbuf->buf, "Content-Length:"))) 
@@ -229,18 +229,7 @@ int msd_handle_process(msd_conn_client_t *client)
     msd_str_cat_len(&(client->sendbuf), buf, file_size);
     free(buf);
     close(fd);
-    
-    /*
-    // 注册回写事件--放入框架内部实现
-    worker = msd_get_worker(client->worker_id);
-    if (msd_ae_create_file_event(worker->t_ael, client->fd, MSD_AE_WRITABLE,
-                msd_write_to_client, client) == MSD_ERR) 
-    {
-        msd_close_client(client->idx, "create file event failed");
-        MSD_ERROR_LOG("Create write file event failed for connection:%s:%d", client->remote_ip, client->remote_port);
-        return MSD_ERR;
-    }
-    */
+
     return MSD_END;
 }
 
