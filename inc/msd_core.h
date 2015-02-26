@@ -57,16 +57,28 @@
 
  
 /* -------------------CONFIG------------------- */
-#define MSD_PTHREAD_LOCK_MODE       /* Lock mode */
-//#define MSD_SYSVSEM_LOCK_MODE
-//#define MSD_FCNTL_LOCK_MODE
+/* Lock mode */
+#ifdef __MSD_PTHREAD_LOCK_MODE__
+    #define MSD_PTHREAD_LOCK_MODE        //线程Mutex
+#elif defined __MSD_SYSVSEM_LOCK_MODE__
+    #define MSD_SYSVSEM_LOCK_MODE        //SYSVSEM
+#elif defined __MSD_FCNTL_LOCK_MODE__
+    #define MSD_FCNTL_LOCK_MODE          //文件锁
+#endif
 
-#define MSD_LOG_MODE_THREAD         /* Log mode */
-//#define MSD_LOG_MODE_PROCESS
+/* Log mode */
+#ifdef __MSD_LOG_MODE_THREAD__
+    #define MSD_LOG_MODE_THREAD         //线程模式
+#elif defined __MSD_LOG_MODE_PROCESS__
+    #define MSD_LOG_MODE_PROCESS        //进程模式
+#endif
 
-#define MSD_EPOLL_MODE              /* Multiplexing mode */
-//#define MSD_SELECT_MODE
- 
+/* Multiplexing I/O mode */
+#ifdef __MSD_EPOLL_MODE__
+    #define MSD_EPOLL_MODE              //epoll  
+#elif defined __MSD_SELECT_MODE__           
+    #define MSD_SELECT_MODE             //select
+#endif
 
 /* ---------------PROJECT HEADER FILE----------- */
 #include "msd_lock.h"
