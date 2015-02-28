@@ -1,18 +1,25 @@
-DEBUG  = -g
+#DEBUG  = -g -D__CJSON_MAIN__
+DEBUG  = -g 
 CC     = gcc
 CFLAGS = $(DEBUG) -Wall -fPIC
+LIB    = -lm 
 
 TARGET = libcJSON.a 
+#TARGET = demo 
 
-OBJECT = cJSON.o 
+#OBJECT = demo.o 
+OBJECT = cJSON.o  
 
 all: $(TARGET) 
 
 $(TARGET):$(OBJECT)
 	ar rcs $@ $<
 
+#$(TARGET):$(OBJECT)
+#	$(CC) $(CFLAGS) $(LIB) $(OBJECT) -o $@
+	
 $(OBJECT): %.o:%.c
-	$(CC) $(CFLAGS) $(INC) $< -c -o $@
+	$(CC) $(CFLAGS) $< -c -o $@
 
 .PHONY :clean install
 install:
