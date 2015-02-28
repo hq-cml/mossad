@@ -93,7 +93,7 @@ int redis_save(redisContext *c, const char* hostname, const char* item_id, const
         return MSD_FAILED;    
     }
     */
-    MSD_INFO_LOG("Success exec cmd: %s\n", cmd); 
+    MSD_INFO_LOG("Success exec cmd: %s", cmd); 
 
     return MSD_OK;
 }
