@@ -10,9 +10,9 @@
  * Description :  Msd_log, a generic log implementation.
  *                两个版本的日志：进程版本和线程版本。
  *                当mossad采用多进程时，用进程版本；采用多线程时，用线程版本
- *                对外接口都是统一的，只需要在msd_core.h中定义需要类型的宏
- *                #define MSD_LOG_MODE_THREAD(默认)
- *                #define MSD_LOG_MODE_PROCESS
+ *                对外接口都是统一的，只需要在Makefile中定义需要类型的宏
+ *                LOG_MODE = -D__MSD_LOG_MODE_THREAD__/-D__MSD_LOG_MODE_PROCESS__
+ *
  *
  *     Version :  1.0.0
  * 
