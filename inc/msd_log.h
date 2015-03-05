@@ -10,9 +10,8 @@
  * Description :  Msd_log, a generic log implementation.
  *                两个版本的日志：进程版本和线程版本。
  *                当mossad采用多进程时，用进程版本；采用多线程时，用线程版本
- *                对外接口都是统一的，只需要在msd_core.h中定义需要类型的宏
- *                #define MSD_LOG_MODE_THREAD(默认)
- *                #define MSD_LOG_MODE_PROCESS
+ *                对外接口都是统一的，只需要在Makefile中定义需要类型的宏
+ *                LOG_MODE = -D__MSD_LOG_MODE_THREAD__/-D__MSD_LOG_MODE_PROCESS__
  *
  *     Version :  1.0.0
  * 
@@ -82,12 +81,12 @@ typedef struct msd_log
 {
     //char      *msd_log_buffer = MAP_FAILED; /* -1 */
     int          msd_log_has_init;           /* 是否已经初始化 */
-    int          msd_log_level;              /* 日志最高纪录的等级 */
-    int          msd_log_size;               /* 每个日志文件的大小 */
-    int          msd_log_num;                /* 日志的个数 */
-    int          msd_log_multi;              /* 是否将不同等级的日志，写入不同的文件 */
+    int          msd_log_level;              /* 日志等级 */
+    int          msd_log_size;               /* 每个日志文件的大小(rotate阈值) */
+    int          msd_log_num;                /* 最多允许的日志的个数 */
+    int          msd_log_multi;              /* 是否将不同等级的日志，写入不同的文件(默认:否) */
     msd_lock_t  *msd_log_rotate_lock;        /* 日志roate锁 */
-    s_msd_log_t  g_msd_log_files[MSD_LOG_LEVEL_DEBUG +1]; /* 各个日志文件句柄 */
+    s_msd_log_t  g_msd_log_files[MSD_LOG_LEVEL_DEBUG +1]; /* 各个等级日志文件句柄 */
 }msd_log_t;
 
 /*
@@ -96,12 +95,12 @@ typedef struct msd_log
  * and errno is set to indicate the error.
  * 如果STDOUT_FILENO定向至终端，则以有色形式删除ok/failed，否则以普通形式输出
  */
-/* print [OK] in green */
+/* print [OK] in green. Escape码:绿色 */
 #define MSD_OK_STATUS \
     (isatty(STDOUT_FILENO)? \
      ("\033[1m[\033[32m OK \033[37m]\033[m") : ("[ OK ]"))
      
-/* print [FAILED] in red */
+/* print [FAILED] in red. Escape码:红色 */
 #define MSD_FAILED_STATUS \
     (isatty(STDOUT_FILENO)? \
      ("\033[1m[\033[31m FAILED \033[37m]\033[m") :("[ FAILED ]"))
@@ -118,7 +117,7 @@ typedef struct msd_log
  * #define myprintf(templt,args...) fprintf(stderr,templt,args)
  * 第一个宏中由于没有对变参起名，我们用默认的宏__VA_ARGS__来替代它。第二个宏中，
  * 我们显式地命名变参为args，那么我们在宏定义中就可以用args来代指变参了。 
- * 同C语言的stdcall一样，变参必须作为参数表的最有一项出现。
+ * 同C语言的stdcall一样，变参必须作为参数表的最后一项出现。
  *
  * 若变参为空，会导致编译错误，此时
  * #define myprintf(templt, ...) fprintf(stderr,templt, ##__VAR_ARGS__)
