@@ -51,9 +51,10 @@
 /* log level */
 #define MSD_LOG_LEVEL_FATAL     0    
 #define MSD_LOG_LEVEL_ERROR     1    
-#define MSD_LOG_LEVEL_WARNING   2    
-#define MSD_LOG_LEVEL_INFO      3    
-#define MSD_LOG_LEVEL_DEBUG     4    
+#define MSD_LOG_LEVEL_WARNING   2
+#define MSD_LOG_LEVEL_NOTICE    3   //added by hq. 2015.3.4
+#define MSD_LOG_LEVEL_INFO      4    
+#define MSD_LOG_LEVEL_DEBUG     5    
 #define MSD_LOG_LEVEL_ALL       MSD_LOG_LEVEL_DEBUG
 
 /* log size and num */
@@ -137,11 +138,12 @@ typedef struct msd_log
 #define MSD_DETAIL(level, fmt, args...) \
     msd_log_write(level, "[%s:%d:%s] " fmt, __FILE__, __LINE__, __FUNCTION__, ##args) /* whether add #?? */
 
-#define MSD_FATAL_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_FATAL, fmt, ##args)
-#define MSD_ERROR_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_ERROR, fmt, ##args)
+#define MSD_FATAL_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_FATAL,   fmt, ##args)
+#define MSD_ERROR_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_ERROR,   fmt, ##args)
 #define MSD_WARNING_LOG(fmt, args...) MSD_DETAIL(MSD_LOG_LEVEL_WARNING, fmt, ##args)
-#define MSD_INFO_LOG(fmt, args...)    MSD_DETAIL(MSD_LOG_LEVEL_INFO, fmt, ##args)
-#define MSD_DEBUG_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_DEBUG, fmt, ##args)
+#define MSD_NOTICE_LOG(fmt, args...)  MSD_DETAIL(MSD_LOG_LEVEL_NOTICE,  fmt, ##args)
+#define MSD_INFO_LOG(fmt, args...)    MSD_DETAIL(MSD_LOG_LEVEL_INFO,    fmt, ##args)
+#define MSD_DEBUG_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_DEBUG,   fmt, ##args)
 
 void msd_boot_notify(int ok, const char *fmt, ...);
 int msd_log_init(const char *dir, const char *filename, int level, int size, int lognum, int multi);
