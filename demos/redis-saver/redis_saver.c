@@ -210,9 +210,6 @@ int msd_handle_prot_len(msd_conn_client_t *client)
  **/
 int msd_handle_process(msd_conn_client_t *client) 
 {
-    // 回显信息写入sendbuf 
-    msd_str_cat_len(&(client->sendbuf), "ok\n", 3);
-
     msd_thread_worker_t *worker; 
     int i;
     time_t now_time;
@@ -297,9 +294,14 @@ int msd_handle_process(msd_conn_client_t *client)
         
     redis_destroy(c);
     cJSON_Delete(p_root);
+
+    // 回显信息写入sendbuf 
+    msd_str_cat_len(&(client->sendbuf), "ok", 2);
     return MSD_OK;
     
 json_null:
+    // 回显信息写入sendbuf 
+    msd_str_cat_len(&(client->sendbuf), "failed", 6);
     MSD_ERROR_LOG("Invalidate json:%s! Client:%s:%d", content_buff, client->remote_ip, client->remote_port);
     free(content_buff);
     redis_destroy(c);
