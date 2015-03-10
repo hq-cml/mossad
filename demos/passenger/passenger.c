@@ -181,7 +181,7 @@ int msd_handle_process(msd_conn_client_t *client)
     msd_dlist_t *dlist;
     
     /* 回显信息写入sendbuf */
-    msd_str_cat_len(&(client->sendbuf), "ok\n", 3);
+    msd_str_cat_len(&(client->sendbuf), "ok", 2);
     /*
     // 注册回写事件 -- 交由Mossad框架实现
     if (msd_ae_create_file_event(worker->t_ael, client->fd, MSD_AE_WRITABLE,
