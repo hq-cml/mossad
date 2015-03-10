@@ -5,7 +5,7 @@ CC = gcc
 # [__MSD_PTHREAD_LOCK_MODE__ / __MSD_SYSVSEM_LOCK_MODE__ / __MSD_FCNTL_LOCK_MODE__]
 LOCK_MODE = -D__MSD_PTHREAD_LOCK_MODE__
 
-CFLAGS  = $(IO_MULTI_MODE) $(LOG_MODE) $(LOCK_MODE) -fPIC -Wall -pipe -DDEBUG -g -D_GNU_SOURCE -D_REENTRANT
+CFLAGS  = $(LOCK_MODE) -fPIC -Wall -pipe -DDEBUG -g -D_GNU_SOURCE -D_REENTRANT
 LIB     = -ldl -lrt -lm -lcurl -rdynamic -lcJSON -L../../lib/cJSON/
 INC     = -I../../inc -I../../lib/cJSON/
 
