@@ -86,7 +86,7 @@ typedef struct msd_log
     int          msd_log_num;                /* 最多允许的日志的个数 */
     int          msd_log_multi;              /* 是否将不同等级的日志，写入不同的文件(默认:否) */
     msd_lock_t  *msd_log_rotate_lock;        /* 日志roate锁 */
-    s_msd_log_t  g_msd_log_files[MSD_LOG_LEVEL_DEBUG +1]; /* 各个等级日志文件句柄 */
+    s_msd_log_t  g_msd_log_files[MSD_LOG_LEVEL_DEBUG +1]; /* 各个等级日志文件句柄，如果multi标记为否(默认)，则只用到索引0  */
 }msd_log_t;
 
 /*
@@ -135,7 +135,7 @@ typedef struct msd_log
 }while(0)
 
 #define MSD_DETAIL(level, fmt, args...) \
-    msd_log_write(level, "[%s:%d:%s] " fmt, __FILE__, __LINE__, __FUNCTION__, ##args) /* whether add #?? */
+    msd_log_write(level, "[%s:%d:%s] " fmt, __FILE__, __LINE__, __FUNCTION__, ##args)
 
 #define MSD_FATAL_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_FATAL,   fmt, ##args)
 #define MSD_ERROR_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_ERROR,   fmt, ##args)
