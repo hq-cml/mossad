@@ -538,7 +538,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
         //sleep(5);
         /*
          * 注意!
-         * 再次判断是否超标，此处有可能其他进程已经完成了roate，所以再判断一次，则
+         * 再次判断是否超标，此处有可能其他线程已经完成了roate，所以再判断一次，则
          * 1.如果仍然超标: 说明没有其线程rotate过，那本进程负责rotate
          * 2.如果不再超标: 说明其他线程已经完成了roate，fd已经更新，则直接退出
          **/
@@ -554,7 +554,6 @@ static int msd_log_rotate(int fd, const char* path, int level)
         /* 说明其他线程已经完成了roate，fd已经更新，则直接退出 */        
         if(st.st_size < g_log.msd_log_size)
         {
-        
             printf("thread %lu relase the lock,ohter thread roate\n", (unsigned long)pthread_self());
             MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
             return MSD_NONEED;
@@ -705,7 +704,7 @@ int msd_log_write(int level, const char *fmt, ...)
     }
     else if(MSD_OK == rotate_result)
     {
-        /* 返回MSD_OK 说明是由本进程执行了roate，则写入操作 */
+        /* 返回MSD_OK 说明是由本线程执行了roate，则写入操作 */
         if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))       
         {
             fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
