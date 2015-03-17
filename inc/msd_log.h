@@ -140,7 +140,7 @@ typedef struct msd_log
 #define MSD_FATAL_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_FATAL,   fmt, ##args)
 #define MSD_ERROR_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_ERROR,   fmt, ##args)
 #define MSD_WARNING_LOG(fmt, args...) MSD_DETAIL(MSD_LOG_LEVEL_WARNING, fmt, ##args)
-#define MSD_NOTICE_LOG(fmt, args...)  MSD_DETAIL(MSD_LOG_LEVEL_NOTICE,  fmt, ##args)
+#define MSD_NOTICE_LOG(fmt, args...)  MSD_DETAIL(MSD_LOG_LEVEL_NOTICE,  fmt, ##args) //added by hq. 2015.3.17
 #define MSD_INFO_LOG(fmt, args...)    MSD_DETAIL(MSD_LOG_LEVEL_INFO,    fmt, ##args)
 #define MSD_DEBUG_LOG(fmt, args...)   MSD_DETAIL(MSD_LOG_LEVEL_DEBUG,   fmt, ##args)
 
