@@ -25,6 +25,7 @@ static char *msd_log_level_name[] = { /* char **msd_log_level_name */
     "FATAL",
     "ERROR",
     "WARN",
+    "NOTICE", //added by hq. 2015.3.17
     "INFO",
     "DEBUG"
 };
