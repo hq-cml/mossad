@@ -171,6 +171,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
             g_log.g_msd_log_files[i].fd = -1;
             memset(g_log.g_msd_log_files[i].path, 0, MSD_LOG_PATH_MAX);
             strcpy(g_log.g_msd_log_files[i].path, dir);
+            //若日志路径不带'/'，则自动加上
             if(g_log.g_msd_log_files[i].path[strlen(dir)] != '/')
             {
                 strcat(g_log.g_msd_log_files[i].path,  "/");
@@ -394,6 +395,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
     return MSD_NONEED;
 
 }
+
 /**
  * 功能: 日志写入，进程版本
  * 参数: @level， @fmt , @...
@@ -496,6 +498,7 @@ int msd_log_write(int level, const char *fmt, ...)
 
     return MSD_OK;
 }
+
 #else
 
 /**
