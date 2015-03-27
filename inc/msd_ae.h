@@ -57,7 +57,7 @@
 
 #define MSD_AE_NOMORE       -1
 
-/* Macros，不使用，啥也不干 */
+/* Macros，不使用，啥也不干，去掉编译器对木有使用的局部变量的警告 */
 #define MSD_AE_NOTUSED(V)   ((void)V)
 
 struct msd_ae_event_loop;
