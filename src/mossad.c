@@ -373,9 +373,9 @@ int main(int argc, char **argv)
     }
     g_ins->so_func = &g_so;
     
+    /* 调用handle_init */
     if (g_ins->so_func->handle_init) 
     {
-        /* 调用handle_init */
         if (g_ins->so_func->handle_init(g_ins->conf) != MSD_OK) 
         {
             MSD_ERROR_LOG("Invoke hook handle_init in master");
