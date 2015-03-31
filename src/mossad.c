@@ -40,13 +40,14 @@ msd_so_func_t    g_so;
 static msd_so_symbol_t syms[] = 
 {
     /* symbol_name,     function pointer,         optional */
-    {"msd_handle_init",        (void **)&g_so.handle_init,        1}, 
-    {"msd_handle_worker_init", (void **)&g_so.handle_worker_init, 1}, 
-    {"msd_handle_fini",        (void **)&g_so.handle_fini,        1}, 
-    {"msd_handle_open",        (void **)&g_so.handle_open,        1}, 
-    {"msd_handle_close",       (void **)&g_so.handle_close,       1}, 
-    {"msd_handle_prot_len",    (void **)&g_so.handle_prot_len,    0},  /* 必选 */
-    {"msd_handle_process",     (void **)&g_so.handle_process,     0},  /* 必选 */
+    {"msd_handle_init",             (void **)&g_so.handle_init,             1}, 
+    {"msd_handle_worker_init",      (void **)&g_so.handle_worker_init,      1}, 
+    {"msd_handle_last_preparation", (void **)&g_so.handle_last_preparation, 1}, 
+    {"msd_handle_fini",             (void **)&g_so.handle_fini,             1}, 
+    {"msd_handle_open",             (void **)&g_so.handle_open,             1}, 
+    {"msd_handle_close",            (void **)&g_so.handle_close,            1}, 
+    {"msd_handle_prot_len",         (void **)&g_so.handle_prot_len,         0},  /* 必选 */
+    {"msd_handle_process",          (void **)&g_so.handle_process,          0},  /* 必选 */
     {NULL, NULL, 0}
 };
 
