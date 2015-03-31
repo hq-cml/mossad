@@ -419,7 +419,7 @@ int main(int argc, char **argv)
     MSD_BOOT_SUCCESS("Create Threadpool");
     MSD_INFO_LOG("Create Threadpool Success");
 
-    /* 最终工作 */
+    /* 最终准备工作 */
     if (g_ins->so_func->handle_last_preparation) 
     {
         if (g_ins->so_func->handle_last_preparation(g_ins->conf, g_ins->pool) != MSD_OK) 
