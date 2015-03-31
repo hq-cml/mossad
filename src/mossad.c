@@ -419,6 +419,17 @@ int main(int argc, char **argv)
     MSD_BOOT_SUCCESS("Create Threadpool");
     MSD_INFO_LOG("Create Threadpool Success");
 
+    /* 最终工作 */
+    if (g_ins->so_func->handle_last_preparation) 
+    {
+        if (g_ins->so_func->handle_last_preparation(g_ins->conf, g_ins->pool) != MSD_OK) 
+        {
+            MSD_ERROR_LOG("Invoke hook handle_last_preparation in master");
+            MSD_BOOT_FAILED("Invoke hook handle_last_preparation in master");
+        }
+    }
+
+    
     /* 修改进程的Title */
     saved_argv = msd_set_program_name(argc, argv, msd_conf_get_str_value(g_ins->conf, "pro_name", "Mossad"));
 
