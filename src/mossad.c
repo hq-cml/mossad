@@ -429,7 +429,6 @@ int main(int argc, char **argv)
         }
     }
 
-    
     /* 修改进程的Title */
     saved_argv = msd_set_program_name(argc, argv, msd_conf_get_str_value(g_ins->conf, "pro_name", "Mossad"));
 
