@@ -43,10 +43,21 @@ int msd_handle_init(void *conf);
  *       1. 可选函数
  *       2. worker线程初始化阶段，调用此函数，可以做一些初始化工作
  *       3. 通常用于初始化worker的priv_data域
- *       3. 如果此函数失败，mossad会直接退出
+ *       4. 如果此函数失败，mossad会直接退出
  * 返回:成功:0; 失败:-x
  **/
 int msd_handle_worker_init(void *conf, void *worker);
+
+/**
+ * 功能: 所有的worker就绪之后，可能会有最终的一些工作要做，比如再生成一个非worker线程的其他线程，此函数可选
+ * 参数: @worker
+ * 说明: 
+ *       1. 可选函数
+ *       2. worker线程池创建完毕之后，会调用
+ *       3. 如果此函数失败，mossad会直接退出
+ * 返回:成功:0; 失败:-x
+ **/
+int msd_handle_last_preparation(void *conf, void *pool);
 
 /**
  * 功能: mossad关闭的时候，触发此回调
