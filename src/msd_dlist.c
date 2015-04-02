@@ -43,6 +43,7 @@ msd_dlist_t *msd_dlist_init(void)
     dl->match = NULL;
     return dl;
 }
+
 /**
  * 功能: Destroy the whole list. 
  * 参数: @dl，dlist结构地址
