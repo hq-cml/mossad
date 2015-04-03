@@ -119,7 +119,7 @@ static void msd_destroy_instance(msd_instance_t *instance)
     MSD_LOCK_DESTROY(instance->thread_woker_list_lock);
     MSD_LOCK_DESTROY(instance->client_conn_vec_lock);
 
-    MSD_INFO_LOG("Mossad is closed! Bye bye!");
+    MSD_INFO_LOG("Mossad is closed! Bye bye!\n\n");
 }
 
 /**
