@@ -361,6 +361,20 @@ static int msd_hash_delete_foreach(const msd_hash_entry_t *he, void *ht)
 }
 
 /**
+ * 功能: clear a hash table
+ * 参数: @ hash结构地址
+ * 描述:
+ *      1. 销毁hash的数据，但是hash结构本身不销毁
+ *      2. 并且ht->data堆数组不销毁，但会清0
+ **/
+void msd_hash_clear(msd_hash_t *ht)
+{
+    msd_hash_foreach(ht, msd_hash_delete_foreach, ht); /*将每个元素清除*/
+    memset(ht->data, 0, ht->slots * sizeof(msd_hash_entry_t *)); 
+    ht->count = 0;
+}
+
+/**
  * 功能: destroy a hash table
  * 参数: @ hash结构地址
  * 描述:
