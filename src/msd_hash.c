@@ -350,13 +350,13 @@ void *msd_hash_get_val(msd_hash_t *ht, const void *key)
  *         是一个需要第一个参数是个he的函数
  * 返回: 成功，0,失败，-x
  **/
-int msd_hash_delete_foreach(const msd_hash_entry_t *he, void *ht)
+static int msd_hash_delete_foreach(const msd_hash_entry_t *he, void *ht)
 {
     if(msd_hash_remove_entry(ht, he->key) != MSD_OK)
     {
         return MSD_ERR;
-    }
-
+    } 
+    
     return MSD_OK;
 }
 
