@@ -115,7 +115,6 @@ void *msd_hash_get_val(msd_hash_t *ht, const void *key);
 void msd_hash_destroy(msd_hash_t *ht);
 void msd_hash_clear(msd_hash_t *ht);
 void msd_hash_free(msd_hash_t *ht);
-int msd_hash_delete_foreach(const msd_hash_entry_t *he, void *ht);
 msd_hash_t *msd_hash_duplicate(msd_hash_t *ht);
 msd_hash_iter_t *msd_hash_iter_new(msd_hash_t *ht);
 int msd_hash_iter_move_next(msd_hash_iter_t *iter);
