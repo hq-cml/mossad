@@ -379,6 +379,7 @@ void msd_hash_clear(msd_hash_t *ht)
  * 参数: @ hash结构地址
  * 描述:
  *      1. 销毁hash的数据，但是hash结构本身不销毁
+ *      2. 并且ht->data堆数组会销毁
  **/
 void msd_hash_destroy(msd_hash_t *ht)
 {
