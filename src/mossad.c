@@ -427,6 +427,8 @@ int main(int argc, char **argv)
             MSD_ERROR_LOG("Invoke hook handle_last_preparation in master");
             MSD_BOOT_FAILED("Invoke hook handle_last_preparation in master");
         }
+        MSD_BOOT_SUCCESS("Last prepareation");
+        MSD_INFO_LOG("Last prepareation Success");
     }
 
     /* 修改进程的Title */
