@@ -382,8 +382,8 @@ int main(int argc, char **argv)
             MSD_BOOT_FAILED("Invoke hook handle_init in master");
         }
     }
-    MSD_BOOT_SUCCESS("Load So File");
-    MSD_INFO_LOG("Load So File Success");
+    MSD_BOOT_SUCCESS("Load So File:%s", g_ins->so_file->buf);
+    MSD_INFO_LOG("Load So File:%s Success", g_ins->so_file->buf);
     
     /* 放开资源限制 */
     msd_rlimit_reset();
