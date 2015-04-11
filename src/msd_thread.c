@@ -281,6 +281,7 @@ void* msd_thread_worker_cycle(void* arg)
     worker->idx = -1;
     msd_dlist_destroy(worker->client_list);
     msd_ae_free_event_loop(worker->t_ael);
+    free(worker);
     pthread_exit(0);
     return (void*)NULL;
 }
