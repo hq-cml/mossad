@@ -271,7 +271,8 @@ static void* msd_signal_thread_cycle(void *arg)
         }    
 
      }
-     return (void *)NULL;
+    free(sig_worker);
+    return (void *)NULL;
 }
 
 /**
