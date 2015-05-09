@@ -67,7 +67,7 @@
 #define MSD_CONTENT_COLS        65
 
 /* length */
-#define MSD_LOG_BUFFER_SIZE     4096
+#define MSD_LOG_BUFFER_SIZE     8192
 #define MSD_LOG_MAX_NUMBER      100
 #define MSD_LOG_PATH_MAX        1024
 
