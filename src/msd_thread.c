@@ -281,7 +281,7 @@ void* msd_thread_worker_cycle(void* arg)
     worker->idx = -1;
     msd_dlist_destroy(worker->client_list);
     msd_ae_free_event_loop(worker->t_ael);
-    free(worker);
+    //free(worker);销毁池子的时候会统一释放
     pthread_exit(0);
     return (void*)NULL;
 }
