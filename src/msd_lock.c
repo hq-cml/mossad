@@ -280,7 +280,7 @@ static int strxcat(char *dst, const char *src, int size)
  *         创建的临时文件不能自动删除，所以执行完 mkstemp函数后要调用unlink函数，
  *         unlink函数删除文件的目录入口，但临时文件还可以通过文件描述符进行访问，
  *         直到最后一个打开的进程关 闭文件操作符，或者程序退出后临时文件被自动彻底地删除。
- * 返回: 成功， 失败，
+ * 返回: 成功， fd。失败，-x
  **/
 int msd_fcntl_init(msd_lock_t **ppl, const char *pathname) 
 {
