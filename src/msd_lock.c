@@ -243,7 +243,7 @@ void msd_sysv_sem_destroy(msd_lock_t *pl, int semid)
 #elif defined(MSD_FCNTL_LOCK_MODE)
 
 #ifndef MAXPATHLEN
-#   ifdef PAHT_MAX
+#   ifdef PATH_MAX
 #       define MAXPATHLEN PATH_MAX
 #   elif defined(_POSIX_PATH_MAX)
 #       define MAXPATHLEN _POSIX_PATH_MAX
