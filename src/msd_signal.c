@@ -271,7 +271,7 @@ static void* msd_signal_thread_cycle(void *arg)
         }    
 
      }
-    free(sig_worker);
+    //free(sig_worker);//msd_destroy_instance中会统一释放资源
     return (void *)NULL;
 }
 
