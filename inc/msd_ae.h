@@ -9,9 +9,9 @@
  * 
  * Description :  A simple event-driven programming library. It's from Redis.
  *                The default multiplexing layer is select. If the system 
- *                support epoll, you can define the epoll macro.
- *
- *                #define MSD_EPOLL_MODE
+ *                support epoll, you can define the epoll macroin Makefile.
+ *                
+ *                IO_MULTI_MODE = -D__MSD_EPOLL_MODE__/-D__MSD_SELECT_MODE__
  *
  *     Version :  1.0.0
  * 
