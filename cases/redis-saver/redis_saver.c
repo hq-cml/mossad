@@ -93,6 +93,8 @@ int redis_save(redisContext *c, const char* hostname, const char* item_id, const
         return MSD_FAILED;    
     }
     */
+    //由于后面重复使用该变量，所以需要提前释放，否则内存泄漏。    
+    freeReplyObject(r);
     MSD_INFO_LOG("Success exec cmd: %s", cmd); 
 
     return MSD_OK;
