@@ -50,19 +50,22 @@ int mongo_connect(void *data, mongoc_client_t **cli, mongoc_collection_t **col)
  *       1. 可选函数
  * 返回:成功:0; 失败:-x
  **/
-int mongo_save(mongoc_collection_t *col, const char* hostname, const char* item_id, const char* time, const char* value)
+int mongo_save(mongoc_collection_t *col, const char* hostname, const char* item_id, const char* stime, const char* value)
 {
     bson_error_t error;    
     bson_oid_t oid;    
     bson_t *doc;
+    time_t t   = time(NULL);
 
     doc = bson_new(); 
     bson_oid_init(&oid, NULL);    
     BSON_APPEND_OID(doc, "_id", &oid);    
     BSON_APPEND_UTF8(doc, "hostname", hostname);  
     BSON_APPEND_UTF8(doc, "item_id",  item_id);
-    BSON_APPEND_UTF8(doc, "time",     time);
+    BSON_APPEND_UTF8(doc, "time",     stime);
     BSON_APPEND_UTF8(doc, "value",    value);
+    BSON_APPEND_TIME_T(doc, "date_ttl", t);
+    
     if (!mongoc_collection_insert(col, MONGOC_INSERT_NONE, doc, NULL, &error)) 
     {        
         MSD_ERROR_LOG("saver error:%s", error.message);    
