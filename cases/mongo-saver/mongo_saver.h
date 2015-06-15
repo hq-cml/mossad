@@ -32,6 +32,8 @@ typedef struct saver_worker_data{
     msd_str_t           *mongo_db; 
     msd_str_t           *mongo_table;
     msd_thread_worker_t *worker;              /* worker_data所依附的worker句柄 */
+    
+    msd_hash_t          *item_black_list;     /* 监控项的黑名单，名单中的item_id自动忽略 */
 }saver_worker_data_t;
 
 #endif
