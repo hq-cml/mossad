@@ -303,13 +303,17 @@ int msd_handle_process(msd_conn_client_t *client)
 
         //MSD_INFO_LOG("item_id:%s\n", p_item_id);
         //MSD_INFO_LOG("value:%s\n", p_value);
-
+        //黑名单监控项，直接忽略之
+        if((msd_hash_get_val(((saver_worker_data_t *)worker->priv_data)->item_black_list, p_item_id)))
+        {
+            MSD_DEBUG_LOG("Black List Item! Host:%s, Item:%s, Value:%s", p_hostname, p_item_id, p_value);
+            continue;
+        }
+        
         //存储
         if(MSD_OK != mongo_save(col, p_hostname, p_item_id, p_time, p_value)){
             goto json_null;
         }
-
-        
     }   
     free(content_buff);
     mongo_destroy(cli, col);
