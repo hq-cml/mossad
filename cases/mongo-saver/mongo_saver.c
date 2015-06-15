@@ -169,6 +169,22 @@ int msd_handle_worker_init(void *conf, void *arg)
     
     worker_data->worker = worker;
  
+    //初始化黑名单
+    if(!(worker_data->item_black_list = msd_hash_create(16)))
+    {
+        MSD_ERROR_LOG("Msd_hash_create Failed!");
+        return MSD_ERR; 
+    }
+    MSD_HASH_SET_SET_KEY(worker_data->item_black_list,  msd_hash_def_set);
+    MSD_HASH_SET_SET_VAL(worker_data->item_black_list,  msd_hash_def_set);
+    MSD_HASH_SET_FREE_KEY(worker_data->item_black_list, msd_hash_def_free);
+    MSD_HASH_SET_FREE_VAL(worker_data->item_black_list, msd_hash_def_free);
+    MSD_HASH_SET_KEYCMP(worker_data->item_black_list,   msd_hash_def_cmp);
+    
+    block = msd_conf_get_block(conf, "item_black_list");
+    msd_hash_foreach(block->block.ht, _hash_deal_with_item_foreach, worker_data);
+    dump_item_black_list(worker_data->item_black_list);
+ 
     return MSD_OK;
 }
 
