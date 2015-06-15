@@ -84,6 +84,34 @@ int mongo_destroy(mongoc_client_t *cli, mongoc_collection_t *col)
     return MSD_OK;
 }
 
+int _hash_deal_with_item_foreach(const msd_hash_entry_t *he, void *userptr)
+{
+    saver_worker_data_t *worker_data = userptr;
+    msd_hash_t *hash = worker_data->item_black_list;
+
+    msd_hash_insert(hash, he->key, he->key);
+    return MSD_OK;
+}
+
+void dump_item_black_list(msd_hash_t *item_black_list)
+{
+    MSD_INFO_LOG(" --------- DUMP BLACK ------------");
+    MSD_INFO_LOG("item_black_list->slots:%d", item_black_list->slots);
+    MSD_INFO_LOG("item_black_list->count:%d", item_black_list->count);
+    msd_hash_foreach(item_black_list, _item_black_hash_print_entry, NULL);
+    MSD_INFO_LOG(" ----------------- The End -------------------\n");
+    return;
+}
+
+/**
+ * 功能: dump出host_nodelist_hash的结构的一个entry
+ * 说明: 也可以用于dump出baseitem_cluitem_hash的结构的一个entry，因为这两种hash的结构相同
+ **/
+int _item_black_hash_print_entry(const msd_hash_entry_t *he, void *userptr)
+{
+    MSD_INFO_LOG("%s => %s", (char *)he->key, (char *)he->val);
+    return MSD_OK;
+}
 
 /**
  * 功能: 初始化回调，初始化Back_end
@@ -109,7 +137,7 @@ int msd_handle_worker_init(void *conf, void *arg)
 {
     MSD_INFO_LOG("Msd_handle_worker_init is called!");
     msd_thread_worker_t *worker = (msd_thread_worker_t *)arg;
-
+    msd_conf_block_t    *block  = NULL;
     saver_worker_data_t *worker_data;
     
     if(!(worker->priv_data = calloc(1, sizeof(saver_worker_data_t))))
