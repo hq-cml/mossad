@@ -59,7 +59,7 @@ void msd_dlist_destroy(msd_dlist_t *dl)
 
     curr = dl->head;
     len = dl->len;
-    while (len--) 
+    while (curr && len--) 
     {
         next = curr->next;
         if (dl->free)
