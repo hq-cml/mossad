@@ -49,20 +49,20 @@ typedef struct msd_dlist_iter
 } msd_dlist_iter_t;
 
 /* Functions implemented as macros */
-#define msd_dlist_length(l)     ((l)->len)
-#define msd_dlist_first(l)      ((l)->head) 
-#define msd_dlist_last(l)       ((l)->tail)
-#define msd_dlist_prev_node(n)  ((n)->prev)
-#define msd_dlist_next_node(n)  ((n)->next)
-#define msd_dlist_node_value(n) ((n)->value)
+#define MSD_DLIST_LENGTH(l)     ((l)->len)
+#define MSD_DLIST_FIRST(l)      ((l)->head) 
+#define MSD_DLIST_LAST(l)       ((l)->tail)
+#define MSD_DLIST_PREV_NODE(n)  ((n)->prev)
+#define MSD_DLIST_NEXT_NODE(n)  ((n)->next)
+#define MSD_DLIST_NODE_VALUE(n) ((n)->value)
 
-#define msd_dlist_set_dup(l,m)      ((l)->dup = (m))
-#define msd_dlist_set_free(l,m)     ((l)->free = (m))
-#define msd_dlist_set_match(l,m)    ((l)->match = (m)) 
+#define MSD_DLIST_SET_DUP(l,m)      ((l)->dup = (m))
+#define MSD_DLIST_SET_FREE(l,m)     ((l)->free = (m))
+#define MSD_DLIST_SET_MATCH(l,m)    ((l)->match = (m)) 
 
-#define msd_dlist_get_dup(l)    ((l)->dup)
-#define msd_dlist_get_free(l)   ((l)->free)
-#define msd_dlist_get_match(l)  ((l)->match)
+#define MSD_DLIST_GET_DUP(l)    ((l)->dup)
+#define MSD_DLIST_GET_FREE(l)   ((l)->free)
+#define MSD_DLIST_GET_MATCH(l)  ((l)->match)
 
 /* Prototypes */
 msd_dlist_t *msd_dlist_init(void);
