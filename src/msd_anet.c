@@ -157,7 +157,7 @@ int msd_anet_tcp_nodelay(char *err, int fd)
 }
 
 /**
- * 功能: 设置缓冲曲大小
+ * 功能: 设置缓冲区大小
  * 参数: @err, @fd, @send_buffsize, @recv_buffsize
  * 描述:
  *      1. 不支持将缓冲区设置为0
