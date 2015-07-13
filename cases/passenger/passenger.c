@@ -310,6 +310,14 @@ deal_one_err:
     return NULL;
 }
 
+/*
+ * 判断非阻塞Connect成功的一般步骤：
+ *
+ * 1.将打开的socket设为非阻塞的,可以用fcntl(socket, F_SETFL, O_NDELAY)完成(有的系统用FNEDLAY也可).
+ * 2.发connect调用,这时返回-1,但是errno被设为EINPROGRESS,意即connect仍旧在进行还没有完成.
+ * 3.将打开的socket设进被监视的可写(注意不是可读)文件集合用select进行监视,如果可写,
+ *   用getsockopt(socket, SOL_SOCKET, SO_ERROR, &error, sizeof(int));来得到error的值,如果为零,则connect成功.
+ */
 static int chose_one_avail_fd(back_end_t *back_end, msd_thread_worker_t *worker)
 {
     assert(back_end);
