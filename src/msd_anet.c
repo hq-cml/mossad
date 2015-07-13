@@ -140,7 +140,8 @@ int msd_anet_nonblock(char *err, int fd)
  * 功能: 设置no_delay
  * 参数: @err, @fd
  * 描述:
- *      1. 关闭禁止Nagle算法，即不等零碎组包，对网络性能影响较大
+ *      1. 关闭Nagle算法，即不等零碎组包，对网络性能影响较大
+ *         关闭了Nagle算法，会导致TCP碎片增多，效率可能会降低；但是交互性会极大提升，适用于高并发场景
  * 返回: 成功，0，失败，-x
  **/
 int msd_anet_tcp_nodelay(char *err, int fd) 
