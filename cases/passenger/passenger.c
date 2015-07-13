@@ -388,7 +388,7 @@ again:
                 }
                 else
                 {
-                    /* 发现可用连接 */
+                    /* error==0, 发现可用连接 */
                     find_flag        = 1;
                     back_end->idx    = i;
                     back_end->fd     = fd_arr[i];
