@@ -155,7 +155,8 @@ static void msd_sig_segv_handler(int sig, siginfo_t *info, void *secret)
      * 所以需要重新注册一次默认操作，再发送一次信号
      */
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_NODEFER | SA_ONSTACK | SA_RESETHAND;
+    //sa.sa_flags = SA_NODEFER | SA_ONSTACK | SA_RESETHAND;
+    sa.sa_flags = SA_NODEFER | SA_RESETHAND;
     sa.sa_handler = SIG_DFL;
     sigaction(sig, &sa, NULL);
     raise(sig); /* raise：用于向进程自身发送信号。成功返回0，失败返回-1。 */
