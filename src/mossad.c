@@ -149,13 +149,13 @@ static void msd_usage(int status)
 {
     if (status != EXIT_SUCCESS) 
     {
-        fprintf(stderr, "Try '%s --help' for more information.\n", MSD_PROG_NAME);
+        fprintf(stderr, "Try '%s --help' for more information.\n", MSD_PROG_TITLE);
     } 
     else 
     {
         printf("Usage:./%6.6s [--config=<conf_file> | -c] [start|stop|restart]\n"
                "%6.6s         [--version | -v]\n"
-               "%6.6s         [--help | -h]\n", MSD_PROG_NAME, " ", " ");
+               "%6.6s         [--help | -h]\n", MSD_PROG_TITLE, " ", " ");
     }
 }
 
