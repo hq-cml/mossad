@@ -59,7 +59,7 @@ msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void*
 
     /* 初始化线程worker列表 */
     if(!(pool->thread_worker_array = 
-        (msd_thread_worker_t **)calloc(worker_num, sizeof(msd_thread_worker_t))))
+        (msd_thread_worker_t **)calloc(worker_num, sizeof(msd_thread_worker_t *))))
     {
         MSD_LOCK_DESTROY(pool->thread_lock);
         free(pool);
