@@ -321,7 +321,8 @@ deal_one_err:
  * added by huaqi 2015-8-12 新增了一个解释，关于MSG_PEEK这段的必要性：
  *   因为注册了read_from_back读事件，所以感觉cose_one_avial_fd中的MSG_PEEK这一块没什么太大必要。
  *   其实，在一种特殊场景下面，还是有一定必要性的。比如，back_end由于某种原因不读取，则会出现TCP阻塞
- *         
+ *   此时如果断网，并且backend重启，然后网络恢复。由于TCP阻塞，所以永远不会触发write，进而永远收不到RST包
+ *   也永远不会触发read_from_back. 
  */
 static int chose_one_avail_fd(back_end_t *back_end, msd_thread_worker_t *worker)
 {
