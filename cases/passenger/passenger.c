@@ -317,6 +317,9 @@ deal_one_err:
  * 2.发connect调用,这时返回-1,但是errno被设为EINPROGRESS,意即connect仍旧在进行还没有完成.
  * 3.将打开的socket设进被监视的可写(注意不是可读)文件集合用select进行监视,如果可写,
  *   用getsockopt(socket, SOL_SOCKET, SO_ERROR, &error, sizeof(int));来得到error的值,如果为零,则connect成功.
+ *
+ * added by huaqi 2015-8-12 新增了一个解释，关于MSG_PEEK这段的必要性
+ *         
  */
 static int chose_one_avail_fd(back_end_t *back_end, msd_thread_worker_t *worker)
 {
