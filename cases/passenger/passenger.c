@@ -318,7 +318,8 @@ deal_one_err:
  * 3.将打开的socket设进被监视的可写(注意不是可读)文件集合用select进行监视,如果可写,
  *   用getsockopt(socket, SOL_SOCKET, SO_ERROR, &error, sizeof(int));来得到error的值,如果为零,则connect成功.
  *
- * added by huaqi 2015-8-12 新增了一个解释，关于MSG_PEEK这段的必要性
+ * added by huaqi 2015-8-12 新增了一个解释，关于MSG_PEEK这段的必要性：
+ *   因为注册了read_from_back读事件，所以感觉cose_one_avial_fd中的MSG_PEEK这一块没什么太大必要。
  *         
  */
 static int chose_one_avail_fd(back_end_t *back_end, msd_thread_worker_t *worker)
