@@ -436,6 +436,17 @@ again:
     }
     else
     {
+        /*
+         * 在UNIX/LINUX下，非阻塞模式SOCKET可以采用recv+MSG_PEEK的方式进行判断，其中MSG_PEEK保证了仅仅进行状态判断，而不影响数据接收
+         * 对于主动关闭的SOCKET, recv返回-1，而且errno被置为9（#define EBADF   9  // Bad file number ）
+         * 或104 （#define ECONNRESET 104 // Connection reset by peer ）
+         * 对于被动关闭的SOCKET,recv返回0，而且errno被置为11（#define EWOULDBLOCK EAGAIN // Operation would block ）
+         * 对正常的SOCKET, 如果有接收数据，则返回>0, 否则返回-1，而且errno被置为11（#define EWOULDBLOCK EAGAIN // Operation would block ）
+         * 因此对于简单的状态判断（不过多考虑异常情况），
+         * recv返回>0，   正常
+         * 返回-1，而且errno被置为11  正常
+         * 其它情况    关闭
+         */
         //探测现有fd可用性
         memset(buf, 0, 2);
         ret = recv(back_end->fd, buf, 1, MSG_PEEK);
