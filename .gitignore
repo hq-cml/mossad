@@ -1,6 +1,7 @@
 # Object files
 *.o
 *.so
+*.log
 
 # exe files
 Mossad

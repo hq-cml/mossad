@@ -5,6 +5,10 @@
  _| |_\/_| |_ \  `-'  / \-\____) | \-\____) | _/ /   \ \_  _| |_.' / 
 |_____||_____| `.___.'   \______.'  \______.'|____| |____||______.'  
 
+
+
+
+
 ========================== Description ============================
     Mossad is a async multithread TCP server framework that you can 
 customize your logical business code and not to care about networking 
@@ -15,19 +19,53 @@ You can refer them to write your business code.
     
     In cases directory, there are some production cases baseed on mossad. 
 
-    Mossad refer to reids, nginx, gko_pool, verben .etc
-
-============================= Notes ===============================
-
+    Mossad refer to reids, memcached, nginx, gko_pool, verben .etc
 
 
 
 ========================== Installation ===========================
-#cd src
-#make
-#make install
+1. Install Mossad
 
-#cd demos/one_demo
-#make
-#make install
+cd src
+#edit makefile for some necessary setting(eg. install target)
+make
+make install
+
+2. Install plugin
+
+cd demos/echo
+#edit makefile for some necessary setting
+make
+make install
+
+
+=============================== Run ==============================
+cd bin/demos/
+mkdir logs
+mkdir pid
+./Mossad
+
+
+============================== Usage =============================
+Usage:./Mossad [--config=<conf_file> | -c] [start|stop|restart]
+               [--version | -v]
+               [--help | -h]
+
+
+======================= Plugin Description ========================
+echo:
+  echo back tcp server
+httpd: 
+  a simple httpd server which support static http access(text/css/js .etc)
+passenger: 
+  a simple tcp request transfer.
+redis-server:
+  a server which recv tcp request and store it into redis
+mongo-server:
+  a server which recv tcp request and store it into mongo
+
+
+
+
+
 
