@@ -8,9 +8,9 @@
  *    Filename :  Msd_log.c
  * 
  * Description :  Msd_log, a generic log implementation.
- *                Á½¸ö°æ±¾µÄÈÕÖ¾£º½ø³Ì°æ±¾ºÍÏß³Ì°æ±¾¡£
- *                µ±mossad²ÉÓÃ¶à½ø³ÌÊ±£¬ÓÃ½ø³Ì°æ±¾£»²ÉÓÃ¶àÏß³ÌÊ±£¬ÓÃÏß³Ì°æ±¾
- *                ¶ÔÍâ½Ó¿Ú¶¼ÊÇÍ³Ò»µÄ£¬Ö»ĞèÒªÔÚMakefileÖĞ¶¨ÒåĞèÒªÀàĞÍµÄºê
+ *                ä¸¤ä¸ªç‰ˆæœ¬çš„æ—¥å¿—ï¼šè¿›ç¨‹ç‰ˆæœ¬å’Œçº¿ç¨‹ç‰ˆæœ¬ã€‚
+ *                å½“mossadé‡‡ç”¨å¤šè¿›ç¨‹æ—¶ï¼Œç”¨è¿›ç¨‹ç‰ˆæœ¬ï¼›é‡‡ç”¨å¤šçº¿ç¨‹æ—¶ï¼Œç”¨çº¿ç¨‹ç‰ˆæœ¬
+ *                å¯¹å¤–æ¥å£éƒ½æ˜¯ç»Ÿä¸€çš„ï¼Œåªéœ€è¦åœ¨Makefileä¸­å®šä¹‰éœ€è¦ç±»å‹çš„å®
  *                LOG_MODE = -D__MSD_LOG_MODE_THREAD__/-D__MSD_LOG_MODE_PROCESS__
  *
  *
@@ -30,17 +30,17 @@ static char *msd_log_level_name[] = { /* char **msd_log_level_name */
     "DEBUG"
 };
 
-static msd_log_t g_log; /* È«¾ÖLog¾ä±ú */
+static msd_log_t g_log; /* å…¨å±€Logå¥æŸ„ */
 
 /**
- * ¹¦ÄÜ: ¿ª±ÙÒ»¿é¹²ÏíÄÚ´æ(·ÏÆú!)
- * ÃèÊö:
- *      1. ÄäÃû·½Ê½´ò¿ª¹²ÏíÄÚ´æ£¬²»ĞèÒªÓ³ÉäÎÄ¼ş
- *      2. MAP_PRIVATE£¬½ø³ÌµÄË½ÓĞµÄ¹²ÏíÄÚ´æ£¬¼´±ãÆä¿ÉÄÜÅÉÉúÁË×Ó½ø³Ì£¬¸¸×Ó´òÓ¡³öÀ´µÄmsd_log_buffer
- *         µÄÖµ¶¼ÊÇÏàÍ¬µÄ£¬µ«ËûÃÇÈ·ÊµË½ÓĞµÄ£¬»¥²»Ó°Ïì
- *      3. MAP_SHARED£¬ÕæÕıÄÜ¹»¸¸×Ó½ø³Ì»¥Ïà¹²Ïí
- *      4. ¾­¹ı²âÊÔ£¬ÔÚ¶àÏß³ÌÄ£Ê½ÏÂ£¬¹²ÏíÄÚ´æµÄ·½Ê½»á·¢Éú´íÂÒ£¬ËùÒÔ²»Ê¹ÓÃ¹²ÏíÄÚ´æÄ£Ê½
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: å¼€è¾Ÿä¸€å—å…±äº«å†…å­˜(åºŸå¼ƒ!)
+ * æè¿°:
+ *      1. åŒ¿åæ–¹å¼æ‰“å¼€å…±äº«å†…å­˜ï¼Œä¸éœ€è¦æ˜ å°„æ–‡ä»¶
+ *      2. MAP_PRIVATEï¼Œè¿›ç¨‹çš„ç§æœ‰çš„å…±äº«å†…å­˜ï¼Œå³ä¾¿å…¶å¯èƒ½æ´¾ç”Ÿäº†å­è¿›ç¨‹ï¼Œçˆ¶å­æ‰“å°å‡ºæ¥çš„msd_log_buffer
+ *         çš„å€¼éƒ½æ˜¯ç›¸åŒçš„ï¼Œä½†ä»–ä»¬ç¡®å®ç§æœ‰çš„ï¼Œäº’ä¸å½±å“
+ *      3. MAP_SHAREDï¼ŒçœŸæ­£èƒ½å¤Ÿçˆ¶å­è¿›ç¨‹äº’ç›¸å…±äº«
+ *      4. ç»è¿‡æµ‹è¯•ï¼Œåœ¨å¤šçº¿ç¨‹æ¨¡å¼ä¸‹ï¼Œå…±äº«å†…å­˜çš„æ–¹å¼ä¼šå‘ç”Ÿé”™ä¹±ï¼Œæ‰€ä»¥ä¸ä½¿ç”¨å…±äº«å†…å­˜æ¨¡å¼
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
 
 static int msd_get_map_mem()
 {
@@ -61,7 +61,7 @@ static int msd_get_map_mem()
  **/
  
 /**
- * ¹¦ÄÜ: ¸ù¾İokµÄÖµ£¬Êä³öºìÉ«»òÕßÂÌÉ«ÔÚÆÁÄ»£¬×î³¤²»³¬¹ı80×Ö·û
+ * åŠŸèƒ½: æ ¹æ®okçš„å€¼ï¼Œè¾“å‡ºçº¢è‰²æˆ–è€…ç»¿è‰²åœ¨å±å¹•ï¼Œæœ€é•¿ä¸è¶…è¿‡80å­—ç¬¦
  **/
 void msd_boot_notify(int ok, const char *fmt, ...)
 {
@@ -70,12 +70,12 @@ void msd_boot_notify(int ok, const char *fmt, ...)
 
     char log_buffer[MSD_LOG_BUFFER_SIZE] = {0};
     va_start(ap, fmt);
-    n = vsnprintf(log_buffer, MSD_SCREEN_COLS, fmt, ap);/*n ÊÇ³É¹¦Ğ´ÈëµÄ×Ö·ûÊı*/
+    n = vsnprintf(log_buffer, MSD_SCREEN_COLS, fmt, ap);/*n æ˜¯æˆåŠŸå†™å…¥çš„å­—ç¬¦æ•°*/
     va_end(ap);
 
     if(n > MSD_CONTENT_COLS)
     {
-        printf("%-*.*s%s%s\n", MSD_CONTENT_COLS-5, MSD_CONTENT_COLS-5,/*ÆäÖĞÇ°±ß*¶¨ÒåµÄÊÇ×ÜµÄ¿í¶È£¬ºó±ß*ÊÇÖ¸¶¨Êä³ö×Ö·û¸öÊı¡£*/
+        printf("%-*.*s%s%s\n", MSD_CONTENT_COLS-5, MSD_CONTENT_COLS-5,/*å…¶ä¸­å‰è¾¹*å®šä¹‰çš„æ˜¯æ€»çš„å®½åº¦ï¼Œåè¾¹*æ˜¯æŒ‡å®šè¾“å‡ºå­—ç¬¦ä¸ªæ•°ã€‚*/
                 log_buffer, " ... ", ok==0? MSD_OK_STATUS:MSD_FAILED_STATUS);
     }
     else
@@ -86,9 +86,9 @@ void msd_boot_notify(int ok, const char *fmt, ...)
 }
 
 /**
- * ¹¦ÄÜ: ÖØÖÃÈÕÖ¾ÎÄ¼şfd
- * ²ÎÊı: @index
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: é‡ç½®æ—¥å¿—æ–‡ä»¶fd
+ * å‚æ•°: @index
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 static int msd_log_reset_fd(int index)
 {
@@ -107,7 +107,7 @@ static int msd_log_reset_fd(int index)
     }
 
     /* in case exec.. */
-    /*Èç¹û×Ó½ø³Ì±»exec×åº¯ÊıÌæ»»£¬ÔòËûÊÇÎŞ·¨²Ù×÷¸ÃÎÄ¼şÁË*/
+    /*å¦‚æœå­è¿›ç¨‹è¢«execæ—å‡½æ•°æ›¿æ¢ï¼Œåˆ™ä»–æ˜¯æ— æ³•æ“ä½œè¯¥æ–‡ä»¶äº†*/
     status = fcntl(g_log.g_msd_log_files[index].fd, F_GETFD, 0);
     status |= FD_CLOEXEC;
     fcntl(g_log.g_msd_log_files[index].fd, F_SETFD, status);  
@@ -115,23 +115,23 @@ static int msd_log_reset_fd(int index)
 }
 
 /**
- * ¹¦ÄÜ: log init
- * ²ÎÊı: @dir Ä¿Â¼Î»ÖÃ
- *       @filename ÎÄ¼şÃû
+ * åŠŸèƒ½: log init
+ * å‚æ•°: @dir ç›®å½•ä½ç½®
+ *       @filename æ–‡ä»¶å
  *       @level 
  *       @size
  *       @lognum
  *       @multi
- * ÃèÊö:
+ * æè¿°:
  *      1. access(dir, mode)
- *         mode:±íÊ¾²âÊÔµÄÄ£Ê½¿ÉÄÜµÄÖµÓĞ:
- *              R_OK:ÊÇ·ñ¾ßÓĞ¶ÁÈ¨ÏŞ             
- *              W_OK:ÊÇ·ñ¾ßÓĞ¿ÉĞ´È¨ÏŞ
- *              X_OK:ÊÇ·ñ¾ßÓĞ¿ÉÖ´ĞĞÈ¨ÏŞ             
- *              F_OK:ÎÄ¼şÊÇ·ñ´æÔÚ             
- *              ·µ»ØÖµ:Èô²âÊÔ³É¹¦Ôò·µ»Ø0,·ñÔò·µ»Ø-1
+ *         mode:è¡¨ç¤ºæµ‹è¯•çš„æ¨¡å¼å¯èƒ½çš„å€¼æœ‰:
+ *              R_OK:æ˜¯å¦å…·æœ‰è¯»æƒé™             
+ *              W_OK:æ˜¯å¦å…·æœ‰å¯å†™æƒé™
+ *              X_OK:æ˜¯å¦å…·æœ‰å¯æ‰§è¡Œæƒé™             
+ *              F_OK:æ–‡ä»¶æ˜¯å¦å­˜åœ¨             
+ *              è¿”å›å€¼:è‹¥æµ‹è¯•æˆåŠŸåˆ™è¿”å›0,å¦åˆ™è¿”å›-1
  *  
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 int msd_log_init(const char *dir, const char *filename, int level, int size, int lognum, int multi)
 {
@@ -157,7 +157,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
     g_log.msd_log_num   = lognum;
     g_log.msd_log_multi = multi; /* !!multi */
 
-    /* ³õÊ¼»¯roateËø */
+    /* åˆå§‹åŒ–roateé” */
     if (MSD_LOCK_INIT(g_log.msd_log_rotate_lock) != 0) 
     {
         return MSD_ERR;
@@ -171,7 +171,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
             g_log.g_msd_log_files[i].fd = -1;
             memset(g_log.g_msd_log_files[i].path, 0, MSD_LOG_PATH_MAX);
             strcpy(g_log.g_msd_log_files[i].path, dir);
-            //ÈôÈÕÖ¾Â·¾¶²»´ø'/'£¬Ôò×Ô¶¯¼ÓÉÏ
+            //è‹¥æ—¥å¿—è·¯å¾„ä¸å¸¦'/'ï¼Œåˆ™è‡ªåŠ¨åŠ ä¸Š
             if(g_log.g_msd_log_files[i].path[strlen(dir)] != '/')
             {
                 strcat(g_log.g_msd_log_files[i].path,  "/");
@@ -180,7 +180,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
             strcat(g_log.g_msd_log_files[i].path, "_");
             strcat(g_log.g_msd_log_files[i].path, msd_log_level_name[i]);
 
-            /*³õÊ¼»¯fd*/
+            /*åˆå§‹åŒ–fd*/
             if(MSD_OK != msd_log_reset_fd(i))
             {
                 return MSD_FAILED;
@@ -198,7 +198,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
         }
         strcat(g_log.g_msd_log_files[0].path, filename);
 
-        /*³õÊ¼»¯fd*/
+        /*åˆå§‹åŒ–fd*/
         if(MSD_OK != msd_log_reset_fd(0))
         {
             return MSD_FAILED;
@@ -217,7 +217,7 @@ int msd_log_init(const char *dir, const char *filename, int level, int size, int
 }
 
 /**
- * ¹¦ÄÜ: close log
+ * åŠŸèƒ½: close log
  **/
 void msd_log_close()
 {
@@ -242,17 +242,17 @@ void msd_log_close()
         }
     }
     
-    MSD_LOCK_DESTROY(g_log.msd_log_rotate_lock); /* Ïû³ıËø */
+    MSD_LOCK_DESTROY(g_log.msd_log_rotate_lock); /* æ¶ˆé™¤é” */
 }
 
 #ifdef MSD_LOG_MODE_PROCESS
 /**
- * ¹¦ÄÜ: ÈÕÖ¾ÇĞ¸î£¬½ø³Ì°æ±¾
- * ²ÎÊı: @
- * ÃèÊö:
- *      1. rotateµÄÊ±ºò£¬¼ÓËø±£»¤£¬·ÀÖ¹ÎÉÂÒ
- *      2. ÎªÁË±£Ö¤¶à½ø³ÌÄ£Ê½ÏÂµÄ¿É¿¿£¬·Ö±ğ²ÉÓÃÁËfstatºÍstat
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: æ—¥å¿—åˆ‡å‰²ï¼Œè¿›ç¨‹ç‰ˆæœ¬
+ * å‚æ•°: @
+ * æè¿°:
+ *      1. rotateçš„æ—¶å€™ï¼ŒåŠ é”ä¿æŠ¤ï¼Œé˜²æ­¢ç´Šä¹±
+ *      2. ä¸ºäº†ä¿è¯å¤šè¿›ç¨‹æ¨¡å¼ä¸‹çš„å¯é ï¼Œåˆ†åˆ«é‡‡ç”¨äº†fstatå’Œstat
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 static int msd_log_rotate(int fd, const char* path, int level)
 {
@@ -265,17 +265,17 @@ static int msd_log_rotate(int fd, const char* path, int level)
     index = g_log.msd_log_multi? level:0;
 
     /*
-     * ×¢Òâ!
-     * ´Ë´¦ĞëÓÃfstat£¬¶øÏÂÃæÄÇ´¦ĞëÓÃstat¡£ÎªÁË¼æÈİ¶à½ø³ÌµÄÇé¿ö£¬´Ë´¦ĞëÓÃfd£¬ÒòÎª±ğµÄ½ø³ÌÓĞ¿ÉÄÜ
-     * ÒÑ¾­rotateÁËÈÕÖ¾ÎÄ¼ş£¬Èç¹ûÓÃÁËpath£¬¾Í¿ÉÄÜ¼ì²â³ö´óĞ¡Ã»ÓĞ³¬¹ıãĞÖµ(ÒòÎª±ğµÄ½ø³ÌÒÑrotate)£¬
-     * µ«ÊÇĞ´ÈëµÄÊ±ºòÓÃµÄÊÇfd£¬Õâ¾Í³öÁËÎÊÌâ£¬ÒòÎª¸Ã½ø³ÌfdÖ¸ÏòµÄÒÑ¾­ÊÇxxx.log.max£¬¶ø²»ÔÙÊÇxxx.log
-     * £¬ËùÒÔÈÕÖ¾»áĞ´µ½ÒÑ¾­rotateÁËµÄxx.log.maxµ±ÖĞÈ¥¡£µ«ÊÇÈç¹û´Ë´¦ÓÃfd£¬¾Í²»»áÓĞÕâÖÖÎÊÌâ£¬ÒòÎª¼´
-     * ±ãÎÄ¼şÃû×Ö±ä»¯ÁË£¬µ«ÊÇfdÈÔÈ»Ö¸ÏòµÄÊÇÔ­À´µÄÎÄ¼ş£¬ÕâÑùÈÔÈ»ÅĞ¶Ïtest.log.max£¬ÈÔÈ»¿ÉÒÔ·¢ÏÖÈÕÖ¾³¬±ê
+     * æ³¨æ„!
+     * æ­¤å¤„é¡»ç”¨fstatï¼Œè€Œä¸‹é¢é‚£å¤„é¡»ç”¨statã€‚ä¸ºäº†å…¼å®¹å¤šè¿›ç¨‹çš„æƒ…å†µï¼Œæ­¤å¤„é¡»ç”¨fdï¼Œå› ä¸ºåˆ«çš„è¿›ç¨‹æœ‰å¯èƒ½
+     * å·²ç»rotateäº†æ—¥å¿—æ–‡ä»¶ï¼Œå¦‚æœç”¨äº†pathï¼Œå°±å¯èƒ½æ£€æµ‹å‡ºå¤§å°æ²¡æœ‰è¶…è¿‡é˜ˆå€¼(å› ä¸ºåˆ«çš„è¿›ç¨‹å·²rotate)ï¼Œ
+     * ä½†æ˜¯å†™å…¥çš„æ—¶å€™ç”¨çš„æ˜¯fdï¼Œè¿™å°±å‡ºäº†é—®é¢˜ï¼Œå› ä¸ºè¯¥è¿›ç¨‹fdæŒ‡å‘çš„å·²ç»æ˜¯xxx.log.maxï¼Œè€Œä¸å†æ˜¯xxx.log
+     * ï¼Œæ‰€ä»¥æ—¥å¿—ä¼šå†™åˆ°å·²ç»rotateäº†çš„xx.log.maxå½“ä¸­å»ã€‚ä½†æ˜¯å¦‚æœæ­¤å¤„ç”¨fdï¼Œå°±ä¸ä¼šæœ‰è¿™ç§é—®é¢˜ï¼Œå› ä¸ºå³
+     * ä¾¿æ–‡ä»¶åå­—å˜åŒ–äº†ï¼Œä½†æ˜¯fdä»ç„¶æŒ‡å‘çš„æ˜¯åŸæ¥çš„æ–‡ä»¶ï¼Œè¿™æ ·ä»ç„¶åˆ¤æ–­test.log.maxï¼Œä»ç„¶å¯ä»¥å‘ç°æ—¥å¿—è¶…æ ‡
      **/
     /* get the file satus, store in st */
     if(MSD_OK != fstat(fd, &st))
     {
-        /*Èô³öÏÖÒì³££¬Ôò³¢ÊÔÖØÖÃfd£¬ÎŞÂÛÊÇ·ñ³É¹¦£¬·µ»ØFAILED*/
+        /*è‹¥å‡ºç°å¼‚å¸¸ï¼Œåˆ™å°è¯•é‡ç½®fdï¼Œæ— è®ºæ˜¯å¦æˆåŠŸï¼Œè¿”å›FAILED*/
         //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         msd_log_reset_fd(index);
         //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
@@ -284,17 +284,17 @@ static int msd_log_rotate(int fd, const char* path, int level)
 
     if(st.st_size >= g_log.msd_log_size)
     {
-        //¼ÓËø
+        //åŠ é”
         MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         printf("process %d get the lock\n", getpid());
         //sleep(5);
         /*
-         * ×¢Òâ!
-         * ÔÙ´ÎÅĞ¶ÏÊÇ·ñ³¬±ê£¬´Ë´¦±ØĞëÓÃstat£¬¶øÉÏÃæÄÇ´¦±ØĞëÓÃfstat£¬ÒòÎªÈç¹ûÓÃÁËfd£¬±ØÈ»¼ì²â³öÈÕÖ¾³¬±ê
-         * £¬±Ï¾¹ÉÏÃæÒÑ¾­¼ì²â¹ıÁËÒ»´Î¡£´ËÊ±ÓĞ¿ÉÄÜÆäËû½ø³ÌÒÑ¾­Íê³ÉÁËroate£¬ËùÒÔµÃÓÃpathÔÙÀ´ÅĞ¶ÏÒ»´Î£¬Ôò
-         * 1.Èç¹ûÈÔÈ»³¬±ê: ËµÃ÷Ã»ÓĞÆäËû½ø³Ìrotate¹ı£¬ÄÇ±¾½ø³Ì¸ºÔğrotate
-         * 2.Èç¹û²»ÔÙ³¬±ê: ËµÃ÷ÆäËû½ø³ÌÒÑ¾­Íê³ÉÁËroate£¬±¾½ø³ÌfdÒÑ¾­Ö¸ÏòÁËxx.log.max£¬
-         *   Ôò±¾½ø³ÌÖ»ĞèÒª¸üĞÂ×Ô¼ºµÄfd
+         * æ³¨æ„!
+         * å†æ¬¡åˆ¤æ–­æ˜¯å¦è¶…æ ‡ï¼Œæ­¤å¤„å¿…é¡»ç”¨statï¼Œè€Œä¸Šé¢é‚£å¤„å¿…é¡»ç”¨fstatï¼Œå› ä¸ºå¦‚æœç”¨äº†fdï¼Œå¿…ç„¶æ£€æµ‹å‡ºæ—¥å¿—è¶…æ ‡
+         * ï¼Œæ¯•ç«Ÿä¸Šé¢å·²ç»æ£€æµ‹è¿‡äº†ä¸€æ¬¡ã€‚æ­¤æ—¶æœ‰å¯èƒ½å…¶ä»–è¿›ç¨‹å·²ç»å®Œæˆäº†roateï¼Œæ‰€ä»¥å¾—ç”¨pathå†æ¥åˆ¤æ–­ä¸€æ¬¡ï¼Œåˆ™
+         * 1.å¦‚æœä»ç„¶è¶…æ ‡: è¯´æ˜æ²¡æœ‰å…¶ä»–è¿›ç¨‹rotateè¿‡ï¼Œé‚£æœ¬è¿›ç¨‹è´Ÿè´£rotate
+         * 2.å¦‚æœä¸å†è¶…æ ‡: è¯´æ˜å…¶ä»–è¿›ç¨‹å·²ç»å®Œæˆäº†roateï¼Œæœ¬è¿›ç¨‹fdå·²ç»æŒ‡å‘äº†xx.log.maxï¼Œ
+         *   åˆ™æœ¬è¿›ç¨‹åªéœ€è¦æ›´æ–°è‡ªå·±çš„fd
          **/
         if(MSD_OK != stat(path, &st))
         {
@@ -306,8 +306,8 @@ static int msd_log_rotate(int fd, const char* path, int level)
         }
         
         /*
-         * Èç¹û´Ë¿Ì·¢ÏÖ£¬ÈÕÖ¾ÎÄ¼şÒÑ¾­²»·ûºÏroateµÄÌõ¼şÁË£¬ËµÃ÷ÁËÒÑ¾­ÓĞÆäËû½ø³ÌrotateÁË£¬
-         * Ôò´Ë¿ÌÓ¦¸Ã·µ»ØOK»òÕßNONEED²¢½âËø£¬È»ºóÖØÖÃ×Ô¼ºµÄfd
+         * å¦‚æœæ­¤åˆ»å‘ç°ï¼Œæ—¥å¿—æ–‡ä»¶å·²ç»ä¸ç¬¦åˆroateçš„æ¡ä»¶äº†ï¼Œè¯´æ˜äº†å·²ç»æœ‰å…¶ä»–è¿›ç¨‹rotateäº†ï¼Œ
+         * åˆ™æ­¤åˆ»åº”è¯¥è¿”å›OKæˆ–è€…NONEEDå¹¶è§£é”ï¼Œç„¶åé‡ç½®è‡ªå·±çš„fd
          **/        
         if(st.st_size < g_log.msd_log_size)
         {
@@ -322,17 +322,17 @@ static int msd_log_rotate(int fd, const char* path, int level)
             
             printf("process %d relase the lock,ohter process roate\n", getpid());
             /*
-             * Á½ÖÖË¼Â·:¾­²âÊÔ·¢ÏÖ¸ÅÂÊÉÏµÚÒ»ÖÖĞ§¹û½ÏºÃ
-             * 1.¼ÌĞø¼ÓËø£¬·µ»ØOK£¬µÈ×Ô¼ºĞ´ÍêÖ®ºó½âËø
-             * 2.Ö±½Ó½âËø£¬·µ»ØNONEED£¬È»ºóÓÉwriteº¯ÊıĞ´Èë  
+             * ä¸¤ç§æ€è·¯:ç»æµ‹è¯•å‘ç°æ¦‚ç‡ä¸Šç¬¬ä¸€ç§æ•ˆæœè¾ƒå¥½
+             * 1.ç»§ç»­åŠ é”ï¼Œè¿”å›OKï¼Œç­‰è‡ªå·±å†™å®Œä¹‹åè§£é”
+             * 2.ç›´æ¥è§£é”ï¼Œè¿”å›NONEEDï¼Œç„¶åç”±writeå‡½æ•°å†™å…¥  
              */
-            /*½»ÓÉwirteº¯ÊıĞ´ÈëÍê±ÏºóÔÙÊÍ·Å*/
+            /*äº¤ç”±wirteå‡½æ•°å†™å…¥å®Œæ¯•åå†é‡Šæ”¾*/
             //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
             //return MSD_NONEED;
             return MSD_OK;
         }
         
-        /* ÈÔÈ»³¬±ê£¬ËµÃ÷ÆäËû½ø³ÌÃ»ÓĞ½øĞĞrotate£¬ÔòÓÉ±¾½ø³ÌÍê³É */
+        /* ä»ç„¶è¶…æ ‡ï¼Œè¯´æ˜å…¶ä»–è¿›ç¨‹æ²¡æœ‰è¿›è¡Œrotateï¼Œåˆ™ç”±æœ¬è¿›ç¨‹å®Œæˆ */
         /* find the first not exist file name */
         for(i = 0; i < g_log.msd_log_num; i++)
         {
@@ -354,7 +354,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
                     return MSD_FAILED;               
                 }
                 
-                /* ÎÒÊµÊ©ÁËrotate£¬Ôò²»Ó¦¸Ã½âËø£¬Ó¦¸ÃµÈ´ıÎÒĞ´ÍêÁË£¬²Å½âËø */
+                /* æˆ‘å®æ–½äº†rotateï¼Œåˆ™ä¸åº”è¯¥è§£é”ï¼Œåº”è¯¥ç­‰å¾…æˆ‘å†™å®Œäº†ï¼Œæ‰è§£é” */
                 //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
                 //sleep(5);
                 return MSD_OK;
@@ -362,7 +362,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
         }
         
         /* all path.n exist, then ,rotate */
-        /* Èç¹ûÈÕÖ¾ÊıÒÑ¾­´ïµ½ÉÏÏŞ£¬Ôò»á½«ËùÓĞµÄ´øºó×ºµÄÈÕÖ¾ÕûÌåÇ°ÒÆ£¬²¢½«µ±Ç°ÈÕÖ¾£¬ÒÔ×î´óºó×ºÃüÃû */
+        /* å¦‚æœæ—¥å¿—æ•°å·²ç»è¾¾åˆ°ä¸Šé™ï¼Œåˆ™ä¼šå°†æ‰€æœ‰çš„å¸¦åç¼€çš„æ—¥å¿—æ•´ä½“å‰ç§»ï¼Œå¹¶å°†å½“å‰æ—¥å¿—ï¼Œä»¥æœ€å¤§åç¼€å‘½å */
         for(i=1; i<g_log.msd_log_num; i++)
         {
             snprintf(tmppath1, MSD_LOG_PATH_MAX, "%s.%d", path, i);
@@ -371,7 +371,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             rename(tmppath1, tmppath2);
         }
 
-        /*½«µ±Ç°ÈÕÖ¾£¬ÒÔ×î´óºó×ºÃüÃû*/
+        /*å°†å½“å‰æ—¥å¿—ï¼Œä»¥æœ€å¤§åç¼€å‘½å*/
         snprintf(tmppath2, MSD_LOG_PATH_MAX, "%s.%d", path, g_log.msd_log_num-1);
         rename(path, tmppath2);
 
@@ -385,7 +385,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
         }
         
         printf("process %d roate the file\n", getpid());
-        /*ÎÒÊµÊ©ÁËrotate£¬Ôò²»Ó¦¸Ã½âËø£¬Ó¦¸ÃµÈ´ıÎÒĞ´ÍêÁË£¬²Å½âËø*/
+        /*æˆ‘å®æ–½äº†rotateï¼Œåˆ™ä¸åº”è¯¥è§£é”ï¼Œåº”è¯¥ç­‰å¾…æˆ‘å†™å®Œäº†ï¼Œæ‰è§£é”*/
         //MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);
         //sleep(2);
         return MSD_OK;
@@ -397,11 +397,11 @@ static int msd_log_rotate(int fd, const char* path, int level)
 }
 
 /**
- * ¹¦ÄÜ: ÈÕÖ¾Ğ´Èë£¬½ø³Ì°æ±¾
- * ²ÎÊı: @level£¬ @fmt , @...
- * ÃèÊö:
- *      1. Ã¿´ÎĞ´ÈëÇ°£¬»á´¥·¢rotate¼ì²é 
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: æ—¥å¿—å†™å…¥ï¼Œè¿›ç¨‹ç‰ˆæœ¬
+ * å‚æ•°: @levelï¼Œ @fmt , @...
+ * æè¿°:
+ *      1. æ¯æ¬¡å†™å…¥å‰ï¼Œä¼šè§¦å‘rotateæ£€æŸ¥ 
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 int msd_log_write(int level, const char *fmt, ...)
 {
@@ -431,7 +431,7 @@ int msd_log_write(int level, const char *fmt, ...)
     }
     */
     now = time(NULL);
-    /*localtime_r() º¯Êı½«ÈÕÀúÊ±¼ätimep×ª»»ÎªÓÃ»§Ö¸¶¨µÄÊ±ÇøµÄÊ±¼ä¡£µ«ÊÇËü¿ÉÒÔ½«Êı¾İ´æ´¢µ½ÓÃ»§Ìá¹©µÄ½á¹¹ÌåÖĞ¡£*/
+    /*localtime_r() å‡½æ•°å°†æ—¥å†æ—¶é—´timepè½¬æ¢ä¸ºç”¨æˆ·æŒ‡å®šçš„æ—¶åŒºçš„æ—¶é—´ã€‚ä½†æ˜¯å®ƒå¯ä»¥å°†æ•°æ®å­˜å‚¨åˆ°ç”¨æˆ·æä¾›çš„ç»“æ„ä½“ä¸­ã€‚*/
     localtime_r(&now, &tm);
 
     pos = sprintf(log_buffer, "[%04d-%02d-%02d %02d:%02d:%02d][%05d][%5s]",
@@ -439,12 +439,12 @@ int msd_log_write(int level, const char *fmt, ...)
                 tm.tm_hour, tm.tm_min, tm.tm_sec, getpid(),
                 msd_log_level_name[level]);
 
-    /*¼Ó¹¤ÈÕÖ¾ÄÚÈİ*/
+    /*åŠ å·¥æ—¥å¿—å†…å®¹*/
     va_start(ap, fmt);
     end = vsnprintf(log_buffer+pos, MSD_LOG_BUFFER_SIZE-pos, fmt, ap);
     va_end(ap);
 
-    /* Ô½½ç´¦Àí */
+    /* è¶Šç•Œå¤„ç† */
     if(end >= (MSD_LOG_BUFFER_SIZE-pos))
     {
         log_buffer[MSD_LOG_BUFFER_SIZE-1] = '\n';
@@ -458,7 +458,7 @@ int msd_log_write(int level, const char *fmt, ...)
 
     index = g_log.msd_log_multi? level:0;
 
-    /*Òì³£´¦Àí*/
+    /*å¼‚å¸¸å¤„ç†*/
     if(g_log.g_msd_log_files[index].fd == -1)
     {
         //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
@@ -472,7 +472,7 @@ int msd_log_write(int level, const char *fmt, ...)
 
     if(MSD_NONEED == (rotate_result = msd_log_rotate(g_log.g_msd_log_files[index].fd, (const char*)g_log.g_msd_log_files[index].path, level)))
     {
-        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 ÊÇÎªÁË'\n' */            
+        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 æ˜¯ä¸ºäº†'\n' */            
         {
             fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
             return MSD_FAILED;
@@ -480,13 +480,13 @@ int msd_log_write(int level, const char *fmt, ...)
     }
     else if(MSD_OK == rotate_result)
     {
-        /* ·µ»ØMSD_OK ËµÃ÷ÊÇÓÉ±¾½ø³ÌÖ´ĞĞÁËroate£¬»òÕßÔÚ´¦ÓÚËø¶¨×´Ì¬ÖĞµÄÊ±ºò£¬±ğµÄ½ø³ÌÍê³ÉÁËroate£¬ÔòÓ¦¸ÃÔÚÍê³ÉÁËĞ´Èë²Ù×÷Ö®ºóÔÙ½âËø */
+        /* è¿”å›MSD_OK è¯´æ˜æ˜¯ç”±æœ¬è¿›ç¨‹æ‰§è¡Œäº†roateï¼Œæˆ–è€…åœ¨å¤„äºé”å®šçŠ¶æ€ä¸­çš„æ—¶å€™ï¼Œåˆ«çš„è¿›ç¨‹å®Œæˆäº†roateï¼Œåˆ™åº”è¯¥åœ¨å®Œæˆäº†å†™å…¥æ“ä½œä¹‹åå†è§£é” */
         if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))       
         {
             fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
             return MSD_FAILED;
         }
-        /*½âËø*/
+        /*è§£é”*/
         printf("process %d relase the lock\n", getpid());
         MSD_LOCK_UNLOCK(g_log.msd_log_rotate_lock);        
     }
@@ -502,11 +502,11 @@ int msd_log_write(int level, const char *fmt, ...)
 #else
 
 /**
- * ¹¦ÄÜ: ÈÕÖ¾ÇĞ¸î£¬Ïß³Ì°æ±¾
- * ²ÎÊı: @
- * ÃèÊö:
- *      1. rotateµÄÊ±ºò£¬¼ÓËø±£»¤£¬·ÀÖ¹ÎÉÂÒ
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: æ—¥å¿—åˆ‡å‰²ï¼Œçº¿ç¨‹ç‰ˆæœ¬
+ * å‚æ•°: @
+ * æè¿°:
+ *      1. rotateçš„æ—¶å€™ï¼ŒåŠ é”ä¿æŠ¤ï¼Œé˜²æ­¢ç´Šä¹±
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 static int msd_log_rotate(int fd, const char* path, int level)
 {
@@ -521,8 +521,8 @@ static int msd_log_rotate(int fd, const char* path, int level)
     /* get the file satus, store in st */
     if(MSD_OK != fstat(fd, &st))
     {
-        /* Èô³öÏÖÒì³££¬Ôò³¢ÊÔÖØÖÃfd£¬ÎŞÂÛÊÇ·ñ³É¹¦£¬·µ»ØFAILED
-         * ²»¼ÓËø£¬²âÊÔÖĞ·¢ÏÖ£¬»á·¢Éú×Ô¼º°Ñ×Ô¼ºËø×¡
+        /* è‹¥å‡ºç°å¼‚å¸¸ï¼Œåˆ™å°è¯•é‡ç½®fdï¼Œæ— è®ºæ˜¯å¦æˆåŠŸï¼Œè¿”å›FAILED
+         * ä¸åŠ é”ï¼Œæµ‹è¯•ä¸­å‘ç°ï¼Œä¼šå‘ç”Ÿè‡ªå·±æŠŠè‡ªå·±é”ä½
          */
         //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         msd_log_reset_fd(index);
@@ -532,15 +532,15 @@ static int msd_log_rotate(int fd, const char* path, int level)
 
     if(st.st_size >= g_log.msd_log_size)
     {
-        //¼ÓËø
+        //åŠ é”
         MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
         printf("thread %lu get the lock\n", (unsigned long)pthread_self());
         //sleep(5);
         /*
-         * ×¢Òâ!
-         * ÔÙ´ÎÅĞ¶ÏÊÇ·ñ³¬±ê£¬´Ë´¦ÓĞ¿ÉÄÜÆäËûÏß³ÌÒÑ¾­Íê³ÉÁËroate£¬ËùÒÔÔÙÅĞ¶ÏÒ»´Î£¬Ôò
-         * 1.Èç¹ûÈÔÈ»³¬±ê: ËµÃ÷Ã»ÓĞÆäÏß³Ìrotate¹ı£¬ÄÇ±¾½ø³Ì¸ºÔğrotate
-         * 2.Èç¹û²»ÔÙ³¬±ê: ËµÃ÷ÆäËûÏß³ÌÒÑ¾­Íê³ÉÁËroate£¬fdÒÑ¾­¸üĞÂ£¬ÔòÖ±½ÓÍË³ö
+         * æ³¨æ„!
+         * å†æ¬¡åˆ¤æ–­æ˜¯å¦è¶…æ ‡ï¼Œæ­¤å¤„æœ‰å¯èƒ½å…¶ä»–çº¿ç¨‹å·²ç»å®Œæˆäº†roateï¼Œæ‰€ä»¥å†åˆ¤æ–­ä¸€æ¬¡ï¼Œåˆ™
+         * 1.å¦‚æœä»ç„¶è¶…æ ‡: è¯´æ˜æ²¡æœ‰å…¶çº¿ç¨‹rotateè¿‡ï¼Œé‚£æœ¬è¿›ç¨‹è´Ÿè´£rotate
+         * 2.å¦‚æœä¸å†è¶…æ ‡: è¯´æ˜å…¶ä»–çº¿ç¨‹å·²ç»å®Œæˆäº†roateï¼Œfdå·²ç»æ›´æ–°ï¼Œåˆ™ç›´æ¥é€€å‡º
          **/
         if(MSD_OK != fstat(fd, &st))
         {
@@ -551,7 +551,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             return MSD_FAILED;
         }
         
-        /* ËµÃ÷ÆäËûÏß³ÌÒÑ¾­Íê³ÉÁËroate£¬fdÒÑ¾­¸üĞÂ£¬ÔòÖ±½ÓÍË³ö */        
+        /* è¯´æ˜å…¶ä»–çº¿ç¨‹å·²ç»å®Œæˆäº†roateï¼Œfdå·²ç»æ›´æ–°ï¼Œåˆ™ç›´æ¥é€€å‡º */        
         if(st.st_size < g_log.msd_log_size)
         {
             printf("thread %lu relase the lock,ohter thread roate\n", (unsigned long)pthread_self());
@@ -559,7 +559,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             return MSD_NONEED;
         }
         
-        /* ÈÔÈ»³¬±ê£¬ËµÃ÷ÆäËûÏß³ÌÃ»ÓĞ½øĞĞrotate£¬ÔòÓÉ±¾½ø³ÌÍê³É */
+        /* ä»ç„¶è¶…æ ‡ï¼Œè¯´æ˜å…¶ä»–çº¿ç¨‹æ²¡æœ‰è¿›è¡Œrotateï¼Œåˆ™ç”±æœ¬è¿›ç¨‹å®Œæˆ */
         /* find the first not exist file name */
         for(i = 0; i < g_log.msd_log_num; i++)
         {
@@ -588,7 +588,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
         }
         
         /* all path.n exist, then ,rotate */
-        /* Èç¹ûÈÕÖ¾ÊıÒÑ¾­´ïµ½ÉÏÏŞ£¬Ôò»á½«ËùÓĞµÄ´øºó×ºµÄÈÕÖ¾ÕûÌåÇ°ÒÆ£¬²¢½«µ±Ç°ÈÕÖ¾£¬ÒÔ×î´óºó×ºÃüÃû */
+        /* å¦‚æœæ—¥å¿—æ•°å·²ç»è¾¾åˆ°ä¸Šé™ï¼Œåˆ™ä¼šå°†æ‰€æœ‰çš„å¸¦åç¼€çš„æ—¥å¿—æ•´ä½“å‰ç§»ï¼Œå¹¶å°†å½“å‰æ—¥å¿—ï¼Œä»¥æœ€å¤§åç¼€å‘½å */
         for(i=1; i<g_log.msd_log_num; i++)
         {
             snprintf(tmppath1, MSD_LOG_PATH_MAX, "%s.%d", path, i);
@@ -597,7 +597,7 @@ static int msd_log_rotate(int fd, const char* path, int level)
             rename(tmppath1, tmppath2);
         }
 
-        /*½«µ±Ç°ÈÕÖ¾£¬ÒÔ×î´óºó×ºÃüÃû*/
+        /*å°†å½“å‰æ—¥å¿—ï¼Œä»¥æœ€å¤§åç¼€å‘½å*/
         snprintf(tmppath2, MSD_LOG_PATH_MAX, "%s.%d", path, g_log.msd_log_num-1);
         rename(path, tmppath2);
 
@@ -621,11 +621,11 @@ static int msd_log_rotate(int fd, const char* path, int level)
 
 }
 /**
- * ¹¦ÄÜ: ÈÕÖ¾Ğ´Èë£¬Ïß³Ì°æ±¾
- * ²ÎÊı: @level£¬ @fmt , @...
- * ÃèÊö:
- *      1. Ã¿´ÎĞ´ÈëÇ°£¬»á´¥·¢rotate¼ì²é 
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: æ—¥å¿—å†™å…¥ï¼Œçº¿ç¨‹ç‰ˆæœ¬
+ * å‚æ•°: @levelï¼Œ @fmt , @...
+ * æè¿°:
+ *      1. æ¯æ¬¡å†™å…¥å‰ï¼Œä¼šè§¦å‘rotateæ£€æŸ¥ 
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 int msd_log_write(int level, const char *fmt, ...)
 {
@@ -655,7 +655,7 @@ int msd_log_write(int level, const char *fmt, ...)
     }
     */ 
     now = time(NULL);
-    /*localtime_r() º¯Êı½«ÈÕÀúÊ±¼ätimep×ª»»ÎªÓÃ»§Ö¸¶¨µÄÊ±ÇøµÄÊ±¼ä¡£µ«ÊÇËü¿ÉÒÔ½«Êı¾İ´æ´¢µ½ÓÃ»§Ìá¹©µÄ½á¹¹ÌåÖĞ¡£*/
+    /*localtime_r() å‡½æ•°å°†æ—¥å†æ—¶é—´timepè½¬æ¢ä¸ºç”¨æˆ·æŒ‡å®šçš„æ—¶åŒºçš„æ—¶é—´ã€‚ä½†æ˜¯å®ƒå¯ä»¥å°†æ•°æ®å­˜å‚¨åˆ°ç”¨æˆ·æä¾›çš„ç»“æ„ä½“ä¸­ã€‚*/
     localtime_r(&now, &tm);
 
     pos = sprintf(log_buffer, "[%04d-%02d-%02d %02d:%02d:%02d][%lu][%5s]",
@@ -663,12 +663,12 @@ int msd_log_write(int level, const char *fmt, ...)
                 tm.tm_hour, tm.tm_min, tm.tm_sec, pthread_self(),
                 msd_log_level_name[level]);
 
-    /*¼Ó¹¤ÈÕÖ¾ÄÚÈİ*/
+    /*åŠ å·¥æ—¥å¿—å†…å®¹*/
     va_start(ap, fmt);
     end = vsnprintf(log_buffer+pos, MSD_LOG_BUFFER_SIZE-pos, fmt, ap);
     va_end(ap);
 
-    /* Ô½½ç´¦Àí */
+    /* è¶Šç•Œå¤„ç† */
     if(end >= (MSD_LOG_BUFFER_SIZE-pos))
     {
         log_buffer[MSD_LOG_BUFFER_SIZE-1] = '\n';
@@ -682,7 +682,7 @@ int msd_log_write(int level, const char *fmt, ...)
 
     index = g_log.msd_log_multi? level:0;
 
-    /*Òì³£´¦Àí*/
+    /*å¼‚å¸¸å¤„ç†*/
     if(g_log.g_msd_log_files[index].fd == -1)
     {
         //MSD_LOCK_LOCK(g_log.msd_log_rotate_lock);
@@ -696,7 +696,7 @@ int msd_log_write(int level, const char *fmt, ...)
 
     if(MSD_NONEED == (rotate_result = msd_log_rotate(g_log.g_msd_log_files[index].fd, (const char*)g_log.g_msd_log_files[index].path, level)))
     {
-        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 ÊÇÎªÁË'\n' */            
+        if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))/* +1 æ˜¯ä¸ºäº†'\n' */            
         {
             fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
             return MSD_FAILED;
@@ -704,7 +704,7 @@ int msd_log_write(int level, const char *fmt, ...)
     }
     else if(MSD_OK == rotate_result)
     {
-        /* ·µ»ØMSD_OK ËµÃ÷ÊÇÓÉ±¾Ïß³ÌÖ´ĞĞÁËroate£¬ÔòĞ´Èë²Ù×÷ */
+        /* è¿”å›MSD_OK è¯´æ˜æ˜¯ç”±æœ¬çº¿ç¨‹æ‰§è¡Œäº†roateï¼Œåˆ™å†™å…¥æ“ä½œ */
         if(write(g_log.g_msd_log_files[index].fd, log_buffer, end + pos + 1) != (end + pos + 1))       
         {
             fprintf(stderr,"write log to file %s failed: %s\n", g_log.g_msd_log_files[index].path, strerror(errno));
@@ -728,13 +728,13 @@ void test(void *arg)
     int j=0;
     for(j=0; j < 1; j++)
     {
-        MSD_FATAL_LOG("%s", "chil"); //Ò»ĞĞÊÇ60¸ö×Ö½Ú
+        MSD_FATAL_LOG("%s", "chil"); //ä¸€è¡Œæ˜¯60ä¸ªå­—èŠ‚
     }
 }
 
 int main()
 {
-    /******** ÆÕÍ¨²âÊÔ **********/
+    /******** æ™®é€šæµ‹è¯• **********/
     /*
     printf("%s\n",MSD_OK_STATUS);
     printf("%s\n",MSD_FAILED_STATUS);
@@ -768,33 +768,33 @@ int main()
     }
     */
 
-    /**************²âÊÔrotateÔÚ¶à½ø³ÌÄ£Ê½ÏÂµÄÇĞ»»ÎÉÂÒÎÊÌâ**************/  
+    /**************æµ‹è¯•rotateåœ¨å¤šè¿›ç¨‹æ¨¡å¼ä¸‹çš„åˆ‡æ¢ç´Šä¹±é—®é¢˜**************/  
     /*
-     * ÓÃÀı1:ÎÄ¼ş´óĞ¡ÏŞÖÆÎª6000£¬log_num=9£¬1000¸ö½ø³Ì²¢·¢Ğ´Èë60×Ö½Ú
-     *       ½á¹ûÍêÃÀĞ´ÈëÁË10¸öÎÄ¼ş£¬ÎŞ´íÂÒ£¬ÎŞ¶ªÊ§£¬¿ÉÒÔ¿´¿´£¬ºÍÔ­Ê¼
-     *       °æ±¾±È½Ï·Ç³£Ã÷ÏÔ
+     * ç”¨ä¾‹1:æ–‡ä»¶å¤§å°é™åˆ¶ä¸º6000ï¼Œlog_num=9ï¼Œ1000ä¸ªè¿›ç¨‹å¹¶å‘å†™å…¥60å­—èŠ‚
+     *       ç»“æœå®Œç¾å†™å…¥äº†10ä¸ªæ–‡ä»¶ï¼Œæ— é”™ä¹±ï¼Œæ— ä¸¢å¤±ï¼Œå¯ä»¥çœ‹çœ‹ï¼Œå’ŒåŸå§‹
+     *       ç‰ˆæœ¬æ¯”è¾ƒéå¸¸æ˜æ˜¾
      */
     /*
-     * ÓÃÀı2:ÎÄ¼ş´óĞ¡ÏŞÖÆÎª60000£¬log_num=9£¬40¸ö½ø³Ì²¢·¢Ğ´Èë600000×Ö½Ú
-     *       ¶à½ø³Ì°æ±¾Ê±¶ø³öÏÖÎÄ¼şÂÔ´óµÄÎÊÌâ£¬µ«ÊÇÈÕÖ¾×ÜÊıÁ¿ÎÈ¶¨¡£Ô­Ê¼
-     *       °æ±¾ÈÕÖ¾ÎÄ¼ş´óĞ¡Ã»Æ×£¬ÈÕÖ¾ÊıÁ¿Ò²Ã»Ê²Ã´Æ×
+     * ç”¨ä¾‹2:æ–‡ä»¶å¤§å°é™åˆ¶ä¸º60000ï¼Œlog_num=9ï¼Œ40ä¸ªè¿›ç¨‹å¹¶å‘å†™å…¥600000å­—èŠ‚
+     *       å¤šè¿›ç¨‹ç‰ˆæœ¬æ—¶è€Œå‡ºç°æ–‡ä»¶ç•¥å¤§çš„é—®é¢˜ï¼Œä½†æ˜¯æ—¥å¿—æ€»æ•°é‡ç¨³å®šã€‚åŸå§‹
+     *       ç‰ˆæœ¬æ—¥å¿—æ–‡ä»¶å¤§å°æ²¡è°±ï¼Œæ—¥å¿—æ•°é‡ä¹Ÿæ²¡ä»€ä¹ˆè°±
      */
     /*
-     * ÓÃÀı3:ÎÄ¼ş´óĞ¡ÏŞÖÆÎª60000£¬log_num=9£¬1000¸ö½ø³Ì²¢·¢Ğ´Èë600000×Ö½Ú
-     *       ¶à½ø³Ì°æ±¾ÄÜ¹»ÃãÇ¿Ó¦¸¶£¬ÓĞÇáÎ¢µÄ³¬¶îĞ´ÈëµÄÎÊÌâ£¬µ«ÊÇ»ù±¾ÈÕÖ¾ÊıÁ¿ 
-     *       µÈ¶¼ºÜÎÈ¶¨£¬Ò»Ö±±£³ÖÔÚ10¸ö¡£Ô­Ê¼°æ±¾Ã»·¨¿´ÁË£¬µ¥¸öÈÕÖ¾´óĞ¡ÒÔ¼°
-     *       ÈÕÖ¾ÊıÁ¿Á½¸öÖ¸±ê¶¼Ã»Æ×
+     * ç”¨ä¾‹3:æ–‡ä»¶å¤§å°é™åˆ¶ä¸º60000ï¼Œlog_num=9ï¼Œ1000ä¸ªè¿›ç¨‹å¹¶å‘å†™å…¥600000å­—èŠ‚
+     *       å¤šè¿›ç¨‹ç‰ˆæœ¬èƒ½å¤Ÿå‹‰å¼ºåº”ä»˜ï¼Œæœ‰è½»å¾®çš„è¶…é¢å†™å…¥çš„é—®é¢˜ï¼Œä½†æ˜¯åŸºæœ¬æ—¥å¿—æ•°é‡ 
+     *       ç­‰éƒ½å¾ˆç¨³å®šï¼Œä¸€ç›´ä¿æŒåœ¨10ä¸ªã€‚åŸå§‹ç‰ˆæœ¬æ²¡æ³•çœ‹äº†ï¼Œå•ä¸ªæ—¥å¿—å¤§å°ä»¥åŠ
+     *       æ—¥å¿—æ•°é‡ä¸¤ä¸ªæŒ‡æ ‡éƒ½æ²¡è°±
      */
     /*
-     * ÓÃÀı4:ÎÄ¼ş´óĞ¡ÏŞÖÆÎª1G£¬log_num=9£¬1000¸ö½ø³Ì²¢·¢Ğ´Èë6000000×Ö½Ú
-     *       ¶à½ø³Ì°æ±¾Ò²ÓĞµã¿¸²»×¡£¬ÈÕÖ¾roateºó´ó¸Å1.1G×óÓÒ£¬Ô­Ê¼°æ±¾¾Í²»²âÁË  
+     * ç”¨ä¾‹4:æ–‡ä»¶å¤§å°é™åˆ¶ä¸º1Gï¼Œlog_num=9ï¼Œ1000ä¸ªè¿›ç¨‹å¹¶å‘å†™å…¥6000000å­—èŠ‚
+     *       å¤šè¿›ç¨‹ç‰ˆæœ¬ä¹Ÿæœ‰ç‚¹æ‰›ä¸ä½ï¼Œæ—¥å¿—roateåå¤§æ¦‚1.1Gå·¦å³ï¼ŒåŸå§‹ç‰ˆæœ¬å°±ä¸æµ‹äº†  
      */
     /*
-     * ÓÃÀı5:ÎÄ¼ş´óĞ¡ÏŞÖÆÎª6000000£¬log_num=9£¬40¸ö½ø³Ì²¢·¢Ğ´Èë600000*2×Ö½Ú
-     *       ²âÊÔ¶à½ø³Ì°æ±¾ÖĞµ±½âËøºó·¢ÏÖÆäËû½ø³ÌrotateÁËÈÕÖ¾£¬ÓĞÁ½ÖÖË¼Â·
-     *       1.¼ÌĞø¼ÓËø£¬·µ»ØOK£¬µÈ×Ô¼ºĞ´ÍêÖ®ºó½âËø
-     *       2.Ö±½Ó½âËø£¬·µ»ØNONEED£¬È»ºóĞ´Èë  
-     *       ½áÂÛµÚÒ»ÖÖ¸ÅÂÊÉÏ½ÏºÃ
+     * ç”¨ä¾‹5:æ–‡ä»¶å¤§å°é™åˆ¶ä¸º6000000ï¼Œlog_num=9ï¼Œ40ä¸ªè¿›ç¨‹å¹¶å‘å†™å…¥600000*2å­—èŠ‚
+     *       æµ‹è¯•å¤šè¿›ç¨‹ç‰ˆæœ¬ä¸­å½“è§£é”åå‘ç°å…¶ä»–è¿›ç¨‹rotateäº†æ—¥å¿—ï¼Œæœ‰ä¸¤ç§æ€è·¯
+     *       1.ç»§ç»­åŠ é”ï¼Œè¿”å›OKï¼Œç­‰è‡ªå·±å†™å®Œä¹‹åè§£é”
+     *       2.ç›´æ¥è§£é”ï¼Œè¿”å›NONEEDï¼Œç„¶åå†™å…¥  
+     *       ç»“è®ºç¬¬ä¸€ç§æ¦‚ç‡ä¸Šè¾ƒå¥½
      */
     /*
     MSD_BOOT_SUCCESS("the programe start");
@@ -813,7 +813,7 @@ int main()
             int j=0;
             for(j=0; j < 1; j++)
             {
-                MSD_FATAL_LOG("%s", "chil"); //Ò»ĞĞÊÇ60¸ö×Ö½Ú
+                MSD_FATAL_LOG("%s", "chil"); //ä¸€è¡Œæ˜¯60ä¸ªå­—èŠ‚
                 //MSD_FATAL_LOG("%s", "chil");
             }
             exit(0);
@@ -829,7 +829,7 @@ int main()
         }
     }
 
-    //¸¸½ø³ÌµÈ´ı×Ó½ø³ÌÍË³ö
+    //çˆ¶è¿›ç¨‹ç­‰å¾…å­è¿›ç¨‹é€€å‡º
     int status;
     for(i=0; i<child_cnt; i++)
     {
@@ -844,18 +844,18 @@ int main()
         perror("ls error");
     }
     */
-    /**************²âÊÔrotateÔÚ¶àÏß³ÌÄ£Ê½ÏÂµÄÇĞ»»ÎÉÂÒÎÊÌâ**************/ 
+    /**************æµ‹è¯•rotateåœ¨å¤šçº¿ç¨‹æ¨¡å¼ä¸‹çš„åˆ‡æ¢ç´Šä¹±é—®é¢˜**************/ 
     /*
-     * ÓÃÀı1,2,3,4: ºÍµÚÒ»¸ö½ø³ÌµÄÓÃÀıÏàÍ¬£¬»»³ÉÏß³Ì
-     * ½áÂÛ£ºÔÚ¼«¶ËÇé¿öÏÂÃæ£¬Ò²²»ÄÜÍêÈ«±£Ö¤Ã¿·İÈÕÖ¾´óĞ¡£¬µ«ÊÇ»ù±¾ÄÜ¹»ÎÈ¶¨¡£ÈÕÖ¾ÊıÁ¿´óĞ¡
-     *       ¿ÉÒÔÎÈ¶¨±£Ö¤
+     * ç”¨ä¾‹1,2,3,4: å’Œç¬¬ä¸€ä¸ªè¿›ç¨‹çš„ç”¨ä¾‹ç›¸åŒï¼Œæ¢æˆçº¿ç¨‹
+     * ç»“è®ºï¼šåœ¨æç«¯æƒ…å†µä¸‹é¢ï¼Œä¹Ÿä¸èƒ½å®Œå…¨ä¿è¯æ¯ä»½æ—¥å¿—å¤§å°ï¼Œä½†æ˜¯åŸºæœ¬èƒ½å¤Ÿç¨³å®šã€‚æ—¥å¿—æ•°é‡å¤§å°
+     *       å¯ä»¥ç¨³å®šä¿è¯
      */
     MSD_BOOT_SUCCESS("the programe start");
     msd_log_init("./logs","test.log", MSD_LOG_LEVEL_ALL, 1<<30, 9, 0);    
     int i;
     int child_cnt = 1000;
     //int child_cnt = 40;    
-    pthread_t thread[child_cnt];               /*±£´æÏß³ÌºÅ*/
+    pthread_t thread[child_cnt];               /*ä¿å­˜çº¿ç¨‹å·*/
 
     for(i=0; i<child_cnt; i++)
     {

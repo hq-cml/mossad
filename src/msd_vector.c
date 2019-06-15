@@ -8,24 +8,24 @@
  *    Filename :  Msd_vector.c
  * 
  * Description :  Msd_vector, a vector based on array. Support any type.
- *                ÔÚÒ»ÕûÆ¬(size*slots)Á¬ÐøµÄÄÚ´æÖÐ£¬Ä£Äâ³öÊý×éµÄÐÐÎª¡£
+ *                åœ¨ä¸€æ•´ç‰‡(size*slots)è¿žç»­çš„å†…å­˜ä¸­ï¼Œæ¨¡æ‹Ÿå‡ºæ•°ç»„çš„è¡Œä¸ºã€‚
  * 
  *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
- *    Modified :  È¥³ýÁË´æÔÚbugµÄiter
+ *    Modified :  åŽ»é™¤äº†å­˜åœ¨bugçš„iter
  *
  **/
 
 #include "msd_core.h"
 
 /**
- * ¹¦ÄÜ: init vector
- * ²ÎÊý: @vec, @slots, @size
- * ÃèÊö:
- *      1. ÔÚÒ»ÕûÆ¬Á¬ÐøµÄÄÚ´æÖÐ£¬Ä£Äâ³öÊý×éµÄÐÐÎª
- * ·µ»Ø: ³É¹¦ 0£¬ Ê§°Ü£¬-x
+ * åŠŸèƒ½: init vector
+ * å‚æ•°: @vec, @slots, @size
+ * æè¿°:
+ *      1. åœ¨ä¸€æ•´ç‰‡è¿žç»­çš„å†…å­˜ä¸­ï¼Œæ¨¡æ‹Ÿå‡ºæ•°ç»„çš„è¡Œä¸º
+ * è¿”å›ž: æˆåŠŸ 0ï¼Œ å¤±è´¥ï¼Œ-x
  **/ 
 static int msd_vector_init(msd_vector_t *vec, unsigned int slots, unsigned int size) 
 {
@@ -47,12 +47,12 @@ static int msd_vector_init(msd_vector_t *vec, unsigned int slots, unsigned int s
 }
 
 /**
- * ¹¦ÄÜ: Create a vector, and init it
- * ²ÎÊý: @slots, vectorÔªËØ¸öÊý
- *       @size, Ã¿¸öÔªËØµÄ´óÐ¡
- * ÃèÊö:
+ * åŠŸèƒ½: Create a vector, and init it
+ * å‚æ•°: @slots, vectorå…ƒç´ ä¸ªæ•°
+ *       @size, æ¯ä¸ªå…ƒç´ çš„å¤§å°
+ * æè¿°:
  *      1. 
- * ·µ»Ø: ³É¹¦£¬vector½á¹¹µØÖ·£¬Ê§°Ü£¬NULL
+ * è¿”å›ž: æˆåŠŸï¼Œvectorç»“æž„åœ°å€ï¼Œå¤±è´¥ï¼ŒNULL
  **/
 msd_vector_t *msd_vector_new(unsigned int slots, unsigned int size) 
 {
@@ -70,10 +70,10 @@ msd_vector_t *msd_vector_new(unsigned int slots, unsigned int size)
 }
 
 /**
- * ¹¦ÄÜ: destroy the vector
- * ²ÎÊý: @vec
- * ÃèÊö:
- *      1. ½öÊÍ·Ådata£¬vec±¾Éí½á¹¹²»ÊÍ·Å
+ * åŠŸèƒ½: destroy the vector
+ * å‚æ•°: @vec
+ * æè¿°:
+ *      1. ä»…é‡Šæ”¾dataï¼Œvecæœ¬èº«ç»“æž„ä¸é‡Šæ”¾
  **/
 static void msd_vector_destroy(msd_vector_t *vec) 
 {
@@ -87,10 +87,10 @@ static void msd_vector_destroy(msd_vector_t *vec)
 }
 
 /**
- * ¹¦ÄÜ: destroy the vector
- * ²ÎÊý: @vec
- * ÃèÊö:
- *      1. ÊÍ·Ådata£¬È»ºóÊÍ·Åvec±¾Éí
+ * åŠŸèƒ½: destroy the vector
+ * å‚æ•°: @vec
+ * æè¿°:
+ *      1. é‡Šæ”¾dataï¼Œç„¶åŽé‡Šæ”¾vecæœ¬èº«
  **/
 void msd_vector_free(msd_vector_t *vec) 
 {
@@ -99,13 +99,13 @@ void msd_vector_free(msd_vector_t *vec)
 }
 
 /**
- * ¹¦ÄÜ: ¸ø³öÒ»¸öÔªËØµÄµØÖ·£¬»ñµÃ´ËÔªËØÔÚvectorÖÐµÄË÷Òý
- * ²ÎÊý: @vec, @elemÔªËØµØÖ·
- * ·µ»Ø: ³É¹¦£¬Ë÷Òý£¬Ê§°Ü£¬-1
+ * åŠŸèƒ½: ç»™å‡ºä¸€ä¸ªå…ƒç´ çš„åœ°å€ï¼ŒèŽ·å¾—æ­¤å…ƒç´ åœ¨vectorä¸­çš„ç´¢å¼•
+ * å‚æ•°: @vec, @elemå…ƒç´ åœ°å€
+ * è¿”å›ž: æˆåŠŸï¼Œç´¢å¼•ï¼Œå¤±è´¥ï¼Œ-1
  **/
 uint32_t msd_vector_idx(msd_vector_t *vec, void *elem)
 {
-    uint8_t   *p, *q;    //ÄÚ´æ°´×Ö½Ú±àÖ·
+    uint8_t   *p, *q;    //å†…å­˜æŒ‰å­—èŠ‚ç¼–å€
 #if __WORDSIZE == 32
     uint32_t   off, idx;
 #else
@@ -137,11 +137,11 @@ uint32_t msd_vector_idx(msd_vector_t *vec, void *elem)
 }
 
 /**
- * ¹¦ÄÜ: double the number of the slots available to a vector
- * ²ÎÊý: @vec
- * ÃèÊö:
- *      1. realloc£¬²»ÐèÒªÊÍ·ÅÔ­À´µÄµØÖ·
- * ·µ»Ø: ³É¹¦ 0 Ê§°Ü -x
+ * åŠŸèƒ½: double the number of the slots available to a vector
+ * å‚æ•°: @vec
+ * æè¿°:
+ *      1. reallocï¼Œä¸éœ€è¦é‡Šæ”¾åŽŸæ¥çš„åœ°å€
+ * è¿”å›ž: æˆåŠŸ 0 å¤±è´¥ -x
  **/ 
 static int msd_vector_resize(msd_vector_t *vec) 
 {
@@ -158,13 +158,13 @@ static int msd_vector_resize(msd_vector_t *vec)
 }
 
 /**
- * ¹¦ÄÜ: vector set at
- * ²ÎÊý: @vec, @index
- *       @data, ´ý²åÈëÔªËØµØÖ·
- * ×¢Òâ:
- *       ±¾º¯Êý¶ÔcountµÄ´¦ÀíÊÇÓÐ¿ÉÄÜ´æÔÚÎÊÌâµÄ£¬set_atÓÐ¿ÉÄÜÊÇÔÚÇå¿Õ!
- *       ËùÒÔVectorÖÐµÄcountÖ»ÄÜÊÇÒ»¸ö²Î¿¼Öµ£¬ËûÊÇ×îºóÒ»¸öÓÐÐ§ÔªËØºóÃæµÄË÷Òý
- * ·µ»Ø: ³É¹¦ 0 Ê§°Ü -x
+ * åŠŸèƒ½: vector set at
+ * å‚æ•°: @vec, @index
+ *       @data, å¾…æ’å…¥å…ƒç´ åœ°å€
+ * æ³¨æ„:
+ *       æœ¬å‡½æ•°å¯¹countçš„å¤„ç†æ˜¯æœ‰å¯èƒ½å­˜åœ¨é—®é¢˜çš„ï¼Œset_atæœ‰å¯èƒ½æ˜¯åœ¨æ¸…ç©º!
+ *       æ‰€ä»¥Vectorä¸­çš„countåªèƒ½æ˜¯ä¸€ä¸ªå‚è€ƒå€¼ï¼Œä»–æ˜¯æœ€åŽä¸€ä¸ªæœ‰æ•ˆå…ƒç´ åŽé¢çš„ç´¢å¼•
+ * è¿”å›ž: æˆåŠŸ 0 å¤±è´¥ -x
  **/
 int msd_vector_set_at(msd_vector_t *vec, unsigned int index, void *elem) 
 {
@@ -186,12 +186,12 @@ int msd_vector_set_at(msd_vector_t *vec, unsigned int index, void *elem)
 } 
  
 /**
- * ¹¦ÄÜ: ÔÚvectorÎ²²¿Ìí¼ÓÒ»¸öÔªËØ
- * ²ÎÊý: @vec
- *       @elem£¬´ý²åÈëÔªËØµØÖ·
- * ÃèÊö:
- *      1. vectorË÷Òý´Ó0¿ªÊ¼
- * ·µ»Ø: ³É¹¦ 0 Ê§°Ü -x
+ * åŠŸèƒ½: åœ¨vectorå°¾éƒ¨æ·»åŠ ä¸€ä¸ªå…ƒç´ 
+ * å‚æ•°: @vec
+ *       @elemï¼Œå¾…æ’å…¥å…ƒç´ åœ°å€
+ * æè¿°:
+ *      1. vectorç´¢å¼•ä»Ž0å¼€å§‹
+ * è¿”å›ž: æˆåŠŸ 0 å¤±è´¥ -x
  **/  
 int msd_vector_push(msd_vector_t *vec, void *elem) 
 {
@@ -206,11 +206,11 @@ int msd_vector_push(msd_vector_t *vec, void *elem)
 }
 
  /**
-  * ¹¦ÄÜ: pop a element
-  * ²ÎÊý: @vec
-  * ÃèÊö:
-  *      1. Ë÷Òý´Ó0¿ªÊ¼£¬×¢Òâ±ß½çÌõ¼þ
-  * ·µ»Ø: ³É¹¦£¬elementµØÖ·£¬Ê§°Ü£¬NULL
+  * åŠŸèƒ½: pop a element
+  * å‚æ•°: @vec
+  * æè¿°:
+  *      1. ç´¢å¼•ä»Ž0å¼€å§‹ï¼Œæ³¨æ„è¾¹ç•Œæ¡ä»¶
+  * è¿”å›ž: æˆåŠŸï¼Œelementåœ°å€ï¼Œå¤±è´¥ï¼ŒNULL
   **/
 void *msd_vector_pop(msd_vector_t *vec)
 {
@@ -227,8 +227,8 @@ void *msd_vector_pop(msd_vector_t *vec)
 } 
 
 /**
- * ¹¦ÄÜ: get a value random
- * ²ÎÊý: @vec , @index
+ * åŠŸèƒ½: get a value random
+ * å‚æ•°: @vec , @index
  **/
 void *msd_vector_get_at(msd_vector_t *vec, unsigned int index) 
 {
@@ -239,9 +239,9 @@ void *msd_vector_get_at(msd_vector_t *vec, unsigned int index)
 }
 
 /**
- * ¹¦ÄÜ: »ñµÃÕ»¶¥ÔªËØ£¬µ«ÊÇ²»pop
- * ²ÎÊý: @vec
- * ·µ»Ø: ³É¹¦£¬elementµØÖ·£¬Ê§°Ü£¬NULL
+ * åŠŸèƒ½: èŽ·å¾—æ ˆé¡¶å…ƒç´ ï¼Œä½†æ˜¯ä¸pop
+ * å‚æ•°: @vec
+ * è¿”å›ž: æˆåŠŸï¼Œelementåœ°å€ï¼Œå¤±è´¥ï¼ŒNULL
  **/
 void *msd_vector_top(msd_vector_t *vec)
 {
@@ -249,9 +249,9 @@ void *msd_vector_top(msd_vector_t *vec)
 }
 
 /**
- * ¹¦ÄÜ: °´ÕÕ¸ø¶¨±È½Ïº¯Êý£¬¶ÔÊý×éµÄÔªËØ½øÐÐÉýÐòÅÅÐò
- * ²ÎÊý: @vec, @cmp
- * ÃèÊö:
+ * åŠŸèƒ½: æŒ‰ç…§ç»™å®šæ¯”è¾ƒå‡½æ•°ï¼Œå¯¹æ•°ç»„çš„å…ƒç´ è¿›è¡Œå‡åºæŽ’åº
+ * å‚æ•°: @vec, @cmp
+ * æè¿°:
  *       void qsort(void *base, size_t nmemb, size_t size, int(*compar)(const void *, const void *));
  *
  * DESCRIPTION:
@@ -259,7 +259,7 @@ void *msd_vector_top(msd_vector_t *vec)
  *       The contents of the array are sorted in ascending order according to a comparison function pointed to by compar, which is called with two arguments that point to the objects being compared.
  *       The  comparison function must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.  If two mem-
  *       bers compare as equal, their order in the sorted array is undefined.
- * ·µ»Ø: ³É¹¦£¬0£¬Ê§°Ü£¬-1
+ * è¿”å›ž: æˆåŠŸï¼Œ0ï¼Œå¤±è´¥ï¼Œ-1
  **/
 int msd_vector_sort(msd_vector_t *vec, msd_vector_cmp_t cmp)
 {
@@ -271,12 +271,12 @@ int msd_vector_sort(msd_vector_t *vec, msd_vector_cmp_t cmp)
 }
 
 /**
- * ¹¦ÄÜ: ¶ÔÊý×éµÄÃ¿¸öÔªËØ£¬Ö´ÐÐÌØ¶¨²Ù×÷
- * ²ÎÊý: @vec, @func, 
- *       @data£¬º¯ÊýfuncµÄÍâ´ø²ÎÊý
- * ÃèÊö:
- *      1. Èç¹ûÄ³¸öÔªËØÖ´ÐÐÊ§°Ü£¬ÔòÖ±½Ó·µ»Ø´íÎó
- * ·µ»Ø: ³É¹¦£¬0£¬Ê§°Ü£¬NULL
+ * åŠŸèƒ½: å¯¹æ•°ç»„çš„æ¯ä¸ªå…ƒç´ ï¼Œæ‰§è¡Œç‰¹å®šæ“ä½œ
+ * å‚æ•°: @vec, @func, 
+ *       @dataï¼Œå‡½æ•°funcçš„å¤–å¸¦å‚æ•°
+ * æè¿°:
+ *      1. å¦‚æžœæŸä¸ªå…ƒç´ æ‰§è¡Œå¤±è´¥ï¼Œåˆ™ç›´æŽ¥è¿”å›žé”™è¯¯
+ * è¿”å›ž: æˆåŠŸï¼Œ0ï¼Œå¤±è´¥ï¼ŒNULL
  **/
 int msd_vector_each(msd_vector_t *vec, msd_vector_each_t func, void *data)
 {
@@ -344,7 +344,7 @@ int main(int argc, char **argv)
         msd_vector_push(vec, &t);
     }
 
-    //²åÈëÖØ¸´Öµ
+    //æ’å…¥é‡å¤å€¼
     t.a = 3;t.b = 97;
     msd_vector_push(vec, &t);
     msd_vector_push(vec, &t);
@@ -357,7 +357,7 @@ int main(int argc, char **argv)
      }
      */
 
-    //Ö¸¶¨Ë÷set
+    //æŒ‡å®šç´¢set
     t.a = 3;t.b = 97;
     msd_vector_set_at(vec, 5, &t);   
     
@@ -365,7 +365,7 @@ int main(int argc, char **argv)
     printf("slots:%d\n", vec->slots);
     printf("count:%d\n\n\n", vec->count);
 
-    //ÅÅÐò
+    //æŽ’åº
     msd_vector_sort(vec, my_cmp);
     msd_vector_each(vec, my_print, vec);
     printf("slots:%d\n", vec->slots);

@@ -17,8 +17,8 @@
 #include "msd_core.h"
 
 /**
- * ¹¦ÄÜ: ¸ñÊ½»¯err»º³åÇø£¬²»¶¨²Î
- * ²ÎÊı: @err, @fmt
+ * åŠŸèƒ½: æ ¼å¼åŒ–errç¼“å†²åŒºï¼Œä¸å®šå‚
+ * å‚æ•°: @err, @fmt
  **/
 static void msd_anet_set_error(char *err, const char *fmt, ...) 
 {
@@ -34,10 +34,10 @@ static void msd_anet_set_error(char *err, const char *fmt, ...)
 }
 
 /**
- * ¹¦ÄÜ: ´´½¨TCP socket
- * ²ÎÊı: @err, ´íÎóÊä³öµÄ»º³å
- *       @domain, Ğ­ÒéÓò
- * ·µ»Ø: ³É¹¦£¬ĞÂÉú³ÉµÄfd£¬Ê§°Ü£¬-x
+ * åŠŸèƒ½: åˆ›å»ºTCP socket
+ * å‚æ•°: @err, é”™è¯¯è¾“å‡ºçš„ç¼“å†²
+ *       @domain, åè®®åŸŸ
+ * è¿”å›: æˆåŠŸï¼Œæ–°ç”Ÿæˆçš„fdï¼Œå¤±è´¥ï¼Œ-x
  **/
 static int msd_anet_create_socket(char *err, int domain) 
 {
@@ -49,14 +49,14 @@ static int msd_anet_create_socket(char *err, int domain)
         return MSD_ERR;
     }
 
-    /* ÔÊĞíÌ×½Ó¿ÚºÍÒ»¸öÒÑÔÚÊ¹ÓÃÖĞµÄµØÖ·À¦°ó */
+    /* å…è®¸å¥—æ¥å£å’Œä¸€ä¸ªå·²åœ¨ä½¿ç”¨ä¸­çš„åœ°å€æ†ç»‘ */
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) 
     {
         msd_anet_set_error(err, "Setsockopt SO_REUSEADDR: %s", strerror(errno));
         return MSD_ERR;
     }
     
-    /* ÉèÖÃCLOEXEC£¬µ±execÊ±ÊÍ·Å´Ëfd */
+    /* è®¾ç½®CLOEXECï¼Œå½“execæ—¶é‡Šæ”¾æ­¤fd */
     if ((flags = fcntl(s, F_GETFD)) < 0)
     {
         msd_anet_set_error(err, "Get fcntl failed: %s", strerror(errno));
@@ -75,9 +75,9 @@ static int msd_anet_create_socket(char *err, int domain)
 }
 
 /**
- * ¹¦ÄÜ: ÏÈbindºólisten
- * ²ÎÊı: @err,@sockfd,@sa,µØÖ·½á¹¹,@len,sa³¤¶È
- * ·µ»Ø: ³É¹¦£¬Ê§°Ü£¬
+ * åŠŸèƒ½: å…ˆbindålisten
+ * å‚æ•°: @err,@sockfd,@sa,åœ°å€ç»“æ„,@len,saé•¿åº¦
+ * è¿”å›: æˆåŠŸï¼Œå¤±è´¥ï¼Œ
  **/
 static int msd_anet_bind_listen(char *err, int sockfd, struct sockaddr *sa, socklen_t len) 
 {
@@ -102,21 +102,21 @@ static int msd_anet_bind_listen(char *err, int sockfd, struct sockaddr *sa, sock
 }
 
 /**
- * ¹¦ÄÜ: Set the socket nonblocking.
- * ²ÎÊı: @err, @fd
- * ÃèÊö:
+ * åŠŸèƒ½: Set the socket nonblocking.
+ * å‚æ•°: @err, @fd
+ * æè¿°:
  *      1. Note that fcntl(2) for F_GETFL and F_SETFL can't be interrupted by a signal.
- *      2. ¶ÔÓÚ·Ç×èÈûµÄfd½øĞĞaccept£¬»áÁ¢¿ÌÍË³ö£¬µ«ÊÇÓÉÓÚÒ»°ã·şÎñÆ÷¶¼»áÀûÓÃI/O¸´ÓÃ¼¼Êõ
- *      3. ¶ÔÓÚacceptµÄ¼ì²âµÄfd£¬ÎŞÂÛÆäÊÇ·ñ×èÈû£¬Ğ§¹ûÃ»ÓĞ²îÒì£¬µ«ÎªÁË·ÀÖ¹Òì³£Çé¿ö£¬±ÈÈç
- *         select·µ»ØÁË£¬ÔÚµ÷ÓÃacceptÖ®Ç°£¬Èç¹ûÁ¬½Ó±»Òì³£ÖÕÖ¹£¬ÕâÊ± accept µ÷ÓÃ¿ÉÄÜ»áÓÉ
- *         ÓÚÃ»ÓĞÒÑÍê³ÉµÄÁ¬½Ó¶ø×èÈû£¬Ö±µ½ÓĞĞÂÁ¬½Ó½¨Á¢¡£
- *      4. ¶ÔÓÚaccept·µ»ØµÄfd£¬ÔòÓ¦¸ÃÉèÖÃÎª·Ç×èÈû£¬·ÀÖ¹´¦ÀíÏß³Ì×èÈûÓÚÄ³¸öI/O²Ù×÷£¬¼´Ê¹
- *         Ê¹ÓÃÁËI/O¸´ÓÃ£¬Ò²ĞèÒª·Ç×èÈû¡£ÒòÎª£¬I/O¸´ÓÃÖ»ÄÜËµÃ÷ socket ¿É¶Á»òÕß¿ÉĞ´£¬²»ÄÜ
- *         ËµÃ÷ÄÜ¶ÁÈë»òÕßÄÜĞ´³ö¶àÉÙÊı¾İ¡£±ÈÈç£¬socket µÄĞ´»º³åÇøÓĞ10¸ö×Ö½ÚµÄ¿ÕÏĞ¿Õ¼ä£¬
- *         ÕâÊ±¼àÊÓµÄ select ·µ»Ø£¬È»ºóÔÚ¸Ã socket ÉÏ½øĞĞĞ´²Ù×÷¡£µ«ÊÇÈç¹ûÒªĞ´Èë100×Ö½Ú£¬
- *         Èç¹û socket Ã»ÓĞÉèÖÃ·Ç×èÈû£¬µ÷ÓÃ write ¾Í»á×èÈûÔÚÄÇÀï¡£ÔÚ¶à¸ö socket µÄÇé¿öÏÂ
- *         £¬¶ÁĞ´Ò»¸ösocket Ê±×èÈû£¬»áÓ°Ïìµ½ÆäËûµÄ socket ¡£
- * ·µ»Ø: ³É¹¦£¬0£¬Ê§°Ü£¬-x
+ *      2. å¯¹äºéé˜»å¡çš„fdè¿›è¡Œacceptï¼Œä¼šç«‹åˆ»é€€å‡ºï¼Œä½†æ˜¯ç”±äºä¸€èˆ¬æœåŠ¡å™¨éƒ½ä¼šåˆ©ç”¨I/Oå¤ç”¨æŠ€æœ¯
+ *      3. å¯¹äºacceptçš„æ£€æµ‹çš„fdï¼Œæ— è®ºå…¶æ˜¯å¦é˜»å¡ï¼Œæ•ˆæœæ²¡æœ‰å·®å¼‚ï¼Œä½†ä¸ºäº†é˜²æ­¢å¼‚å¸¸æƒ…å†µï¼Œæ¯”å¦‚
+ *         selectè¿”å›äº†ï¼Œåœ¨è°ƒç”¨acceptä¹‹å‰ï¼Œå¦‚æœè¿æ¥è¢«å¼‚å¸¸ç»ˆæ­¢ï¼Œè¿™æ—¶ accept è°ƒç”¨å¯èƒ½ä¼šç”±
+ *         äºæ²¡æœ‰å·²å®Œæˆçš„è¿æ¥è€Œé˜»å¡ï¼Œç›´åˆ°æœ‰æ–°è¿æ¥å»ºç«‹ã€‚
+ *      4. å¯¹äºacceptè¿”å›çš„fdï¼Œåˆ™åº”è¯¥è®¾ç½®ä¸ºéé˜»å¡ï¼Œé˜²æ­¢å¤„ç†çº¿ç¨‹é˜»å¡äºæŸä¸ªI/Oæ“ä½œï¼Œå³ä½¿
+ *         ä½¿ç”¨äº†I/Oå¤ç”¨ï¼Œä¹Ÿéœ€è¦éé˜»å¡ã€‚å› ä¸ºï¼ŒI/Oå¤ç”¨åªèƒ½è¯´æ˜ socket å¯è¯»æˆ–è€…å¯å†™ï¼Œä¸èƒ½
+ *         è¯´æ˜èƒ½è¯»å…¥æˆ–è€…èƒ½å†™å‡ºå¤šå°‘æ•°æ®ã€‚æ¯”å¦‚ï¼Œsocket çš„å†™ç¼“å†²åŒºæœ‰10ä¸ªå­—èŠ‚çš„ç©ºé—²ç©ºé—´ï¼Œ
+ *         è¿™æ—¶ç›‘è§†çš„ select è¿”å›ï¼Œç„¶ååœ¨è¯¥ socket ä¸Šè¿›è¡Œå†™æ“ä½œã€‚ä½†æ˜¯å¦‚æœè¦å†™å…¥100å­—èŠ‚ï¼Œ
+ *         å¦‚æœ socket æ²¡æœ‰è®¾ç½®éé˜»å¡ï¼Œè°ƒç”¨ write å°±ä¼šé˜»å¡åœ¨é‚£é‡Œã€‚åœ¨å¤šä¸ª socket çš„æƒ…å†µä¸‹
+ *         ï¼Œè¯»å†™ä¸€ä¸ªsocket æ—¶é˜»å¡ï¼Œä¼šå½±å“åˆ°å…¶ä»–çš„ socket ã€‚
+ * è¿”å›: æˆåŠŸï¼Œ0ï¼Œå¤±è´¥ï¼Œ-x
  **/
 int msd_anet_nonblock(char *err, int fd) 
 {
@@ -137,12 +137,12 @@ int msd_anet_nonblock(char *err, int fd)
 }
 
 /**
- * ¹¦ÄÜ: ÉèÖÃno_delay
- * ²ÎÊı: @err, @fd
- * ÃèÊö:
- *      1. ¹Ø±ÕNagleËã·¨£¬¼´²»µÈÁãËé×é°ü£¬¶ÔÍøÂçĞÔÄÜÓ°Ïì½Ï´ó
- *         ¹Ø±ÕÁËNagleËã·¨£¬»áµ¼ÖÂTCPËéÆ¬Ôö¶à£¬Ğ§ÂÊ¿ÉÄÜ»á½µµÍ£»µ«ÊÇ½»»¥ĞÔ»á¼«´óÌáÉı£¬ÊÊÓÃÓÚ¸ß²¢·¢³¡¾°
- * ·µ»Ø: ³É¹¦£¬0£¬Ê§°Ü£¬-x
+ * åŠŸèƒ½: è®¾ç½®no_delay
+ * å‚æ•°: @err, @fd
+ * æè¿°:
+ *      1. å…³é—­Nagleç®—æ³•ï¼Œå³ä¸ç­‰é›¶ç¢ç»„åŒ…ï¼Œå¯¹ç½‘ç»œæ€§èƒ½å½±å“è¾ƒå¤§
+ *         å…³é—­äº†Nagleç®—æ³•ï¼Œä¼šå¯¼è‡´TCPç¢ç‰‡å¢å¤šï¼Œæ•ˆç‡å¯èƒ½ä¼šé™ä½ï¼›ä½†æ˜¯äº¤äº’æ€§ä¼šæå¤§æå‡ï¼Œé€‚ç”¨äºé«˜å¹¶å‘åœºæ™¯
+ * è¿”å›: æˆåŠŸï¼Œ0ï¼Œå¤±è´¥ï¼Œ-x
  **/
 int msd_anet_tcp_nodelay(char *err, int fd) 
 {
@@ -157,12 +157,12 @@ int msd_anet_tcp_nodelay(char *err, int fd)
 }
 
 /**
- * ¹¦ÄÜ: ÉèÖÃ»º³åÇø´óĞ¡
- * ²ÎÊı: @err, @fd, @send_buffsize, @recv_buffsize
- * ÃèÊö:
- *      1. ²»Ö§³Ö½«»º³åÇøÉèÖÃÎª0
- *      2. ¶ÔÓÚÕìÌıfd£¬Ã»±ØÒªÉèÖÃ»º³åÇø£»¶ÔÓÚ¸÷ÒÑ´æÔÚµÄÁ¬½Ófd£¬¿ÉÒÔÉèÖÃ»º³åÇø
- * ·µ»Ø: ³É¹¦£¬0,Ê§°Ü£¬-x
+ * åŠŸèƒ½: è®¾ç½®ç¼“å†²åŒºå¤§å°
+ * å‚æ•°: @err, @fd, @send_buffsize, @recv_buffsize
+ * æè¿°:
+ *      1. ä¸æ”¯æŒå°†ç¼“å†²åŒºè®¾ç½®ä¸º0
+ *      2. å¯¹äºä¾¦å¬fdï¼Œæ²¡å¿…è¦è®¾ç½®ç¼“å†²åŒºï¼›å¯¹äºå„å·²å­˜åœ¨çš„è¿æ¥fdï¼Œå¯ä»¥è®¾ç½®ç¼“å†²åŒº
+ * è¿”å›: æˆåŠŸï¼Œ0,å¤±è´¥ï¼Œ-x
  **/
 int msd_anet_set_buffer(char *err, int fd, int send_buffsize, int recv_buffsize) 
 {
@@ -187,11 +187,11 @@ int msd_anet_set_buffer(char *err, int fd, int send_buffsize, int recv_buffsize)
 }
 
 /**
- * ¹¦ÄÜ: ÉèÖÃkeepalive
- * ²ÎÊı: @err, @fd
- * ÃèÊö:
+ * åŠŸèƒ½: è®¾ç½®keepalive
+ * å‚æ•°: @err, @fd
+ * æè¿°:
  *      1. 
- * ·µ»Ø: ³É¹¦£¬Ê§°Ü£¬
+ * è¿”å›: æˆåŠŸï¼Œå¤±è´¥ï¼Œ
  **/
 int msd_anet_tcp_keepalive(char *err, int fd) 
 {
@@ -205,18 +205,18 @@ int msd_anet_tcp_keepalive(char *err, int fd)
 }
 
 /**
- * ¹¦ÄÜ: ½¨Á¢TCP·şÎñÆ÷: create->bind->listen
- * ²ÎÊı: @err, @addr, @port
- * ÃèÊö:
- *      1. Èç¹ûaddrÎª¿Õ£¬Ôò°ó¶¨È«²¿µØÖ·
- * ·µ»Ø: ³É¹¦£¬sockfd, Ê§°Ü£¬-x
+ * åŠŸèƒ½: å»ºç«‹TCPæœåŠ¡å™¨: create->bind->listen
+ * å‚æ•°: @err, @addr, @port
+ * æè¿°:
+ *      1. å¦‚æœaddrä¸ºç©ºï¼Œåˆ™ç»‘å®šå…¨éƒ¨åœ°å€
+ * è¿”å›: æˆåŠŸï¼Œsockfd, å¤±è´¥ï¼Œ-x
  **/
 int msd_anet_tcp_server(char *err, char *addr, int port) 
 {
     int sockfd;
     struct sockaddr_in sa;
     
-    /* ´´½¨AF_INET */
+    /* åˆ›å»ºAF_INET */
     if ((sockfd = msd_anet_create_socket(err, AF_INET)) == MSD_ERR) 
     {
         return MSD_ERR;
@@ -225,9 +225,9 @@ int msd_anet_tcp_server(char *err, char *addr, int port)
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
     sa.sin_port = htons(port);
-    sa.sin_addr.s_addr = htonl(INADDR_ANY); /* °ó¶¨ËùÓĞÍø¿¨ */
+    sa.sin_addr.s_addr = htonl(INADDR_ANY); /* ç»‘å®šæ‰€æœ‰ç½‘å¡ */
     
-    /* Èç¹ûaddr·Ç¿Õ£¬ÔòbindÖ¸¶¨µÄipµØÖ· */
+    /* å¦‚æœaddréç©ºï¼Œåˆ™bindæŒ‡å®šçš„ipåœ°å€ */
     if (addr && inet_aton(addr, &sa.sin_addr) == 0) 
     {
         msd_anet_set_error(err, "invalid bind address");
@@ -243,12 +243,12 @@ int msd_anet_tcp_server(char *err, char *addr, int port)
 }
 
 /**
- * ¹¦ÄÜ: Í¨ÓÃaccept
- * ²ÎÊı: @err, sockfd, sa, len
- * ÃèÊö:
- *      1. sa/len--Öµ/½á¹û²ÎÊı 
- *      2. ×èÈû¹ı³ÌÖĞ£¬Èô±»ĞÅºÅÖĞ¶Ï£¬Ôò¼ÌĞø
- * ·µ»Ø: ³É¹¦£¬ĞÂµÄfd£¬Ê§°Ü£¬-x
+ * åŠŸèƒ½: é€šç”¨accept
+ * å‚æ•°: @err, sockfd, sa, len
+ * æè¿°:
+ *      1. sa/len--å€¼/ç»“æœå‚æ•° 
+ *      2. é˜»å¡è¿‡ç¨‹ä¸­ï¼Œè‹¥è¢«ä¿¡å·ä¸­æ–­ï¼Œåˆ™ç»§ç»­
+ * è¿”å›: æˆåŠŸï¼Œæ–°çš„fdï¼Œå¤±è´¥ï¼Œ-x
  **/
 static int msd_anet_generic_accept(char *err, int sockfd, struct sockaddr *sa, socklen_t *len) 
 {
@@ -258,7 +258,7 @@ static int msd_anet_generic_accept(char *err, int sockfd, struct sockaddr *sa, s
         fd = accept(sockfd, sa, len);
         if (fd < 0) 
         {
-            /* ×èÈû¹ı³ÌÖĞ£¬Èô±»ĞÅºÅÖĞ¶Ï£¬Ôò¼ÌĞø */
+            /* é˜»å¡è¿‡ç¨‹ä¸­ï¼Œè‹¥è¢«ä¿¡å·ä¸­æ–­ï¼Œåˆ™ç»§ç»­ */
             if (errno == EINTR) 
             {
                 continue;
@@ -275,11 +275,11 @@ static int msd_anet_generic_accept(char *err, int sockfd, struct sockaddr *sa, s
 }
 
 /**
- * ¹¦ÄÜ: Tcp accept
- * ²ÎÊı: @err, sockfd, ip, port
- * ÃèÊö:
- *      1. ½«ipºÍport´æÈë²ÎÊıËùÖ¸¶¨µØÖ·
- * ·µ»Ø: ³É¹¦£¬ĞÂfd, Ê§°Ü£¬-x
+ * åŠŸèƒ½: Tcp accept
+ * å‚æ•°: @err, sockfd, ip, port
+ * æè¿°:
+ *      1. å°†ipå’Œportå­˜å…¥å‚æ•°æ‰€æŒ‡å®šåœ°å€
+ * è¿”å›: æˆåŠŸï¼Œæ–°fd, å¤±è´¥ï¼Œ-x
  **/
 int msd_anet_tcp_accept(char *err, int sockfd, char *ip, int *port) 
 {
@@ -304,12 +304,12 @@ int msd_anet_tcp_accept(char *err, int sockfd, char *ip, int *port)
 }
 
 /**
- * ¹¦ÄÜ: Ïòfd¶ÁÈ¡count¸ö×Ö½Ú£¬´æ´¢ÓÚbuf
- * ²ÎÊı: @
- * ÃèÊö:
- *      1. Èç¹ûÓöµ½EOF£¬»òÕß³ö´í£¬Ôò·µ»Ø
- *      2. Ò»Ö±¶ÁÈ¡£¬Ö±µ½¶Á¹»ÁËcount×Ö½Ú
- * ·µ»Ø: ³É¹¦£¬Ò»¹²¶ÁÈ¡µÄ×Ö·ûÊı£¬Ê§°Ü£¬-x
+ * åŠŸèƒ½: å‘fdè¯»å–countä¸ªå­—èŠ‚ï¼Œå­˜å‚¨äºbuf
+ * å‚æ•°: @
+ * æè¿°:
+ *      1. å¦‚æœé‡åˆ°EOFï¼Œæˆ–è€…å‡ºé”™ï¼Œåˆ™è¿”å›
+ *      2. ä¸€ç›´è¯»å–ï¼Œç›´åˆ°è¯»å¤Ÿäº†countå­—èŠ‚
+ * è¿”å›: æˆåŠŸï¼Œä¸€å…±è¯»å–çš„å­—ç¬¦æ•°ï¼Œå¤±è´¥ï¼Œ-x
  **/
 int msd_anet_read(int fd, char *buf, int count) 
 {
@@ -333,12 +333,12 @@ int msd_anet_read(int fd, char *buf, int count)
 }
 
 /**
- * ¹¦ÄÜ: ÏòfdĞ´Èëcount¸ö×Ö½Ú
- * ²ÎÊı: @
- * ÃèÊö:
- *      1. Èç¹ûÓöµ½´íÎó£¬ÔòÍË³ö
- *      2. Ò»Ö±Ğ´£¬Ö±µ½Ğ´ÂúÁËcount¸ö×Ö·û
- * ·µ»Ø: ³É¹¦£¬Ê§°Ü£¬
+ * åŠŸèƒ½: å‘fdå†™å…¥countä¸ªå­—èŠ‚
+ * å‚æ•°: @
+ * æè¿°:
+ *      1. å¦‚æœé‡åˆ°é”™è¯¯ï¼Œåˆ™é€€å‡º
+ *      2. ä¸€ç›´å†™ï¼Œç›´åˆ°å†™æ»¡äº†countä¸ªå­—ç¬¦
+ * è¿”å›: æˆåŠŸï¼Œå¤±è´¥ï¼Œ
  **/
 int msd_anet_write(int fd, char *buf, int count) 
 {
@@ -361,11 +361,11 @@ int msd_anet_write(int fd, char *buf, int count)
 }
 
 /**
- * ¹¦ÄÜ: resolve
- * ²ÎÊı: @err, host, ipbuf
- * ÃèÊö:
- *      1. ¶Ô²ÎÊıhost½øĞĞdns½âÎö£¬½«½á¹û´æÈëipbuf
- * ·µ»Ø: ³É¹¦£¬0, Ê§°Ü£¬-x
+ * åŠŸèƒ½: resolve
+ * å‚æ•°: @err, host, ipbuf
+ * æè¿°:
+ *      1. å¯¹å‚æ•°hostè¿›è¡Œdnsè§£æï¼Œå°†ç»“æœå­˜å…¥ipbuf
+ * è¿”å›: æˆåŠŸï¼Œ0, å¤±è´¥ï¼Œ-x
  **/
 int msd_anet_resolve(char *err, char *host, char *ipbuf) 
 {
@@ -387,9 +387,9 @@ int msd_anet_resolve(char *err, char *host, char *ipbuf)
 }
 
 /**
- * ¹¦ÄÜ: ¸ù¾İfd»ñÈ¡µ½¶Ô¶ËĞÅÏ¢£¬´æÈë²ÎÊıËùÖ¸¶¨µØÖ·
- * ²ÎÊı: @err, fd, ip, port
- * ·µ»Ø: ³É¹¦£¬Ê§°Ü£¬
+ * åŠŸèƒ½: æ ¹æ®fdè·å–åˆ°å¯¹ç«¯ä¿¡æ¯ï¼Œå­˜å…¥å‚æ•°æ‰€æŒ‡å®šåœ°å€
+ * å‚æ•°: @err, fd, ip, port
+ * è¿”å›: æˆåŠŸï¼Œå¤±è´¥ï¼Œ
  **/
 int msd_anet_peer_tostring(char *err, int fd, char *ip, int *port) 
 {
@@ -415,10 +415,10 @@ int msd_anet_peer_tostring(char *err, int fd, char *ip, int *port)
 }
 
 /**
- * ¹¦ÄÜ: Í¨ÓÃÁ¬½Ó
- * ²ÎÊı: @err, addr, port, flags
- * ËµÃ÷: Ä¬ÈÏÊÇ·Ç×èÈûµÄ
- * ·µ»Ø: ³É¹¦£¬ĞÂµÄfd£»Ê§°Ü£¬-x
+ * åŠŸèƒ½: é€šç”¨è¿æ¥
+ * å‚æ•°: @err, addr, port, flags
+ * è¯´æ˜: é»˜è®¤æ˜¯éé˜»å¡çš„
+ * è¿”å›: æˆåŠŸï¼Œæ–°çš„fdï¼›å¤±è´¥ï¼Œ-x
  **/
 static int msd_anet_tcp_generic_connect(char *err, char *addr, int port, int flags) 
 {
@@ -455,9 +455,9 @@ static int msd_anet_tcp_generic_connect(char *err, char *addr, int port, int fla
         }
     }
 
-    /* µ±ÒÔ·Ç×èÈûµÄ·½Ê½À´½øĞĞÁ¬½ÓµÄÊ±ºò£¬·µ»ØµÄ½á¹ûÈç¹ûÊÇ -1,Õâ²¢²»´ú±íÕâ´ÎÁ¬½Ó
-     * ·¢ÉúÁË´íÎó£¬Èç¹ûËüµÄ·µ»Ø½á¹ûÊÇ EINPROGRESS£¬ÄÇÃ´¾Í´ú±íÁ¬½Ó»¹ÔÚ½øĞĞÖĞ¡£ 
-     * ºóÃæ¿ÉÒÔÍ¨¹ıpoll»òÕßselectÀ´ÅĞ¶ÏsocketÊÇ·ñ¿ÉĞ´£¬Èç¹û¿ÉÒÔĞ´£¬ËµÃ÷Á¬½ÓÍê³ÉÁË
+    /* å½“ä»¥éé˜»å¡çš„æ–¹å¼æ¥è¿›è¡Œè¿æ¥çš„æ—¶å€™ï¼Œè¿”å›çš„ç»“æœå¦‚æœæ˜¯ -1,è¿™å¹¶ä¸ä»£è¡¨è¿™æ¬¡è¿æ¥
+     * å‘ç”Ÿäº†é”™è¯¯ï¼Œå¦‚æœå®ƒçš„è¿”å›ç»“æœæ˜¯ EINPROGRESSï¼Œé‚£ä¹ˆå°±ä»£è¡¨è¿æ¥è¿˜åœ¨è¿›è¡Œä¸­ã€‚ 
+     * åé¢å¯ä»¥é€šè¿‡pollæˆ–è€…selectæ¥åˆ¤æ–­socketæ˜¯å¦å¯å†™ï¼Œå¦‚æœå¯ä»¥å†™ï¼Œè¯´æ˜è¿æ¥å®Œæˆäº†
      **/
     if (connect(sockfd, (struct sockaddr*)&sa, sizeof(sa)) == -1) 
     {
@@ -473,7 +473,7 @@ static int msd_anet_tcp_generic_connect(char *err, char *addr, int port, int fla
 }
 
 /**
- * ¹¦ÄÜ: ×èÈûÁ¬½Ó
+ * åŠŸèƒ½: é˜»å¡è¿æ¥
  **/
 int msd_anet_tcp_connect(char *err, char *addr, int port) 
 {
@@ -481,15 +481,15 @@ int msd_anet_tcp_connect(char *err, char *addr, int port)
 }
 
 /**
- * ¹¦ÄÜ: ·Ç×èÈûÁ¬½Ó
- * ËµÃ÷£º
- *       TCP socket ±»ÉèÎª·Ç×èÈûºóµ÷ÓÃ connect £¬connectº¯Êı»áÁ¢¼´·µ»Ø EINPROCESS£¬µ« 
- *       TCP µÄ 3 ´ÎÎÕÊÖ¼ÌĞø½øĞĞ¡£Ö®ºó¿ÉÒÔÓÃ select ¼ì²é Á¬½ÓÊÇ·ñ½¨Á¢³É¹¦¡£
- *       ·Ç×èÈû connect ÓĞ3 ÖÖÓÃÍ¾£º
- *          1. ÔÚ3 ´ÎÎÕÊÖµÄÍ¬Ê±×öÒ»Ğ©ÆäËûµÄ´¦Àí¡£
- *          2. ¿ÉÒÔÍ¬Ê±½¨Á¢¶à¸öÁ¬½Ó¡£
- *¡¡¡¡¡¡¡¡¡¡3. ÔÚÀûÓÃ select µÈ´ıµÄÊ±ºò£¬¿ÉÒÔ¸ø select Éè¶¨Ò»¸öÊ±¼ä£¬
- *             ´Ó¶ø¿ÉÒÔËõ¶Ì connect µÄ³¬Ê±Ê±¼ä¡£
+ * åŠŸèƒ½: éé˜»å¡è¿æ¥
+ * è¯´æ˜ï¼š
+ *       TCP socket è¢«è®¾ä¸ºéé˜»å¡åè°ƒç”¨ connect ï¼Œconnectå‡½æ•°ä¼šç«‹å³è¿”å› EINPROCESSï¼Œä½† 
+ *       TCP çš„ 3 æ¬¡æ¡æ‰‹ç»§ç»­è¿›è¡Œã€‚ä¹‹åå¯ä»¥ç”¨ select æ£€æŸ¥ è¿æ¥æ˜¯å¦å»ºç«‹æˆåŠŸã€‚
+ *       éé˜»å¡ connect æœ‰3 ç§ç”¨é€”ï¼š
+ *          1. åœ¨3 æ¬¡æ¡æ‰‹çš„åŒæ—¶åšä¸€äº›å…¶ä»–çš„å¤„ç†ã€‚
+ *          2. å¯ä»¥åŒæ—¶å»ºç«‹å¤šä¸ªè¿æ¥ã€‚
+ *ã€€ã€€ã€€ã€€ã€€3. åœ¨åˆ©ç”¨ select ç­‰å¾…çš„æ—¶å€™ï¼Œå¯ä»¥ç»™ select è®¾å®šä¸€ä¸ªæ—¶é—´ï¼Œ
+ *             ä»è€Œå¯ä»¥ç¼©çŸ­ connect çš„è¶…æ—¶æ—¶é—´ã€‚
  **/
 int msd_anet_tcp_nonblock_connect(char *err, char *addr, int port) 
 {
@@ -523,11 +523,11 @@ int main(void)
     }
     
     msd_anet_tcp_nodelay(error, fd);
-    /* ¶ÔÓÚaccpetµÄ¶ÔÏó£¬Ò²ÓĞ±ØÒªÉèÖÃ·Ç×èÈû */
+    /* å¯¹äºaccpetçš„å¯¹è±¡ï¼Œä¹Ÿæœ‰å¿…è¦è®¾ç½®éé˜»å¡ */
     msd_anet_nonblock(error, fd);
     
     /*
-    //²âÊÔNONBLOCKºÍNODELAY
+    //æµ‹è¯•NONBLOCKå’ŒNODELAY
     msd_anet_nonblock(error, fd);
     msd_anet_tcp_nodelay(error, fd);
     if((sock = msd_anet_tcp_accept(error, fd, ip, &port)) != MSD_ERR)

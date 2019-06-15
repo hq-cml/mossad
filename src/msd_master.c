@@ -32,11 +32,11 @@ static void msd_master_recv_signal(msd_ae_event_loop *el, int fd,
 static void msd_master_shut_down();
 
 /**
- * ¹¦ÄÜ: Ö÷Ïß³Ì¹¤×÷
- * ²ÎÊı: 
- * ÃèÊö:
- *      1. client_vecµÄÔªËØÊÇconn_clientµÄÖ¸Õë!¶ø²»ÊÇconn_client±¾Éí
- * ·µ»Ø:³É¹¦:Ôò»áÒ»Ö±×èÈûÔÚae_mainÀïÃæ£¬²»·µ»Ø; Ê§°Ü:-x
+ * åŠŸèƒ½: ä¸»çº¿ç¨‹å·¥ä½œ
+ * å‚æ•°: 
+ * æè¿°:
+ *      1. client_vecçš„å…ƒç´ æ˜¯conn_clientçš„æŒ‡é’ˆ!è€Œä¸æ˜¯conn_clientæœ¬èº«
+ * è¿”å›:æˆåŠŸ:åˆ™ä¼šä¸€ç›´é˜»å¡åœ¨ae_mainé‡Œé¢ï¼Œä¸è¿”å›; å¤±è´¥:-x
  **/
 int msd_master_cycle() 
 {
@@ -75,9 +75,9 @@ int msd_master_cycle()
         return MSD_ERR;    
     }
     
-    /* ´´½¨·şÎñÆ÷ */
+    /* åˆ›å»ºæœåŠ¡å™¨ */
     listen_fd = msd_anet_tcp_server(error_buf, 
-        msd_conf_get_str_value(g_ins->conf, "host", NULL), /* NULL±íÊ¾bindËùÓĞÍø¿¨ */
+        msd_conf_get_str_value(g_ins->conf, "host", NULL), /* NULLè¡¨ç¤ºbindæ‰€æœ‰ç½‘å¡ */
         msd_conf_get_int_value(g_ins->conf, "port", 9527)
     );
     if (listen_fd == MSD_ERR) 
@@ -90,7 +90,7 @@ int msd_master_cycle()
 
     MSD_INFO_LOG("Create Server Success, listen_fd:%d", listen_fd);
     
-    /* ÉèÖÃ·Ç×èÈûºÍnodelay */
+    /* è®¾ç½®éé˜»å¡å’Œnodelay */
     if((MSD_OK != msd_anet_nonblock(error_buf, listen_fd)) 
         || (MSD_OK != msd_anet_tcp_nodelay(error_buf, listen_fd)))
     {
@@ -103,7 +103,7 @@ int msd_master_cycle()
     MSD_DEBUG_LOG("Set Nonblock and Nodelay Success");
     master->listen_fd = listen_fd;
 
-    /* ×¢²álisten_fdµÄ¶ÁÈ¡ÊÂ¼ş */
+    /* æ³¨å†Œlisten_fdçš„è¯»å–äº‹ä»¶ */
     if (msd_ae_create_file_event(master->m_ael, listen_fd, 
                 MSD_AE_READABLE, msd_master_accept, NULL) == MSD_ERR) 
     {
@@ -114,7 +114,7 @@ int msd_master_cycle()
         return MSD_ERR; 
     }
 
-    /* ×¢²ásig_worker->notify_read_fdµÄ¶ÁÈ¡ÊÂ¼ş */
+    /* æ³¨å†Œsig_worker->notify_read_fdçš„è¯»å–äº‹ä»¶ */
     if (msd_ae_create_file_event(master->m_ael, g_ins->sig_worker->notify_read_fd, 
                 MSD_AE_READABLE, msd_master_recv_signal, master) == MSD_ERR) 
     {
@@ -125,7 +125,7 @@ int msd_master_cycle()
         return MSD_ERR; 
     }
 
-    /* ×¢²ámasterÊ±¼äÊÂ¼ş */
+    /* æ³¨å†Œmasteræ—¶é—´äº‹ä»¶ */
     if(msd_ae_create_time_event(master->m_ael, master->poll_interval*1000, 
             msd_master_cron, master, NULL) == MSD_ERR)
     {
@@ -139,16 +139,16 @@ int msd_master_cycle()
     MSD_INFO_LOG("Create Master Ae Success");
     msd_ae_main_loop(master->m_ael);
 
-    /* ae_main_loopÍË³ö£¬master¿ªÊ¼Ïú»Ù */
+    /* ae_main_loopé€€å‡ºï¼Œmasterå¼€å§‹é”€æ¯ */
     //msd_master_destroy(master);
     
     return MSD_OK;
 }
 
 /**
- * ¹¦ÄÜ: Ïú»Ùmaster×ÊÔ´
- * ²ÎÊı: 
- * ÃèÊö:
+ * åŠŸèƒ½: é”€æ¯masterèµ„æº
+ * å‚æ•°: 
+ * æè¿°:
  *      1. 
  **/
 int msd_master_destroy(msd_master_t *master)
@@ -161,14 +161,14 @@ int msd_master_destroy(msd_master_t *master)
 }
  
 /**
- * ¹¦ÄÜ: Ö÷Ïß³Ìaccept²Ù×÷
- * ²ÎÊı: @el, ae¾ä±ú 
- *       @fd, ĞèÒªacceptµÄlisten_fd 
- *       @client_data, ¶îÍâ²ÎÊı
- *       @mask, ĞèÒª´¦ÀíµÄÊÂ¼ş 
- * ÃèÊö:
- *      1. ´Ëº¯ÊıÊÇ»Øµ÷º¯Êı£¬ËùÓĞµÄ²ÎÊı¶¼ÊÇÊÇÓÉae_mainµ÷ÓÃ
- *         process_eventº¯ÊıµÄÊ±ºò¸³ÓèµÄ
+ * åŠŸèƒ½: ä¸»çº¿ç¨‹acceptæ“ä½œ
+ * å‚æ•°: @el, aeå¥æŸ„ 
+ *       @fd, éœ€è¦acceptçš„listen_fd 
+ *       @client_data, é¢å¤–å‚æ•°
+ *       @mask, éœ€è¦å¤„ç†çš„äº‹ä»¶ 
+ * æè¿°:
+ *      1. æ­¤å‡½æ•°æ˜¯å›è°ƒå‡½æ•°ï¼Œæ‰€æœ‰çš„å‚æ•°éƒ½æ˜¯æ˜¯ç”±ae_mainè°ƒç”¨
+ *         process_eventå‡½æ•°çš„æ—¶å€™èµ‹äºˆçš„
  **/
 static void msd_master_accept(msd_ae_event_loop *el, int fd, 
         void *client_data, int mask)
@@ -184,7 +184,7 @@ static void msd_master_accept(msd_ae_event_loop *el, int fd,
     MSD_AE_NOTUSED(client_data);
 
     MSD_DEBUG_LOG("Master Begin Accept");
-    /* »ñµÃclientµÄfd£¬ºÍÆäipºÍport */   
+    /* è·å¾—clientçš„fdï¼Œå’Œå…¶ipå’Œport */   
     cli_fd = msd_anet_tcp_accept(error_buf, fd, cli_ip, &cli_port);
     if (cli_fd == MSD_ERR) 
     {
@@ -194,7 +194,7 @@ static void msd_master_accept(msd_ae_event_loop *el, int fd,
 
     MSD_INFO_LOG("Receive connection from %s:%d.The client_fd is %d.", cli_ip, cli_port, cli_fd);
 
-    /* ÉèÖÃ·Ç×èÈûºÍnodelay */
+    /* è®¾ç½®éé˜»å¡å’Œnodelay */
     if((MSD_OK != msd_anet_nonblock(error_buf, cli_fd)) 
         || (MSD_OK != msd_anet_tcp_nodelay(error_buf, cli_fd)))
     {
@@ -203,7 +203,7 @@ static void msd_master_accept(msd_ae_event_loop *el, int fd,
         return;        
     }    
 
-    /* ´´½¨client½á¹¹ */
+    /* åˆ›å»ºclientç»“æ„ */
     if(MSD_ERR == (client_idx = msd_create_client(cli_fd, cli_ip, cli_port)))
     {
         close(cli_fd);
@@ -211,7 +211,7 @@ static void msd_master_accept(msd_ae_event_loop *el, int fd,
         return;         
     }
 
-    /* ÈÎÎñÏÂ·¢ */
+    /* ä»»åŠ¡ä¸‹å‘ */
     if(MSD_ERR == (worker_id = msd_thread_worker_dispatch(client_idx)))
     {
         msd_close_client(client_idx, "Dispatch failed!");
@@ -223,15 +223,15 @@ static void msd_master_accept(msd_ae_event_loop *el, int fd,
 }
 
 /**
- * ¹¦ÄÜ: Ö÷Ïß³Ì´´½¨client²Ù×÷
- * ²ÎÊı: @cli_fd£¬client¶ÔÓ¦µÄfd
- *       @cli_ip£¬client IP
+ * åŠŸèƒ½: ä¸»çº¿ç¨‹åˆ›å»ºclientæ“ä½œ
+ * å‚æ•°: @cli_fdï¼Œclientå¯¹åº”çš„fd
+ *       @cli_ipï¼Œclient IP
  *       @cli_port,client Port
- * ÃèÊö:
- *      1. cliet->magic£¬³õÊ¼±»Ö¸ÎªÄ§»ÃÊı£¬ÓÃ»§ºóĞø¼ì²éÊÇ·ñ·Ç·¨¸ü¸Ä
- *      2. msd_vector_set_atµÄµÚÈı¸ö²ÎÊıÊÇÔªËØµÄÖ¸Õë£¬¶øconn_vecµÄÔªËØÊÇÖ¸ÕëÀàĞÍ,
- *         ËùÒÔmsd_vector_set_at£¬ µÚÈı¸ö²ÎÊıÓ¦¸ÃÊÇ¸ö¶ş¼¶Ö¸Õë 
- * ·µ»Ø:³É¹¦:ĞÂÉú³ÉclientµÄidx£¬²»·µ»Ø; Ê§°Ü:-x 
+ * æè¿°:
+ *      1. cliet->magicï¼Œåˆå§‹è¢«æŒ‡ä¸ºé­”å¹»æ•°ï¼Œç”¨æˆ·åç»­æ£€æŸ¥æ˜¯å¦éæ³•æ›´æ”¹
+ *      2. msd_vector_set_atçš„ç¬¬ä¸‰ä¸ªå‚æ•°æ˜¯å…ƒç´ çš„æŒ‡é’ˆï¼Œè€Œconn_vecçš„å…ƒç´ æ˜¯æŒ‡é’ˆç±»å‹,
+ *         æ‰€ä»¥msd_vector_set_atï¼Œ ç¬¬ä¸‰ä¸ªå‚æ•°åº”è¯¥æ˜¯ä¸ªäºŒçº§æŒ‡é’ˆ 
+ * è¿”å›:æˆåŠŸ:æ–°ç”Ÿæˆclientçš„idxï¼Œä¸è¿”å›; å¤±è´¥:-x 
  **/
 static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
 {
@@ -245,7 +245,7 @@ static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
     {
         MSD_ERROR_LOG("Max client num. Can not create more");
 
-        /* ³¢ÊÔĞ´»ØÊ§°ÜÔ­Òò£¬cli_fd·Ç×èÈû */
+        /* å°è¯•å†™å›å¤±è´¥åŸå› ï¼Œcli_fdéé˜»å¡ */
         write(cli_fd, "Max client num.\n", strlen("Max client num.\n"));
         return MSD_ERR;
     }
@@ -255,8 +255,8 @@ static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
     client  = *pclient;
     if (!client)
     {
-        /* clientÓĞ¿ÉÄÜÎª¿Õ£¬Èç¹ûÔø¾­Ã»ÓĞ·ÅÖÃ¹ıclient£¬¾Í»áÊÇ¿Õ
-         * Èç¹ûÔø¾­µÄclient±»closeÁË£¬Ôò²»ÊÇ¿Õ
+        /* clientæœ‰å¯èƒ½ä¸ºç©ºï¼Œå¦‚æœæ›¾ç»æ²¡æœ‰æ”¾ç½®è¿‡clientï¼Œå°±ä¼šæ˜¯ç©º
+         * å¦‚æœæ›¾ç»çš„clientè¢«closeäº†ï¼Œåˆ™ä¸æ˜¯ç©º
          */
         client = (msd_conn_client_t *)calloc(1, sizeof(*client));
         if (!client) 
@@ -269,13 +269,13 @@ static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
         MSD_DEBUG_LOG("Create client struct.Idx:%d", idx);
     }
 
-    /* client×ÜÊı×ÔÔö */
+    /* clientæ€»æ•°è‡ªå¢ */
     master->total_clients++;
     MSD_LOCK_UNLOCK(g_ins->client_conn_vec_lock);
     
     msd_client_clear(client);
-    /* ³õÊ¼»¯cli½á¹¹ */
-    client->magic         = MSD_MAGIC_DEBUG;  /* ³õÊ¼»¯Ä§»ÃÊı */
+    /* åˆå§‹åŒ–cliç»“æ„ */
+    client->magic         = MSD_MAGIC_DEBUG;  /* åˆå§‹åŒ–é­”å¹»æ•° */
     client->fd            = cli_fd;
     client->status        = C_COMMING;
     client->close_conn    = 0;
@@ -293,14 +293,14 @@ static int msd_create_client(int cli_fd, const char *cli_ip, int cli_port)
 
 
 /**
- * ¹¦ÄÜ: ÔÚmasterÏß³ÌµÄconn_vecÖĞÕÒµ½Ò»¸ö¿ÕÏĞµÄÎ»ÖÃ
- * ÃèÊö:
- *      1. ±éÀúÊÇ´Ólast_conn¿ªÊ¼µÄ£¬ÕâÑù¿ÉÒÔ±ÜÃâÃ¿´Î¶¼´ÓÍ·¿ªÊ¼£¬Ìá¸ßĞ§ÂÊ
- *         µ«ÊÇÒ²»áÔì³ÉÖĞ¼ä³öÏÖ¿×¶´(Ä³Ğ©client¹Ø±ÕÁËÁ¬½Ó)£¬ÀûÓÃmod²Ù×÷£¬
- *         ÊµÏÖÑ­»·£¬Ìî²¹¿×¶´
- *      2. ÕÒµ½clientµÄÌõ¼ş£¬Èç¹ûclientÎªNULL£¬ËµÃ÷Ôø¾­Ã»ÓĞ³õÊ¼»¯£¬Èç¹û
- *         client->access_timeÎª¿Õ£¬ËµÃ÷ÊÇ¿×¶´£¬Ôø¾­µÄclientÒÑ¹Ø±Õ
- * ·µ»Ø:³É¹¦:0£¬²»·µ»Ø; Ê§°Ü:-x 
+ * åŠŸèƒ½: åœ¨masterçº¿ç¨‹çš„conn_vecä¸­æ‰¾åˆ°ä¸€ä¸ªç©ºé—²çš„ä½ç½®
+ * æè¿°:
+ *      1. éå†æ˜¯ä»last_connå¼€å§‹çš„ï¼Œè¿™æ ·å¯ä»¥é¿å…æ¯æ¬¡éƒ½ä»å¤´å¼€å§‹ï¼Œæé«˜æ•ˆç‡
+ *         ä½†æ˜¯ä¹Ÿä¼šé€ æˆä¸­é—´å‡ºç°å­”æ´(æŸäº›clientå…³é—­äº†è¿æ¥)ï¼Œåˆ©ç”¨modæ“ä½œï¼Œ
+ *         å®ç°å¾ªç¯ï¼Œå¡«è¡¥å­”æ´
+ *      2. æ‰¾åˆ°clientçš„æ¡ä»¶ï¼Œå¦‚æœclientä¸ºNULLï¼Œè¯´æ˜æ›¾ç»æ²¡æœ‰åˆå§‹åŒ–ï¼Œå¦‚æœ
+ *         client->access_timeä¸ºç©ºï¼Œè¯´æ˜æ˜¯å­”æ´ï¼Œæ›¾ç»çš„clientå·²å…³é—­
+ * è¿”å›:æˆåŠŸ:0ï¼Œä¸è¿”å›; å¤±è´¥:-x 
  **/
 static int msd_client_find_free_slot()
 {
@@ -331,11 +331,11 @@ static int msd_client_find_free_slot()
 }
 
 /**
- * ¹¦ÄÜ: Çå¿Õconn_client½á¹¹
- * ÃèÊö:
- *      1. Ö»ÊÇÇå¿Õclient½á¹¹ÀïÃæµÄ³ÉÔ±£¬client±¾Éí²»ÊÍ·Å
- *      2. ¶ÔÓÚÊÇÖ¸ÕëµÄ³ÉÔ±£¬ĞèÒª·ÅÖÃ¶ş´Îfree
- * ·µ»Ø:³É¹¦:0£¬²»·µ»Ø; Ê§°Ü:-x 
+ * åŠŸèƒ½: æ¸…ç©ºconn_clientç»“æ„
+ * æè¿°:
+ *      1. åªæ˜¯æ¸…ç©ºclientç»“æ„é‡Œé¢çš„æˆå‘˜ï¼Œclientæœ¬èº«ä¸é‡Šæ”¾
+ *      2. å¯¹äºæ˜¯æŒ‡é’ˆçš„æˆå‘˜ï¼Œéœ€è¦æ”¾ç½®äºŒæ¬¡free
+ * è¿”å›:æˆåŠŸ:0ï¼Œä¸è¿”å›; å¤±è´¥:-x 
  **/
 static int msd_client_clear(msd_conn_client_t *client)
 {
@@ -371,11 +371,11 @@ static int msd_client_clear(msd_conn_client_t *client)
 }
 
 /**
- * ¹¦ÄÜ: ÈÎÎñ·ÖÅä
- * ²ÎÊı: @client_idx: clientµÄÎ»ÖÃ
- * ÃèÊö:
+ * åŠŸèƒ½: ä»»åŠ¡åˆ†é…
+ * å‚æ•°: @client_idx: clientçš„ä½ç½®
+ * æè¿°:
  *      1. 
- * ·µ»Ø:³É¹¦:ÁìÃüµÄwokerµÄid£¬²»·µ»Ø; Ê§°Ü:-x 
+ * è¿”å›:æˆåŠŸ:é¢†å‘½çš„wokerçš„idï¼Œä¸è¿”å›; å¤±è´¥:-x 
  **/
 static int msd_thread_worker_dispatch(int client_idx)
 {
@@ -391,7 +391,7 @@ static int msd_thread_worker_dispatch(int client_idx)
     //TODO client->status=C_DISPATCHING
     
     worker = *(worker_pool->thread_worker_array+ worker_id);
-    /* ÈÎÎñ·ÖÅäĞ´ÈëÍ¨Öª! */
+    /* ä»»åŠ¡åˆ†é…å†™å…¥é€šçŸ¥! */
     res = write(worker->notify_write_fd, &client_idx, sizeof(int));
     if (res == -1)
     {
@@ -403,11 +403,11 @@ static int msd_thread_worker_dispatch(int client_idx)
 }
 
 /**
- * ¹¦ÄÜ: ÔÚwoker¶ÓÁĞÖĞÕÒµ½Ò»¸öÄÜÓÃµÄ
- * ÃèÊö:
- *      1. Ö±½ÓÔÚwoker¶ÓÁĞÖĞÏòºóÕÒ£¬ÀûÓÃmodÊµÏÖÑ­»·
- *      2. //TODO: Ó¦¸Ã°´ÕÕ·±Ã¦³Ì¶È£¬ÕÒµ½×îÏĞµÄwoker£¬¶ø²»ÊÇÂÖÑµ
- * ·µ»Ø:³É¹¦:wokerµÄË÷Òı. Ê§°Ü:-x 
+ * åŠŸèƒ½: åœ¨wokeré˜Ÿåˆ—ä¸­æ‰¾åˆ°ä¸€ä¸ªèƒ½ç”¨çš„
+ * æè¿°:
+ *      1. ç›´æ¥åœ¨wokeré˜Ÿåˆ—ä¸­å‘åæ‰¾ï¼Œåˆ©ç”¨modå®ç°å¾ªç¯
+ *      2. //TODO: åº”è¯¥æŒ‰ç…§ç¹å¿™ç¨‹åº¦ï¼Œæ‰¾åˆ°æœ€é—²çš„wokerï¼Œè€Œä¸æ˜¯è½®è®­
+ * è¿”å›:æˆåŠŸ:wokerçš„ç´¢å¼•. å¤±è´¥:-x 
  **/
 static int msd_thread_list_find_next()
 {
@@ -438,10 +438,10 @@ static int msd_thread_list_find_next()
 
 
 /**
- * ¹¦ÄÜ: ¹Ø±Õclient
- * ²ÎÊı: @client_idx
- *       @info£¬¹Ø±ÕµÄÌáÊ¾ĞÅÏ¢
- * ËµÃ÷: 
+ * åŠŸèƒ½: å…³é—­client
+ * å‚æ•°: @client_idx
+ *       @infoï¼Œå…³é—­çš„æç¤ºä¿¡æ¯
+ * è¯´æ˜: 
  *    1. 
  **/
 void msd_close_client(int client_idx, const char *info) 
@@ -458,13 +458,13 @@ void msd_close_client(int client_idx, const char *info)
     
     client->status = C_CLOSING;
     
-    /* µ÷ÓÃhandle_close */
+    /* è°ƒç”¨handle_close */
     if (g_ins->so_func->handle_close) 
     {
         g_ins->so_func->handle_close(client, info);
     }
 
-    /* É¾³ıclient¶ÔÓ¦fdµÄaeÊÂ¼şºÍwoker->client_listÖĞ³ÉÔ± */
+    /* åˆ é™¤clientå¯¹åº”fdçš„aeäº‹ä»¶å’Œwoker->client_listä¸­æˆå‘˜ */
     worker = g_ins->pool->thread_worker_array[client->worker_id];
     if(worker)
     {
@@ -481,25 +481,25 @@ void msd_close_client(int client_idx, const char *info)
     }
     else
     {
-        /* ÈÎÎñÏÂ·¢Ê§°Ü£¬Ò²»áµ÷ÓÃmsd_close_client£¬´ËÊ±worker_idµÈµÈ
-         * Ïà¹ØĞÅÏ¢»¹Ã»ºÍclient½øĞĞ¹ØÁª£¬ËùÒÔ¿ÉÄÜ³öÏÖwokerÎª¿Õ */
+        /* ä»»åŠ¡ä¸‹å‘å¤±è´¥ï¼Œä¹Ÿä¼šè°ƒç”¨msd_close_clientï¼Œæ­¤æ—¶worker_idç­‰ç­‰
+         * ç›¸å…³ä¿¡æ¯è¿˜æ²¡å’Œclientè¿›è¡Œå…³è”ï¼Œæ‰€ä»¥å¯èƒ½å‡ºç°wokerä¸ºç©º */
         MSD_ERROR_LOG("The worker not found!!");
     }
     
-    /* É¾³ıconn_vec¶ÔÓ¦½Úµã£¬msd_vctor_set_atµÄµÚÈı¸ö²ÎÊıÊÇdataµÄÖ¸Õë£¬
-     * ¶øÔÚ´¦µÄdata´ú±íµÄclient_connµÄÖ¸Õë£¬ËùÒÔµÚÈı¸ö²ÎÊıÓ¦¸ÃÊÇ¸ö¶ş¼¶Ö¸Õë 
+    /* åˆ é™¤conn_vecå¯¹åº”èŠ‚ç‚¹ï¼Œmsd_vctor_set_atçš„ç¬¬ä¸‰ä¸ªå‚æ•°æ˜¯dataçš„æŒ‡é’ˆï¼Œ
+     * è€Œåœ¨å¤„çš„dataä»£è¡¨çš„client_connçš„æŒ‡é’ˆï¼Œæ‰€ä»¥ç¬¬ä¸‰ä¸ªå‚æ•°åº”è¯¥æ˜¯ä¸ªäºŒçº§æŒ‡é’ˆ 
      **/
     msd_vector_set_at(g_ins->master->client_vec, client->idx, (void *)&null);
     g_ins->master->total_clients--;
     MSD_LOCK_UNLOCK(g_ins->client_conn_vec_lock);
     
-    /* closeµôclient¶ÔÓ¦fd */
+    /* closeæ‰clientå¯¹åº”fd */
     close(client->fd);
 
-    /* µ÷ÓÃmsd_client_clear()Çå¿Õclient½á¹¹ */
+    /* è°ƒç”¨msd_client_clear()æ¸…ç©ºclientç»“æ„ */
     msd_client_clear(client);
 
-    /* free client±¾Éí */
+    /* free clientæœ¬èº« */
     free(client);
 
     MSD_INFO_LOG("Close client[%d], info:%s", client->idx, info);
@@ -507,14 +507,14 @@ void msd_close_client(int client_idx, const char *info)
 }
 
 /**
- * ¹¦ÄÜ: masterÏß³ÌµÄÊ±¼ä»Øµ÷º¯Êı¡£
- * ²ÎÊı: @el
- *       @id£¬Ê±¼äÊÂ¼şid
- *       @privdata£¬masterÖ¸Õë
- * ËµÃ÷: 
- *       ¶¨ÆÚÍ³¼ÆÈ«²¿clientµÄĞÅÏ¢£¬²é¿´ÊÇ·ñ³öÏÖÒì³£
- *       5·ÖÖÓÔËĞĞÒ»´Î
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: masterçº¿ç¨‹çš„æ—¶é—´å›è°ƒå‡½æ•°ã€‚
+ * å‚æ•°: @el
+ *       @idï¼Œæ—¶é—´äº‹ä»¶id
+ *       @privdataï¼ŒmasteræŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       å®šæœŸç»Ÿè®¡å…¨éƒ¨clientçš„ä¿¡æ¯ï¼ŒæŸ¥çœ‹æ˜¯å¦å‡ºç°å¼‚å¸¸
+ *       5åˆ†é’Ÿè¿è¡Œä¸€æ¬¡
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate) 
 {
@@ -535,10 +535,10 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
     int master_client_cnt = 0;
     int worker_client_cnt = 0;
 
-    int m_c_comm_disp_cnt = 0; /* MasterÖĞ´¦ÓÚCOMMINGºÍDISPATCHING×´Ì¬µÄclient¸öÊı */
+    int m_c_comm_disp_cnt = 0; /* Masterä¸­å¤„äºCOMMINGå’ŒDISPATCHINGçŠ¶æ€çš„clientä¸ªæ•° */
     
     MSD_INFO_LOG("Master cron begin!");
-    /* ±éÀúclient_vec */
+    /* éå†client_vec */
     MSD_LOCK_LOCK(g_ins->client_conn_vec_lock);
     MSD_LOCK_LOCK(g_ins->thread_woker_list_lock);
     for( i=0; i < master->client_limit; i++)
@@ -557,7 +557,7 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
         }
     }
     /*
-    //¶Î´íÎó£¬Ö®ËùÒÔ¶Î´íÎó£¬ÊÇÒòÎªÓÃÁËmsd_vector_iter_next£¬Õâ¸öº¯ÊıÒÀÀµvec->count£¬²»¿¿Æ×
+    //æ®µé”™è¯¯ï¼Œä¹‹æ‰€ä»¥æ®µé”™è¯¯ï¼Œæ˜¯å› ä¸ºç”¨äº†msd_vector_iter_nextï¼Œè¿™ä¸ªå‡½æ•°ä¾èµ–vec->countï¼Œä¸é è°±
     do {
         pclient = (msd_conn_client_t **)(iter->data);
         client  = *pclient;
@@ -569,7 +569,7 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
     } while (msd_vector_iter_next(iter) == 0);
     */
 
-    /* ±éÀúËùÓĞµÄworkerÖĞµÄclient_list */
+    /* éå†æ‰€æœ‰çš„workerä¸­çš„client_list */
     
     for (i = 0; i < pool->thread_worker_num; i++)
     {
@@ -589,7 +589,7 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
         }
     }
 
-    /* MasterµÄclientÊı£¬ĞèÒª¼õÈ¥ÉĞÎ´Íê³É·ÖÅäµÄ£¬ÓëworkerÖĞÏàµÈ */
+    /* Masterçš„clientæ•°ï¼Œéœ€è¦å‡å»å°šæœªå®Œæˆåˆ†é…çš„ï¼Œä¸workerä¸­ç›¸ç­‰ */
     if(master->total_clients == master_client_cnt 
         && (master_client_cnt - m_c_comm_disp_cnt) == worker_client_cnt )
     {
@@ -598,7 +598,7 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
     }
     else
     {
-        //¸ü¼ÓÏêÏ¸µÄÈÎÎñĞÅÏ¢!
+        //æ›´åŠ è¯¦ç»†çš„ä»»åŠ¡ä¿¡æ¯!
         for( i=0; i < master->client_limit; i++)
         {
             pclient = (msd_conn_client_t **)msd_vector_get_at(master->client_vec, i);
@@ -638,14 +638,14 @@ static int msd_master_cron(msd_ae_event_loop *el, long long id, void *privdate)
 }
 
 /**
- * ¹¦ÄÜ: Ö÷Ïß³Ì½ÓÊÕsingalÏß³Ì´«¹ıÀ´µÄĞÅºÅÏûÏ¢
- * ²ÎÊı: @el, ae¾ä±ú 
- *       @fd, signalÏß³ÌÍ¨Öªfd 
- *       @client_data, ¶îÍâ²ÎÊı
- *       @mask, ĞèÒª´¦ÀíµÄÊÂ¼ş 
- * ÃèÊö:
- *      1. ´Ëº¯ÊıÊÇ»Øµ÷º¯Êı£¬ËùÓĞµÄ²ÎÊı¶¼ÊÇÊÇÓÉae_mainµ÷ÓÃ
- *         process_eventº¯ÊıµÄÊ±ºò¸³ÓèµÄ
+ * åŠŸèƒ½: ä¸»çº¿ç¨‹æ¥æ”¶singalçº¿ç¨‹ä¼ è¿‡æ¥çš„ä¿¡å·æ¶ˆæ¯
+ * å‚æ•°: @el, aeå¥æŸ„ 
+ *       @fd, signalçº¿ç¨‹é€šçŸ¥fd 
+ *       @client_data, é¢å¤–å‚æ•°
+ *       @mask, éœ€è¦å¤„ç†çš„äº‹ä»¶ 
+ * æè¿°:
+ *      1. æ­¤å‡½æ•°æ˜¯å›è°ƒå‡½æ•°ï¼Œæ‰€æœ‰çš„å‚æ•°éƒ½æ˜¯æ˜¯ç”±ae_mainè°ƒç”¨
+ *         process_eventå‡½æ•°çš„æ—¶å€™èµ‹äºˆçš„
  **/
 static void msd_master_recv_signal(msd_ae_event_loop *el, int fd, 
         void *client_data, int mask)
@@ -679,13 +679,13 @@ static void msd_master_recv_signal(msd_ae_event_loop *el, int fd,
 }
 
 /**
- * ¹¦ÄÜ: master·¢³ömossad¹Ø±ÕÖ¸Áî
- * ÃèÊö:
- *      0. ¹Ø±Õlisten_fd£¬Í£Ö¹ĞÂµÄÁ¬½ÓÇëÇó
- *      1. ÏòËùÓĞworkerÏß³Ì·¢³ö¹Ø±ÕÖ¸Áî£¬Ô¼¶¨fd:-1
- *      2. Ñ­»·µÈ´ıÈ«²¿worker¹Ø±ÕÁ¬½Ó£¬×îÖØÒªµÄÒ»²½£¬
- *         ËùÓĞµÄ¹¤×÷¶¼ÊÇÎªÁËËü£¬ÈÃclientÄÜÓÑºÃÍË³ö
- *      3. AE loopÍË³ö
+ * åŠŸèƒ½: masterå‘å‡ºmossadå…³é—­æŒ‡ä»¤
+ * æè¿°:
+ *      0. å…³é—­listen_fdï¼Œåœæ­¢æ–°çš„è¿æ¥è¯·æ±‚
+ *      1. å‘æ‰€æœ‰workerçº¿ç¨‹å‘å‡ºå…³é—­æŒ‡ä»¤ï¼Œçº¦å®šfd:-1
+ *      2. å¾ªç¯ç­‰å¾…å…¨éƒ¨workerå…³é—­è¿æ¥ï¼Œæœ€é‡è¦çš„ä¸€æ­¥ï¼Œ
+ *         æ‰€æœ‰çš„å·¥ä½œéƒ½æ˜¯ä¸ºäº†å®ƒï¼Œè®©clientèƒ½å‹å¥½é€€å‡º
+ *      3. AE loopé€€å‡º
  **/
 static void msd_master_shut_down()
 {
@@ -697,22 +697,22 @@ static void msd_master_shut_down()
     int master_client_cnt;
     int i, res, info;
 
-    /* ÓÃ»§×Ô¶¨ÒåÎö¹¹»Øµ÷ */
+    /* ç”¨æˆ·è‡ªå®šä¹‰ææ„å›è°ƒ */
     if (g_ins->so_func->handle_fini) 
     {
-        /* µ÷ÓÃhandle_init */
+        /* è°ƒç”¨handle_init */
         if (g_ins->so_func->handle_fini(g_ins->conf) != MSD_OK) 
         {
             MSD_ERROR_LOG("Invoke hook handle_fini in master");
         }
     }
     
-    /* ¹Ø±Õlisten_fd£¬Í£Ö¹ĞÂµÄÁ¬½ÓÇëÇó */
+    /* å…³é—­listen_fdï¼Œåœæ­¢æ–°çš„è¿æ¥è¯·æ±‚ */
     msd_ae_delete_file_event(master->m_ael, master->listen_fd, MSD_AE_READABLE);
     close(master->listen_fd); 
-    /* µ½´Ë´¦£¬mossad´¦ÓÚ°ë¹Ø±Õ£¬Íâ½çÎŞ·¨½¨Á¢ĞÂÁ¬½ÓÁË£¬µ«ÊÇÔ­ÓĞÁ¬½ÓÈÔÈ»·şÎñ */
+    /* åˆ°æ­¤å¤„ï¼Œmossadå¤„äºåŠå…³é—­ï¼Œå¤–ç•Œæ— æ³•å»ºç«‹æ–°è¿æ¥äº†ï¼Œä½†æ˜¯åŸæœ‰è¿æ¥ä»ç„¶æœåŠ¡ */
 
-    /* ÏòËùÓĞworkerÏß³Ì·¢³ö¹Ø±ÕÖ¸Áî£¬Ô¼¶¨fd:-1 */
+    /* å‘æ‰€æœ‰workerçº¿ç¨‹å‘å‡ºå…³é—­æŒ‡ä»¤ï¼Œçº¦å®šfd:-1 */
     MSD_LOCK_LOCK(g_ins->thread_woker_list_lock);
     for (i = 0; i < pool->thread_worker_num; i++)
     {
@@ -731,12 +731,12 @@ static void msd_master_shut_down()
     }
     MSD_LOCK_UNLOCK(g_ins->thread_woker_list_lock);  
     
-    /* ĞİÃß10ºÁÃë£¬ÈÃ³öCPUÊ±¼äÆ¬£¬Áô¸ø¸÷¸öwokerÏß³Ìshutdown */
+    /* ä¼‘çœ 10æ¯«ç§’ï¼Œè®©å‡ºCPUæ—¶é—´ç‰‡ï¼Œç•™ç»™å„ä¸ªwokerçº¿ç¨‹shutdown */
     msd_thread_usleep(10000);
 
-    /* Ñ­»·µÈ´ıËùÓĞµÄworker½áÊø¹Ø±Õ */
+    /* å¾ªç¯ç­‰å¾…æ‰€æœ‰çš„workerç»“æŸå…³é—­ */
     do{
-        /* ±éÀúclient_vec£¬²é¿´Á¬½Ó¸öÊı */
+        /* éå†client_vecï¼ŒæŸ¥çœ‹è¿æ¥ä¸ªæ•° */
         master_client_cnt = 0;
         MSD_LOCK_LOCK(g_ins->client_conn_vec_lock);
         for( i=0; i < master->client_limit; i++)
@@ -757,11 +757,11 @@ static void msd_master_shut_down()
         else
         {
             MSD_WARNING_LOG("Still not shutdown! (%d)", master_client_cnt);
-            msd_thread_usleep(10000);/* 10ºÁÃë */
+            msd_thread_usleep(10000);/* 10æ¯«ç§’ */
         }
     }while(1);
 
-    /* AeÍË³ö */
+    /* Aeé€€å‡º */
     msd_ae_stop(master->m_ael);
     
     MSD_INFO_LOG("Master shut down!");

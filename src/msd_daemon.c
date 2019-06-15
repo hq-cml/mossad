@@ -32,11 +32,11 @@
  * origin command line length. To avoid it we append to a new title
  * the origin command line in the parenthesis. 
 
- * ¸ù¾İÏÂÃæµÄ½âÊÍ£¬argvµÄ¸÷¸öÔªËØÖ¸¶¨µÄ×Ö·ûÊı×éµÄµØÖ·ÊÇÁ¬ĞøµÄ£¬argv½áÊøºó
- * ½ô½Ó×ÅÊÇenvironÊı×éµÄµÄµØÖ·
+ * æ ¹æ®ä¸‹é¢çš„è§£é‡Šï¼Œargvçš„å„ä¸ªå…ƒç´ æŒ‡å®šçš„å­—ç¬¦æ•°ç»„çš„åœ°å€æ˜¯è¿ç»­çš„ï¼Œargvç»“æŸå
+ * ç´§æ¥ç€æ˜¯environæ•°ç»„çš„çš„åœ°å€
  **/
 
-extern char **environ; /* Õâ¸öµ½µ×ÊÇÔÚÄÄÀï¶¨ÒåºÍ·ÖÅä¿Õ¼äµÄ£¿mainº¯ÊıÒş²ØµÄµÚÈı¸ö²ÎÊı£¿ */
+extern char **environ; /* è¿™ä¸ªåˆ°åº•æ˜¯åœ¨å“ªé‡Œå®šä¹‰å’Œåˆ†é…ç©ºé—´çš„ï¼Ÿmainå‡½æ•°éšè—çš„ç¬¬ä¸‰ä¸ªå‚æ•°ï¼Ÿ */
 static char *arg_start;
 static char *arg_end;
 static char *env_start;
@@ -45,9 +45,9 @@ static void msd_daemon_set_title(const char* fmt, ...);
 static char **msd_daemon_argv_dup(int argc, char *argv[]);
 
 /**
- * ¹¦ÄÜ: ±¸·İ³öÕû¸öµÄargv¶şÎ¬Êı×é
- * ²ÎÊı: @argc, @argv
- * ·µ»Ø: ³É¹¦£¬±¸·İµÄµØÖ·, Ê§°Ü£¬NULL
+ * åŠŸèƒ½: å¤‡ä»½å‡ºæ•´ä¸ªçš„argväºŒç»´æ•°ç»„
+ * å‚æ•°: @argc, @argv
+ * è¿”å›: æˆåŠŸï¼Œå¤‡ä»½çš„åœ°å€, å¤±è´¥ï¼ŒNULL
  **/
 static char **msd_daemon_argv_dup(int argc, char *argv[]) 
 {
@@ -56,7 +56,7 @@ static char **msd_daemon_argv_dup(int argc, char *argv[])
     arg_end = argv[argc - 1] + strlen(argv[argc - 1]) + 1;
     env_start = environ[0];
 
-    /* ¿ª±ÙÄÚ´æ£¬°Ñargv[]Õû¸öcopyÒ»¸ö¸±±¾³öÀ´ */
+    /* å¼€è¾Ÿå†…å­˜ï¼ŒæŠŠargv[]æ•´ä¸ªcopyä¸€ä¸ªå‰¯æœ¬å‡ºæ¥ */
     char **saved_argv = (char **)malloc((argc + 1) * sizeof(char *));
     saved_argv[argc] = NULL;
     if (!saved_argv) 
@@ -77,8 +77,8 @@ static char **msd_daemon_argv_dup(int argc, char *argv[])
 }
 
 /**
- * ¹¦ÄÜ: ÊÍ·ÅÉÏÃæµÄ±¸·İ³öµÄargvÊı×é
- * ²ÎÊı: @daemon_argv
+ * åŠŸèƒ½: é‡Šæ”¾ä¸Šé¢çš„å¤‡ä»½å‡ºçš„argvæ•°ç»„
+ * å‚æ•°: @daemon_argv
  **/
 void msd_daemon_argv_free(char **daemon_argv) 
 {
@@ -91,16 +91,16 @@ void msd_daemon_argv_free(char **daemon_argv)
 }
 
 /**
- * ¹¦ÄÜ: ĞŞ¸Ä½ø³ÌµÄtitle
- * ²ÎÊı: @argc, @argv
- * ËµÃ÷£º
- *      1. Ê×ÏÈ±¸·İ³öÕûÌ×µÄargvµÄ¶şÎ¬Êı×é£¬È»ºó°ÑtitleĞ´Èëµ½Ô­À´µÄargv¶ÔÓ¦µÄ¿Õ¼äÖĞÈ¥
- *      2. Èç¹ûargv[]µÄ¿Õ¼ä»¹²»×ãÒÔÈİÄÉtitile£¬Ôò½«½ôËæÆäºóµÄenvironÒ²ÓÃÉÏ£¬ÈÔĞèÏÈ±¸·İ
- * ×¢Òâ:
+ * åŠŸèƒ½: ä¿®æ”¹è¿›ç¨‹çš„title
+ * å‚æ•°: @argc, @argv
+ * è¯´æ˜ï¼š
+ *      1. é¦–å…ˆå¤‡ä»½å‡ºæ•´å¥—çš„argvçš„äºŒç»´æ•°ç»„ï¼Œç„¶åæŠŠtitleå†™å…¥åˆ°åŸæ¥çš„argvå¯¹åº”çš„ç©ºé—´ä¸­å»
+ *      2. å¦‚æœargv[]çš„ç©ºé—´è¿˜ä¸è¶³ä»¥å®¹çº³titileï¼Œåˆ™å°†ç´§éšå…¶åçš„environä¹Ÿç”¨ä¸Šï¼Œä»éœ€å…ˆå¤‡ä»½
+ * æ³¨æ„:
  *      Before invoke this function, you should call msd_daemon_argv_dup first.
  *      Otherwise there will be a segment fault!
  *
- * ·µ»Ø: ³É¹¦£¬±¸·İµÄµØÖ·, Ê§°Ü£¬NULL
+ * è¿”å›: æˆåŠŸï¼Œå¤‡ä»½çš„åœ°å€, å¤±è´¥ï¼ŒNULL
  **/
 static void msd_daemon_set_title(const char* fmt, ...) 
 {
@@ -116,7 +116,7 @@ static void msd_daemon_set_title(const char* fmt, ...)
     if(tlen>127)
         tlen=127;
 
-	/* Èç¹ûargv[]µÄ¿Õ¼ä»¹²»×ã¹»£¬²¢ÇÒargvºÍenvironµØÖ·ÊÇÁ¬ĞøµÄ */
+	/* å¦‚æœargv[]çš„ç©ºé—´è¿˜ä¸è¶³å¤Ÿï¼Œå¹¶ä¸”argvå’Œenvironåœ°å€æ˜¯è¿ç»­çš„ */
 	if (arg_end - arg_start < tlen && env_start == arg_end) 
     {
         //fprintf(stderr, "dup the environ\n");
@@ -134,17 +134,17 @@ static void msd_daemon_set_title(const char* fmt, ...)
 
     i = arg_end - arg_start;
     memset(arg_start, 0, i);
-    strncpy(arg_start, title, i - 1);/* ´Û¸Ä³ÌĞòµÄÃû×Ö */
+    strncpy(arg_start, title, i - 1);/* ç¯¡æ”¹ç¨‹åºçš„åå­— */
 
 #ifdef __linux__
     /* printf("the macro __linux__ is defined\n"); */
-    /* ¸øÏß³ÌÃüÃû */
+    /* ç»™çº¿ç¨‹å‘½å */
     prctl(PR_SET_NAME, title);
 #endif /* __linux__ */
 }
 
 
-/* ÉèÖÃ³ÌĞòÃû³Æ */
+/* è®¾ç½®ç¨‹åºåç§° */
 char ** msd_set_program_name(int argc, char *argv[], const char *name)
 {
     char **saved_argv = msd_daemon_argv_dup(argc, argv);
@@ -161,20 +161,20 @@ char ** msd_set_program_name(int argc, char *argv[], const char *name)
 
 
 /**
- * ¹¦ÄÜ: ÖØ¶¨Ïò
- * ·µ»Ø: ±¸·İµÄ±ê×¼Êä³ö
+ * åŠŸèƒ½: é‡å®šå‘
+ * è¿”å›: å¤‡ä»½çš„æ ‡å‡†è¾“å‡º
  **/
 int msd_redirect_std() 
 {
     int fd;
     int org_fd;
-    org_fd = dup(STDOUT_FILENO); /* ±£´æÒ»·İ±ê×¼Êä³ö */
+    org_fd = dup(STDOUT_FILENO); /* ä¿å­˜ä¸€ä»½æ ‡å‡†è¾“å‡º */
     if ((fd = open("/dev/null", O_RDWR, 0)) != -1) 
     {
         /*
          * int dup2(int oldfd, int newfd);
          * dup2 makes newfd be the copy of oldfd, closing newfd first if necessary.
-         * ËùÓĞĞ´µ½Êä³ö¡¢ÊäÈë¡¢³ö´íµÄĞÅÏ¢£¬¶¼»áÖØ¶¨Ïòµ½/dev/null
+         * æ‰€æœ‰å†™åˆ°è¾“å‡ºã€è¾“å…¥ã€å‡ºé”™çš„ä¿¡æ¯ï¼Œéƒ½ä¼šé‡å®šå‘åˆ°/dev/null
          */
         dup2(fd, STDIN_FILENO);
         dup2(fd, STDOUT_FILENO);
@@ -188,23 +188,23 @@ int msd_redirect_std()
 }
 
 /**
- * ¹¦ÄÜ: daemon
- * ²ÎÊı: @is_chdir: ÊÇ·ñÇĞ»»Ä¿Â¼
- *       @is_close: ÊÇ·ñÖØ¶¨Ïò0,1,2
+ * åŠŸèƒ½: daemon
+ * å‚æ•°: @is_chdir: æ˜¯å¦åˆ‡æ¢ç›®å½•
+ *       @is_close: æ˜¯å¦é‡å®šå‘0,1,2
  **/
 void msd_daemonize(int is_chdir, int is_redirect) 
 {
-    /* ´´½¨×Ó½ø³Ì£¬¸¸½ø³ÌÍË³ö */
+    /* åˆ›å»ºå­è¿›ç¨‹ï¼Œçˆ¶è¿›ç¨‹é€€å‡º */
     if (fork() != 0) 
     {
-        sleep(1);/* Í£ÁôÒ»ÃëÔÙÍÆ³ö£¬ÁôÊ±¼ä´òÓ¡Æô¶¯ĞÅÏ¢ */
+        sleep(1);/* åœç•™ä¸€ç§’å†æ¨å‡ºï¼Œç•™æ—¶é—´æ‰“å°å¯åŠ¨ä¿¡æ¯ */
         exit(0); /* parent exits */
     } 
 
-    /* µÚÒ»×Ó½ø³Ì´´½¨ĞÂµÄ»á»°£¬³ÉÎªĞÂ»á»°ºÍ½ø³Ì×éµÄ×é³¤ */
+    /* ç¬¬ä¸€å­è¿›ç¨‹åˆ›å»ºæ–°çš„ä¼šè¯ï¼Œæˆä¸ºæ–°ä¼šè¯å’Œè¿›ç¨‹ç»„çš„ç»„é•¿ */
     setsid(); /* Create a new session. */
     
-    /* µÚÒ»×Ó½ø³ÌÍË³ö£¬µÚ¶ş×Ó½ø³Ì¼ÌĞø£¬µÚ¶ş×Ó½ø³Ì²»ÔÙÊÇ»á»°×é³¤ */
+    /* ç¬¬ä¸€å­è¿›ç¨‹é€€å‡ºï¼Œç¬¬äºŒå­è¿›ç¨‹ç»§ç»­ï¼Œç¬¬äºŒå­è¿›ç¨‹ä¸å†æ˜¯ä¼šè¯ç»„é•¿ */
     if (fork() != 0) 
     {
         exit(0); /* parent exits */
@@ -212,7 +212,7 @@ void msd_daemonize(int is_chdir, int is_redirect)
     
     if (is_chdir)  
     {
-        /* ÇĞµ½¸ùÄ¿Â¼ */
+        /* åˆ‡åˆ°æ ¹ç›®å½• */
         if (chdir("/") != 0) 
         {
             fprintf(stderr, "chdir failed:%s", strerror(errno));
@@ -220,7 +220,7 @@ void msd_daemonize(int is_chdir, int is_redirect)
         }
     }
 
-    /* ÖØ¶¨Ïò1¡¢2¡¢3 */
+    /* é‡å®šå‘1ã€2ã€3 */
     if (is_redirect) 
     {
         msd_redirect_std();
@@ -228,33 +228,33 @@ void msd_daemonize(int is_chdir, int is_redirect)
 }
 
 /**
- * ¹¦ÄÜ: ĞŞ¸ÄÈíÓ²ÏŞÖÆ
+ * åŠŸèƒ½: ä¿®æ”¹è½¯ç¡¬é™åˆ¶
  **/
 void msd_rlimit_reset() 
 {
     struct rlimit rlim;
-    /* RLIMIT_NOFILE ÏŞÖÆÖ¸¶¨ÁË½ø³Ì¿ÉÒÔ´ò¿ªµÄ×î¶àÎÄ¼şÊı¡£ */
-    rlim.rlim_cur = MSD_MAX_FD; /* ÈíÏŞÖÆ */
-    rlim.rlim_max = MSD_MAX_FD; /* Ó²ÏŞÖÆ */
+    /* RLIMIT_NOFILE é™åˆ¶æŒ‡å®šäº†è¿›ç¨‹å¯ä»¥æ‰“å¼€çš„æœ€å¤šæ–‡ä»¶æ•°ã€‚ */
+    rlim.rlim_cur = MSD_MAX_FD; /* è½¯é™åˆ¶ */
+    rlim.rlim_max = MSD_MAX_FD; /* ç¡¬é™åˆ¶ */
     setrlimit(RLIMIT_NOFILE, &rlim);
 
-    /* RLIMIT_COREÏŞÖÆÖ¸¶¨ÁË½ø³Ì¿ÉÒÔ´´½¨µÄ×î´ócoreÎÄ¼şµÄ´óĞ¡¡£Èç¹û´ËÏŞÖÆÉèÎª0£¬½«²»ÄÜ´´½¨¡£ */
+    /* RLIMIT_COREé™åˆ¶æŒ‡å®šäº†è¿›ç¨‹å¯ä»¥åˆ›å»ºçš„æœ€å¤§coreæ–‡ä»¶çš„å¤§å°ã€‚å¦‚æœæ­¤é™åˆ¶è®¾ä¸º0ï¼Œå°†ä¸èƒ½åˆ›å»ºã€‚ */
     rlim.rlim_cur = 1 << 29; 
     rlim.rlim_max = 1 << 29;
     setrlimit(RLIMIT_CORE, &rlim);
 }
 
 /**
- * ¹¦ÄÜ: ÎÄ¼şËø
- * ²ÎÊı: @fd, @enable 1:¼ÓËø 0:½âËø
- * ·µ»Ø: ³É¹¦£¬0, Ê§°Ü£¬-x
+ * åŠŸèƒ½: æ–‡ä»¶é”
+ * å‚æ•°: @fd, @enable 1:åŠ é” 0:è§£é”
+ * è¿”å›: æˆåŠŸï¼Œ0, å¤±è´¥ï¼Œ-x
  **/
 static int msd_pid_file_lock(int fd, int enable) 
 {
     struct flock f;
     memset(&f, 0, sizeof(f));
     f.l_type = enable ? F_WRLCK : F_UNLCK;
-    /* Õû¸öÎÄ¼ş¼ÓËø */
+    /* æ•´ä¸ªæ–‡ä»¶åŠ é” */
     f.l_whence = SEEK_SET;
     f.l_start = 0;
     f.l_len = 0;
@@ -277,9 +277,9 @@ static int msd_pid_file_lock(int fd, int enable)
 }
 
 /**
- * ¹¦ÄÜ: ´´½¨pidÎÄ¼ş
- * ²ÎÊı: @pid_file
- * ·µ»Ø: ³É¹¦£¬0, Ê§°Ü£¬-x
+ * åŠŸèƒ½: åˆ›å»ºpidæ–‡ä»¶
+ * å‚æ•°: @pid_file
+ * è¿”å›: æˆåŠŸï¼Œ0, å¤±è´¥ï¼Œ-x
  **/
 int msd_pid_file_create(char *pid_file) 
 {
@@ -287,10 +287,10 @@ int msd_pid_file_create(char *pid_file)
     char buf[16];
     mode_t old_mode;
 
-    //ÁÙÊ±¸Ä±äumask
+    //ä¸´æ—¶æ”¹å˜umask
     old_mode = umask(022);
 
-    /* O_EXCL Èç¹ûO_CREAT Ò²±»ÉèÖÃ, ´ËÖ¸Áî»áÈ¥¼ì²éÎÄ¼şÊÇ·ñ´æÔÚ. ÎÄ¼şÈô²»´æÔÚÔò½¨Á¢¸ÃÎÄ¼ş, ·ñÔò½«µ¼ÖÂ´ò¿ªÎÄ¼ş´íÎó. */
+    /* O_EXCL å¦‚æœO_CREAT ä¹Ÿè¢«è®¾ç½®, æ­¤æŒ‡ä»¤ä¼šå»æ£€æŸ¥æ–‡ä»¶æ˜¯å¦å­˜åœ¨. æ–‡ä»¶è‹¥ä¸å­˜åœ¨åˆ™å»ºç«‹è¯¥æ–‡ä»¶, å¦åˆ™å°†å¯¼è‡´æ‰“å¼€æ–‡ä»¶é”™è¯¯. */
     //if ((fd = open(pid_file, O_CREAT | O_RDWR | O_EXCL, 0644)) < 0) 
     if ((fd = open(pid_file, O_CREAT | O_RDWR , 0644)) < 0) 
     {
@@ -298,7 +298,7 @@ int msd_pid_file_create(char *pid_file)
         goto finish;
     }
 
-    /* ÉÏËø */
+    /* ä¸Šé” */
     if ((locked = msd_pid_file_lock(fd, 1)) < 0) 
     {
         perror("lock failed");
@@ -325,7 +325,7 @@ finish:
     if (fd >= 0) 
     {
         int saved_errno = errno;
-        /* ½âËø */
+        /* è§£é” */
         if (locked >= 0) 
         {
             msd_pid_file_lock(fd, 0);
@@ -334,20 +334,20 @@ finish:
         errno = saved_errno;
     }
 
-    //»¹Ô­umask
+    //è¿˜åŸumask
     umask(old_mode);
     return ret;
 }
 
 /**
- * ¹¦ÄÜ: ¶ÁÈ¡pid_fileÎÄ¼ş£¬¶Ô¶Á³öµÄ½ø³ÌºÅ·¢ËÍĞÅºÅ£¬ÅĞ¶ÏÆä´æ»î
- *       Èç¹ûpid_file²»´æÔÚ£¬ÔòÖ±½Ó·µ»Ø0£»Èç¹û´æÔÚ£¬µ«ÊÇ½ø³ÌºÅ
- *       ¶ÔÓ¦µÄ½ø³ÌÒÑ¹ÒÁËÔòÉ¾³ıpid_fileÎÄ¼ş£¬·µ»Ø0£»·ñÔò·µ»Ø
- *       ÕæÊµ½ø³Ìpid
- * ²ÎÊı: @pid_file
- * ËµÃ÷£º
- *       1. ¸Ãº¯ÊıÓÃÓÚ³ÌĞò¿ªÊ¼´¦£¬ÅĞ¶ÏÊÇ·ñÓĞÆäËûÊµÀıÒÑ¾­ÔÚÔËĞĞ
- * ·µ»Ø: ³É¹¦£¬pidÎÄ¼şÄÚÈİ£¬»òÕß0, Ê§°Ü£¬-1
+ * åŠŸèƒ½: è¯»å–pid_fileæ–‡ä»¶ï¼Œå¯¹è¯»å‡ºçš„è¿›ç¨‹å·å‘é€ä¿¡å·ï¼Œåˆ¤æ–­å…¶å­˜æ´»
+ *       å¦‚æœpid_fileä¸å­˜åœ¨ï¼Œåˆ™ç›´æ¥è¿”å›0ï¼›å¦‚æœå­˜åœ¨ï¼Œä½†æ˜¯è¿›ç¨‹å·
+ *       å¯¹åº”çš„è¿›ç¨‹å·²æŒ‚äº†åˆ™åˆ é™¤pid_fileæ–‡ä»¶ï¼Œè¿”å›0ï¼›å¦åˆ™è¿”å›
+ *       çœŸå®è¿›ç¨‹pid
+ * å‚æ•°: @pid_file
+ * è¯´æ˜ï¼š
+ *       1. è¯¥å‡½æ•°ç”¨äºç¨‹åºå¼€å§‹å¤„ï¼Œåˆ¤æ–­æ˜¯å¦æœ‰å…¶ä»–å®ä¾‹å·²ç»åœ¨è¿è¡Œ
+ * è¿”å›: æˆåŠŸï¼Œpidæ–‡ä»¶å†…å®¹ï¼Œæˆ–è€…0, å¤±è´¥ï¼Œ-1
  **/
 pid_t msd_pid_file_running(char *pid_file) 
 {
@@ -363,7 +363,7 @@ pid_t msd_pid_file_running(char *pid_file)
         goto finish;
     }
     
-    /* ¼ÓËø */
+    /* åŠ é” */
     if ((locked = msd_pid_file_lock(fd, 1)) < 0) 
     {
         goto finish;
@@ -415,7 +415,7 @@ finish:
         int saved_errno = errno;
         if (locked >= 0) 
         {
-            /* ½âËø */
+            /* è§£é” */
             msd_pid_file_lock(fd, 0);
         }
         close(fd);

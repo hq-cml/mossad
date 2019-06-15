@@ -7,7 +7,7 @@
  *
  *    Filename :  Msd_thread.c
  * 
- * Description :  Msd_thread, ¹¤×÷Ïß³ÌÏà¹ØÊµÏÖ.
+ * Description :  Msd_thread, å·¥ä½œçº¿ç¨‹ç›¸å…³å®ç°.
  * 
  *     Version :  1.0.0
  * 
@@ -17,7 +17,7 @@
 #include "msd_core.h"
 
 #define MSD_IOBUF_SIZE    4096
-#define MSD_MAX_PROT_LEN  10485760 /* ×î´óÇëÇó°ü10M */
+#define MSD_MAX_PROT_LEN  10485760 /* æœ€å¤§è¯·æ±‚åŒ…10M */
 
 
 extern msd_instance_t *g_ins;
@@ -31,12 +31,12 @@ static int msd_thread_worker_cron(msd_ae_event_loop *el, long long id, void *pri
 static void msd_thread_worker_shut_down(msd_thread_worker_t *worker);
 
 /**
- * ¹¦ÄÜ:´´½¨Ïß³Ì³Ø
- * ²ÎÊı:@num: ¹¤×÷Ïß³Ì¸öÊı 
- *      @statc_size: ¹¤×÷Ïß³ÌÕ»´óĞ¡ 
- * ÃèÊö:
+ * åŠŸèƒ½:åˆ›å»ºçº¿ç¨‹æ± 
+ * å‚æ•°:@num: å·¥ä½œçº¿ç¨‹ä¸ªæ•° 
+ *      @statc_size: å·¥ä½œçº¿ç¨‹æ ˆå¤§å° 
+ * æè¿°:
  *      1. 
- * ·µ»Ø:³É¹¦:Ïß³Ì³ØµØÖ·;Ê§°Ü:NULL
+ * è¿”å›:æˆåŠŸ:çº¿ç¨‹æ± åœ°å€;å¤±è´¥:NULL
  **/
 msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void* (*worker_task)(void*)) 
 {
@@ -50,14 +50,14 @@ msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void*
         return NULL;
     }
 
-    /* ³õÊ¼»¯Ïß³ÌËø */
+    /* åˆå§‹åŒ–çº¿ç¨‹é” */
     if (MSD_LOCK_INIT(pool->thread_lock) != 0) 
     {
         free(pool);
         return NULL;
     }
 
-    /* ³õÊ¼»¯Ïß³ÌworkerÁĞ±í */
+    /* åˆå§‹åŒ–çº¿ç¨‹workeråˆ—è¡¨ */
     if(!(pool->thread_worker_array = 
         (msd_thread_worker_t **)calloc(worker_num, sizeof(msd_thread_worker_t *))))
     {
@@ -69,13 +69,13 @@ msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void*
     pool->thread_worker_num = worker_num;
     pool->thread_stack_size = stack_size;    
 
-    /* ³õÊ¼»¯client³¬Ê±Ê±¼ä£¬Ä¬ÈÏ5·ÖÖÓ */
+    /* åˆå§‹åŒ–clientè¶…æ—¶æ—¶é—´ï¼Œé»˜è®¤5åˆ†é’Ÿ */
     pool->client_timeout =  msd_conf_get_int_value(g_ins->conf, "client_timeout", 300);
 
-    /* ³õÊ¼»¯cronÆµÂÊ */
+    /* åˆå§‹åŒ–croné¢‘ç‡ */
     pool->poll_interval  =  msd_conf_get_int_value(g_ins->conf, "worker_poll_interval", 60);
     
-    /* ³õÊ¼»¯Æô¶¯wokerÏß³Ì */
+    /* åˆå§‹åŒ–å¯åŠ¨wokerçº¿ç¨‹ */
     for (i = 0; i < worker_num; ++i) 
     {
         if(msd_thread_worker_create(pool, worker_task, i) != MSD_OK)
@@ -89,15 +89,15 @@ msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void*
 }
 
 /**
- * ¹¦ÄÜ:´´½¨¹¤×÷Ïß³Ì
- * ²ÎÊı:@pool: Ïß³Ì³Ø¾ä±ú 
- *      @worker: ¹¤×÷º¯Êı
- *      @idx: Ïß³ÌÎ»ÖÃË÷ÒıºÅ 
- * ÃèÊö:
- *      1. Ê×ÏÈ´´½¨wokerÏß³ÌµÄ×ÊÔ´£¬²¢³õÊ¼»¯
- *      2. ½«Ïß³Ì¾ä±ú·ÅÈëÖ÷Ïß³ÌµÄÈİÆ÷ÖĞµÄ¶ÔÓ¦Î»ÖÃ
- *      3. Æô¶¯wokerÏß³Ì£¬¿ªÊ¼¸É»î£¬º¯Êı·µ»Ø
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½:åˆ›å»ºå·¥ä½œçº¿ç¨‹
+ * å‚æ•°:@pool: çº¿ç¨‹æ± å¥æŸ„ 
+ *      @worker: å·¥ä½œå‡½æ•°
+ *      @idx: çº¿ç¨‹ä½ç½®ç´¢å¼•å· 
+ * æè¿°:
+ *      1. é¦–å…ˆåˆ›å»ºwokerçº¿ç¨‹çš„èµ„æºï¼Œå¹¶åˆå§‹åŒ–
+ *      2. å°†çº¿ç¨‹å¥æŸ„æ”¾å…¥ä¸»çº¿ç¨‹çš„å®¹å™¨ä¸­çš„å¯¹åº”ä½ç½®
+ *      3. å¯åŠ¨wokerçº¿ç¨‹ï¼Œå¼€å§‹å¹²æ´»ï¼Œå‡½æ•°è¿”å›
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task)(void *), int idx)
 {
@@ -113,11 +113,11 @@ static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task
     worker->idx                  = idx;
     worker->status               = W_STOP;
     worker->priv_data            = NULL;
-    pool->thread_worker_array[idx] = worker; /* ·ÅÈë¶ÔÓ¦µÄÎ»ÖÃ */
+    pool->thread_worker_array[idx] = worker; /* æ”¾å…¥å¯¹åº”çš„ä½ç½® */
 
     /* 
-     * ´´½¨Í¨ĞÅ¹ÜµÀ
-     * masterÏß³Ì½«ĞèÒª´¦ÀíµÄfdĞ´Èë¹ÜµÀ£¬wokerÏß³Ì´Ó¹ÜµÀÈ¡³ö
+     * åˆ›å»ºé€šä¿¡ç®¡é“
+     * masterçº¿ç¨‹å°†éœ€è¦å¤„ç†çš„fdå†™å…¥ç®¡é“ï¼Œwokerçº¿ç¨‹ä»ç®¡é“å–å‡º
      **/
     int fds[2];
     if (pipe(fds) != 0)
@@ -129,7 +129,7 @@ static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task
     worker->notify_read_fd  = fds[0];
     worker->notify_write_fd = fds[1];
 
-    /* ¹ÜµÀ²»ÄÜÊÇ×èÈûµÄ! */
+    /* ç®¡é“ä¸èƒ½æ˜¯é˜»å¡çš„! */
     if((MSD_OK != msd_anet_nonblock(error_buf,  worker->notify_read_fd))
         || (MSD_OK != msd_anet_nonblock(error_buf,  worker->notify_write_fd)))
     {
@@ -140,7 +140,7 @@ static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task
         return MSD_ERR;        
     }
 
-    /* ´´½¨ae¾ä±ú */
+    /* åˆ›å»ºaeå¥æŸ„ */
     if(!(worker->t_ael = msd_ae_create_event_loop()))
     {
         close(worker->notify_read_fd);
@@ -150,7 +150,7 @@ static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task
         return MSD_ERR;  
     }
 
-    /* ³õÊ¼»¯client¶ÓÁĞ */
+    /* åˆå§‹åŒ–clienté˜Ÿåˆ— */
     if(!(worker->client_list = msd_dlist_init()))
     {
         close(worker->notify_read_fd);
@@ -161,7 +161,7 @@ static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task
         return MSD_ERR;         
     }
 
-    /* ´´½¨Ïß³Ì */
+    /* åˆ›å»ºçº¿ç¨‹ */
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setstacksize(&attr, pool->thread_stack_size);
@@ -179,9 +179,9 @@ static int msd_thread_worker_create(msd_thread_pool_t *pool, void* (*worker_task
 }
 
 /**
- * ¹¦ÄÜ: Ïú»ÙÏß³Ì³Ø
- * ²ÎÊı: @pool: Ïß³Ì³Ø¾ä±ú 
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: é”€æ¯çº¿ç¨‹æ± 
+ * å‚æ•°: @pool: çº¿ç¨‹æ± å¥æŸ„ 
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 int msd_thread_pool_destroy(msd_thread_pool_t *pool) 
 {
@@ -206,10 +206,10 @@ int msd_thread_pool_destroy(msd_thread_pool_t *pool)
 }
 
 /**
- * ¹¦ÄÜ: Ïß³ÌË¯Ãßº¯Êı
- * ²ÎÊı: @sec, Ë¯ÃßÊ±³¤£¬ÃëÊı
- * ËµÃ÷: 
- *       1.ÀûÓÃselect±äÏàÊµÏÖË¯ÃßĞ§¹û
+ * åŠŸèƒ½: çº¿ç¨‹ç¡çœ å‡½æ•°
+ * å‚æ•°: @sec, ç¡çœ æ—¶é•¿ï¼Œç§’æ•°
+ * è¯´æ˜: 
+ *       1.åˆ©ç”¨selectå˜ç›¸å®ç°ç¡çœ æ•ˆæœ
  **/
 void msd_thread_sleep(int s) 
 {
@@ -220,10 +220,10 @@ void msd_thread_sleep(int s)
 }
 
 /**
- * ¹¦ÄÜ: Ïß³ÌË¯Ãßº¯Êı
- * ²ÎÊı: @sec, Ë¯ÃßÊ±³¤£¬ÃëÊı
- * ËµÃ÷: 
- *       1.ÀûÓÃselect±äÏàÊµÏÖË¯ÃßĞ§¹û
+ * åŠŸèƒ½: çº¿ç¨‹ç¡çœ å‡½æ•°
+ * å‚æ•°: @sec, ç¡çœ æ—¶é•¿ï¼Œç§’æ•°
+ * è¯´æ˜: 
+ *       1.åˆ©ç”¨selectå˜ç›¸å®ç°ç¡çœ æ•ˆæœ
  **/
 void msd_thread_usleep(int s) 
 {
@@ -235,12 +235,12 @@ void msd_thread_usleep(int s)
 
 
 /**
- * ¹¦ÄÜ: workerÏß³Ì¹¤×÷º¯Êı
- * ²ÎÊı: @arg: Ïß³Ìº¯Êı£¬Í¨³£À´Ëµ£¬¶¼ÊÇÏß³Ì×ÔÉí¾ä±úµÄÖ¸Õë
- * ËµÃ÷: 
- *       1.msd_ae_free_event_loop²»Ó¦¸ÃÔÚaeµÄ»Øµ÷ÀïÃæµ÷ÓÃ£¬ÔÚ»Øµ÷ÀïÃæÓ¦¸Ãµ÷ÓÃ
- *         msd_ae_stop£¬µ¼ÖÂmsd_ae_main_loopÍË³ö£¬È»ºóaeµÄÎö¹¹·ÅÔÚmain_loopºó
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: workerçº¿ç¨‹å·¥ä½œå‡½æ•°
+ * å‚æ•°: @arg: çº¿ç¨‹å‡½æ•°ï¼Œé€šå¸¸æ¥è¯´ï¼Œéƒ½æ˜¯çº¿ç¨‹è‡ªèº«å¥æŸ„çš„æŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1.msd_ae_free_event_loopä¸åº”è¯¥åœ¨aeçš„å›è°ƒé‡Œé¢è°ƒç”¨ï¼Œåœ¨å›è°ƒé‡Œé¢åº”è¯¥è°ƒç”¨
+ *         msd_ae_stopï¼Œå¯¼è‡´msd_ae_main_loopé€€å‡ºï¼Œç„¶åaeçš„ææ„æ”¾åœ¨main_loopå
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 void* msd_thread_worker_cycle(void* arg) 
 {
@@ -249,7 +249,7 @@ void* msd_thread_worker_cycle(void* arg)
 
     worker->status = W_RUNNING;
 
-    /* workerÏß³Ì³õÊ¼»¯º¯Êı */
+    /* workerçº¿ç¨‹åˆå§‹åŒ–å‡½æ•° */
     if (g_ins->so_func->handle_worker_init) 
     {
         if (g_ins->so_func->handle_worker_init(g_ins->conf, worker) != MSD_OK) 
@@ -269,31 +269,31 @@ void* msd_thread_worker_cycle(void* arg)
 
     }
 
-    /* Æô¶¯¶¨Ê±Æ÷£¬ÇåÀí³¬Ê±µÄclient */
+    /* å¯åŠ¨å®šæ—¶å™¨ï¼Œæ¸…ç†è¶…æ—¶çš„client */
     msd_ae_create_time_event(worker->t_ael, 1000*worker->pool->poll_interval,
             msd_thread_worker_cron, worker, NULL);
 
-    /* ÎŞÏŞÑ­»· */
+    /* æ— é™å¾ªç¯ */
     msd_ae_main_loop(worker->t_ael);
 
-    /* ÍË³öÁËae_main_loop£¬Ïß³ÌµÄÉúÃü×ßµ½¾¡Í· */
+    /* é€€å‡ºäº†ae_main_loopï¼Œçº¿ç¨‹çš„ç”Ÿå‘½èµ°åˆ°å°½å¤´ */
     worker->tid = 0;
     worker->idx = -1;
     msd_dlist_destroy(worker->client_list);
     msd_ae_free_event_loop(worker->t_ael);
-    //free(worker);Ïú»Ù³Ø×ÓµÄÊ±ºò»áÍ³Ò»ÊÍ·Å
+    //free(worker);é”€æ¯æ± å­çš„æ—¶å€™ä¼šç»Ÿä¸€é‡Šæ”¾
     pthread_exit(0);
     return (void*)NULL;
 }
 
 /**
- * ¹¦ÄÜ: workerÏß³Ì¹¤×÷º¯Êı
- * ²ÎÊı: @arg: Ïß³Ìº¯Êı£¬Í¨³£À´Ëµ£¬¶¼ÊÇÏß³Ì×ÔÉí¾ä±úµÄÖ¸Õë
- * ËµÃ÷: 
- *       1. Èç¹û¶Á³öµÄclient_idxÊÇ-1£¬Ôò±íÊ¾ĞèÒª³ÌĞò¼´½«¹Ø±Õ
- *       2. Èç¹û¶Á³öµÄclient_idx·Ç-1£¬Ôò¸ù¾İidxÈ¡³öclient¾ä±ú
- *          ½«client->fd¼ÓÈë¶ÁÈ¡ÊÂ¼ş¼¯ºÏ£¬½øĞĞ¹ÜÀí
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: workerçº¿ç¨‹å·¥ä½œå‡½æ•°
+ * å‚æ•°: @arg: çº¿ç¨‹å‡½æ•°ï¼Œé€šå¸¸æ¥è¯´ï¼Œéƒ½æ˜¯çº¿ç¨‹è‡ªèº«å¥æŸ„çš„æŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. å¦‚æœè¯»å‡ºçš„client_idxæ˜¯-1ï¼Œåˆ™è¡¨ç¤ºéœ€è¦ç¨‹åºå³å°†å…³é—­
+ *       2. å¦‚æœè¯»å‡ºçš„client_idxé-1ï¼Œåˆ™æ ¹æ®idxå–å‡ºclientå¥æŸ„
+ *          å°†client->fdåŠ å…¥è¯»å–äº‹ä»¶é›†åˆï¼Œè¿›è¡Œç®¡ç†
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int notify_fd, 
         void *client_data, int mask)
@@ -305,7 +305,7 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
     msd_conn_client_t    *client = NULL;
     int                  read_len;
 
-    /* ÁìÈ¡client idx */
+    /* é¢†å–client idx */
     if((read_len = read(notify_fd, &client_idx, sizeof(int)))!= sizeof(int))
     {
         MSD_ERROR_LOG("Worker[%d] read the notify_fd error! read_len:%d", worker->idx, read_len);
@@ -313,14 +313,14 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
     }
     MSD_INFO_LOG("Worker[%d] Get the task. Client_idx[%d]", worker->idx, client_idx);
 
-    /* Èç¹û¶Á³öµÄclient_idxÊÇ-1£¬Ôò±íÊ¾ĞèÒª³ÌĞò¼´½«¹Ø±Õ */
+    /* å¦‚æœè¯»å‡ºçš„client_idxæ˜¯-1ï¼Œåˆ™è¡¨ç¤ºéœ€è¦ç¨‹åºå³å°†å…³é—­ */
     if(-1 == client_idx)
     {
         msd_thread_worker_shut_down(worker);
         return;
     }
     
-    /* ¸ù¾İclient idx»ñÈ¡µ½clientµØÖ· */
+    /* æ ¹æ®client idxè·å–åˆ°clientåœ°å€ */
     MSD_LOCK_LOCK(g_ins->client_conn_vec_lock);
     pclient = (msd_conn_client_t **)msd_vector_get_at(master->client_vec, client_idx);
     MSD_LOCK_UNLOCK(g_ins->client_conn_vec_lock);
@@ -335,14 +335,14 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
         return;
     }
 
-    /* ½«worker_idĞ´Èëclient½á¹¹ */
+    /* å°†worker_idå†™å…¥clientç»“æ„ */
     client->worker_id = worker->idx;
     client->status    = C_WAITING;
     
-    /* Ïòworker->client_list×·¼Óclient */
+    /* å‘worker->client_listè¿½åŠ client */
     msd_dlist_add_node_tail(worker->client_list, client);
     
-    /* »¶Ó­ĞÅÏ¢ */
+    /* æ¬¢è¿ä¿¡æ¯ */
     if(g_ins->so_func->handle_open)
     {
         if(MSD_OK != g_ins->so_func->handle_open(client))
@@ -354,7 +354,7 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
         }
     }
         
-    /* ×¢²á¶ÁÈ¡ÊÂ¼ş */
+    /* æ³¨å†Œè¯»å–äº‹ä»¶ */
     if (msd_ae_create_file_event(worker->t_ael, client->fd, MSD_AE_READABLE,
                 msd_read_from_client, client) == MSD_ERR) 
     {
@@ -366,11 +366,11 @@ static void msd_thread_worker_process_notify(struct msd_ae_event_loop *el, int n
 }
 
 /**
- * ¹¦ÄÜ: client¿É¶ÁÊ±µÄ»Øµ÷º¯Êı¡£
- * ²ÎÊı: @privdata£¬»Øµ÷º¯ÊıµÄÈë²Î
- * ËµÃ÷: 
+ * åŠŸèƒ½: clientå¯è¯»æ—¶çš„å›è°ƒå‡½æ•°ã€‚
+ * å‚æ•°: @privdataï¼Œå›è°ƒå‡½æ•°çš„å…¥å‚
+ * è¯´æ˜: 
  *       1.  
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, int mask) 
 {
@@ -388,7 +388,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     client->access_time = time(NULL);
     if (nread == -1) 
     {
-        /* ·Ç×èÈûµÄfd£¬¶ÁÈ¡²»»á×èÈû£¬Èç¹ûÎŞÄÚÈİ¿É¶Á£¬Ôòerrno==EAGAIN */
+        /* éé˜»å¡çš„fdï¼Œè¯»å–ä¸ä¼šé˜»å¡ï¼Œå¦‚æœæ— å†…å®¹å¯è¯»ï¼Œåˆ™errno==EAGAIN */
         if (errno == EAGAIN) 
         {
             MSD_WARNING_LOG("Read connection [%s:%d] eagain: %s",
@@ -424,15 +424,15 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
     MSD_INFO_LOG("Read from client. IP:%s, Port:%d. Length:%d, Content:%s", 
                     client->remote_ip, client->remote_port, nread, buf);
 
-    /* ½«¶Á³öµÄÄÚÈİÆ´½Óµ½recvbufÉÏÃæ£¬ÕâÀïÊÇÆ´½Ó£¬ÒòÎª¿ÉÄÜÇëÇóµÄ°üºÜ´ó
-     * ĞèÒª¶à´Îread²ÅÄÜ½«¶ÁÈ¡ÄÚÈİÆ´×°³ÉÒ»¸öÍêÕûµÄÇëÇó */
+    /* å°†è¯»å‡ºçš„å†…å®¹æ‹¼æ¥åˆ°recvbufä¸Šé¢ï¼Œè¿™é‡Œæ˜¯æ‹¼æ¥ï¼Œå› ä¸ºå¯èƒ½è¯·æ±‚çš„åŒ…å¾ˆå¤§
+     * éœ€è¦å¤šæ¬¡readæ‰èƒ½å°†è¯»å–å†…å®¹æ‹¼è£…æˆä¸€ä¸ªå®Œæ•´çš„è¯·æ±‚ */
     msd_str_cat(&(client->recvbuf), buf);
 
-    /* Ò»´Î½ÓÊÜµÄÄÚÈİ¿ÉÄÜÊÇ¶à¸öÍêÕûµÄĞ­Òé°ü */
+    /* ä¸€æ¬¡æ¥å—çš„å†…å®¹å¯èƒ½æ˜¯å¤šä¸ªå®Œæ•´çš„åè®®åŒ… */
     do{
         if (client->recv_prot_len == 0) 
         {
-            /* Ã¿´Î¶ÁÈ¡µÄ³¤¶È²»¶¨£¬ËùÒÔrecv_prot_lenÊÇÒ»¸ö±äÁ¿£¬²»¶Ïµ÷Õû */ 
+            /* æ¯æ¬¡è¯»å–çš„é•¿åº¦ä¸å®šï¼Œæ‰€ä»¥recv_prot_lenæ˜¯ä¸€ä¸ªå˜é‡ï¼Œä¸æ–­è°ƒæ•´ */ 
             client->recv_prot_len = g_ins->so_func->handle_prot_len(client);
             MSD_DEBUG_LOG("Get the recv_prot_len %d", client->recv_prot_len);
         } 
@@ -447,9 +447,9 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
 
         if (client->recv_prot_len == 0) 
         {
-            /* µ±´¦ÀíÒ»¸ö±È½Ï´óĞÍµÄÇëÇó°üµÄÊ±ºò(»òÕß¿Í»§¶ËÊÇtelnet£¬Ã¿Ò»´Î»Ø³µ¶¼»á´¥·¢Ò»¸öTCP°ü·¢ËÍ)
-             * Ò»¸öÇëÇó¿ÉÄÜ»áÓÉ¶à¸öTCP°ü·¢ËÍ¹ıÀ´andle_inputÔİÊ±»¹ÎŞ·¨ÅĞ¶Ï³öÕû¸öÇëÇóµÄ³¤¶È£¬Ôò·µ»Ø0£¬
-             * ±íÊ¾ĞèÒª¼ÌĞø¶ÁÈ¡Êı¾İ£¬Ö±µ½handle_inputÄÜ¹»ÅĞ¶Ï³öÇëÇó³¤¶ÈÎªÖ¹
+            /* å½“å¤„ç†ä¸€ä¸ªæ¯”è¾ƒå¤§å‹çš„è¯·æ±‚åŒ…çš„æ—¶å€™(æˆ–è€…å®¢æˆ·ç«¯æ˜¯telnetï¼Œæ¯ä¸€æ¬¡å›è½¦éƒ½ä¼šè§¦å‘ä¸€ä¸ªTCPåŒ…å‘é€)
+             * ä¸€ä¸ªè¯·æ±‚å¯èƒ½ä¼šç”±å¤šä¸ªTCPåŒ…å‘é€è¿‡æ¥andle_inputæš‚æ—¶è¿˜æ— æ³•åˆ¤æ–­å‡ºæ•´ä¸ªè¯·æ±‚çš„é•¿åº¦ï¼Œåˆ™è¿”å›0ï¼Œ
+             * è¡¨ç¤ºéœ€è¦ç»§ç»­è¯»å–æ•°æ®ï¼Œç›´åˆ°handle_inputèƒ½å¤Ÿåˆ¤æ–­å‡ºè¯·æ±‚é•¿åº¦ä¸ºæ­¢
              */
             MSD_INFO_LOG("Unkonw the accurate protocal length, do noting!. Connection. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
@@ -460,47 +460,47 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
         if ( client->recvbuf->len >= client->recv_prot_len) 
         {
             client->status = C_PROCESSING;
-            /* Ä¿Ç°¶ÁÈ¡µ½µÄÊı¾İ£¬ÒÑ¾­×ã¹»Æ´³öÒ»¸öÍêÕûÇëÇó°ü£¬Ôòµ÷ÓÃhandle_process */
+            /* ç›®å‰è¯»å–åˆ°çš„æ•°æ®ï¼Œå·²ç»è¶³å¤Ÿæ‹¼å‡ºä¸€ä¸ªå®Œæ•´è¯·æ±‚åŒ…ï¼Œåˆ™è°ƒç”¨handle_process */
             ret = g_ins->so_func->handle_process(client);
             
             if(MSD_OK == ret)
             {
-                /* ·µ»ØO£¬±íÊ¾³É¹¦²¢¼ÌĞø */
+                /* è¿”å›Oï¼Œè¡¨ç¤ºæˆåŠŸå¹¶ç»§ç»­ */
                 MSD_INFO_LOG("The handle_process success. Continue. Connection. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
             }
             else if(MSD_END == ret)
             {
-                /* ·µ»ØMSD_END£¬±íÊ¾³É¹¦µ«²»¼ÌĞø */
+                /* è¿”å›MSD_ENDï¼Œè¡¨ç¤ºæˆåŠŸä½†ä¸ç»§ç»­ */
                 MSD_INFO_LOG("The handle_process success. End. Connection. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
                 //msd_close_client(client->idx, NULL);
                 //return;
-                client->close_conn = 1; /* response³É¹¦Ö®ºó£¬×Ô¶¯¹Ø±ÕÁ¬½Ó */
+                client->close_conn = 1; /* responseæˆåŠŸä¹‹åï¼Œè‡ªåŠ¨å…³é—­è¿æ¥ */
                 msd_ae_delete_file_event(el, fd, MSD_AE_READABLE);
             }
             else
             {
-                /* ´¦ÀíÊ§°Ü£¬Ö±½Ó¹Ø±Õclient */
+                /* å¤„ç†å¤±è´¥ï¼Œç›´æ¥å…³é—­client */
                 MSD_ERROR_LOG("The handle_process failed. End. Connection. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
                 msd_close_client(client->idx, NULL);
                 return;
             }
 
-            /* Ã¿´ÎÖ»¶ÁÈ¡recv_prot_lenÊı¾İ³¤¶È£¬Èç¹ûrecvbufÀïÃæ»¹ÓĞÊ£ÓàÊı¾İ£¬ÔòÓ¦¸Ã½Ø³öÀ´±£Áô */
+            /* æ¯æ¬¡åªè¯»å–recv_prot_lenæ•°æ®é•¿åº¦ï¼Œå¦‚æœrecvbufé‡Œé¢è¿˜æœ‰å‰©ä½™æ•°æ®ï¼Œåˆ™åº”è¯¥æˆªå‡ºæ¥ä¿ç•™ */
             if(MSD_OK != msd_str_range(client->recvbuf, client->recv_prot_len,  client->recvbuf->len - 1))
             {
-                /* µ±recv_prot_len==recvbuf->lenµÄÊ±ºò£¬range()·µ»Ø´íÎó£¬Ö±½ÓÇå¿Õ»º³åÇø */
+                /* å½“recv_prot_len==recvbuf->lençš„æ—¶å€™ï¼Œrange()è¿”å›é”™è¯¯ï¼Œç›´æ¥æ¸…ç©ºç¼“å†²åŒº */
                 msd_str_clear(client->recvbuf);
             }
                 
-            /* ½«Ğ­Òé³¤¶ÈÇå0£¬ÒòÎªÃ¿´ÎÇëÇó¶¼ÊÇ¶ÀÁ¢µÄ£¬ÇëÇóµÄĞ­Òé³¤¶ÈÊÇ¿ÉÄÜ·¢Éú±ä»¯£¬±ÈÈçhttp·şÎñÆ÷ 
-               * ĞèÒªÓÉhandle_inputº¯ÊıÈ¥ÊµÊ±¼ÆËã */
+            /* å°†åè®®é•¿åº¦æ¸…0ï¼Œå› ä¸ºæ¯æ¬¡è¯·æ±‚éƒ½æ˜¯ç‹¬ç«‹çš„ï¼Œè¯·æ±‚çš„åè®®é•¿åº¦æ˜¯å¯èƒ½å‘ç”Ÿå˜åŒ–ï¼Œæ¯”å¦‚httpæœåŠ¡å™¨ 
+               * éœ€è¦ç”±handle_inputå‡½æ•°å»å®æ—¶è®¡ç®— */
             client->recv_prot_len = 0; 
             client->status        = C_WAITING;
 
-            /* Èç¹ûsendbuf²»Îª¿Õ£¬Ôò×¢²áClientĞ´»ØÊÂ¼ş */
+            /* å¦‚æœsendbufä¸ä¸ºç©ºï¼Œåˆ™æ³¨å†ŒClientå†™å›äº‹ä»¶ */
             if(client->sendbuf->len > 0)
             {
                 worker = msd_get_worker(client->worker_id);
@@ -513,7 +513,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
                 }
             }
             
-            /* ¶Å¾ø¿Õ×ª */
+            /* æœç»ç©ºè½¬ */
             if(client->recvbuf->len <= 0)
             {
                 return;
@@ -521,7 +521,7 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
         }
         else
         {
-            /* Ä¿Ç°¶ÁÈ¡µ½µÄÊı¾İ»¹²»¹»×é×°³ÉĞèÒªµÄÇëÇó£¬Ôò¼ÌĞøµÈ´ı¶ÁÈ¡ */
+            /* ç›®å‰è¯»å–åˆ°çš„æ•°æ®è¿˜ä¸å¤Ÿç»„è£…æˆéœ€è¦çš„è¯·æ±‚ï¼Œåˆ™ç»§ç»­ç­‰å¾…è¯»å– */
             MSD_DEBUG_LOG("The data lenght not enough, do noting!. IP:%s, Port:%d", 
                             client->remote_ip, client->remote_port);
             return;
@@ -531,11 +531,11 @@ static void msd_read_from_client(msd_ae_event_loop *el, int fd, void *privdata, 
 }
 
 /**
- * ¹¦ÄÜ: Ïòclient»ØĞ´response
- * ²ÎÊı: @privdata£¬»Øµ÷º¯ÊıµÄÈë²Î
- * ËµÃ÷: 
+ * åŠŸèƒ½: å‘clientå›å†™response
+ * å‚æ•°: @privdataï¼Œå›è°ƒå‡½æ•°çš„å…¥å‚
+ * è¯´æ˜: 
  *       1.  
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 void msd_write_to_client(msd_ae_event_loop *el, int fd, void *privdata, int mask) 
 {
@@ -549,12 +549,12 @@ void msd_write_to_client(msd_ae_event_loop *el, int fd, void *privdata, int mask
     client->access_time = time(NULL);
     if (nwrite < 0) 
     {
-        if (errno == EAGAIN) /* ·Ç×èÈûfdĞ´Èë£¬¿ÉÄÜÔİ²»¿ÉÓÃ */
+        if (errno == EAGAIN) /* éé˜»å¡fdå†™å…¥ï¼Œå¯èƒ½æš‚ä¸å¯ç”¨ */
         {
             MSD_WARNING_LOG("Write to client temporarily unavailable! IP:%s, Port:%d.", client->remote_ip, client->remote_port);
             nwrite = 0;
         } 
-        else if(errno==EINTR)/* ÔâÓöÖĞ¶Ï */
+        else if(errno==EINTR)/* é­é‡ä¸­æ–­ */
         {  
             MSD_WARNING_LOG("Handle process was interupted! IP:%s, Port:%d. Error:%s.", client->remote_ip, client->remote_port, strerror(errno));
             nwrite = 0; 
@@ -568,15 +568,15 @@ void msd_write_to_client(msd_ae_event_loop *el, int fd, void *privdata, int mask
     }
     MSD_INFO_LOG("Write to client! IP:%s, Port:%d. Write_len:%d", client->remote_ip, client->remote_port, nwrite);
 
-    /* ½«ÒÑ¾­Ğ´ÍêµÄÊı¾İ£¬´ÓsendbufÖĞ²Ã¼ôµô */
+    /* å°†å·²ç»å†™å®Œçš„æ•°æ®ï¼Œä»sendbufä¸­è£å‰ªæ‰ */
     if(MSD_OK != msd_str_range(client->sendbuf, nwrite, client->sendbuf->len-1))
     {
-        /* Èç¹ûÒÑ¾­Ğ´ÍêÁË,Ôòwrite_len == client->sendbuf->len¡£Ôòmsd_str_range·µ»ØNONEED */
+        /* å¦‚æœå·²ç»å†™å®Œäº†,åˆ™write_len == client->sendbuf->lenã€‚åˆ™msd_str_rangeè¿”å›NONEED */
         msd_str_clear(client->sendbuf);
     }
 
-     /* Ë®Æ½´¥·¢£¬Èç¹ûsendbufÒÑ¾­Îª¿Õ£¬ÔòÉ¾³ıĞ´ÊÂ¼ş£¬·ñÔò»á²»¶Ï´¥·¢
-       * ×¢²áĞ´ÊÂ¼şÓĞsoÖĞµÄhandle_processÈ¥Íê³É */
+     /* æ°´å¹³è§¦å‘ï¼Œå¦‚æœsendbufå·²ç»ä¸ºç©ºï¼Œåˆ™åˆ é™¤å†™äº‹ä»¶ï¼Œå¦åˆ™ä¼šä¸æ–­è§¦å‘
+       * æ³¨å†Œå†™äº‹ä»¶æœ‰soä¸­çš„handle_processå»å®Œæˆ */
     if(client->sendbuf->len == 0)
     {
         msd_ae_delete_file_event(el, fd, MSD_AE_WRITABLE);
@@ -590,14 +590,14 @@ void msd_write_to_client(msd_ae_event_loop *el, int fd, void *privdata, int mask
 }
 
 /**
- * ¹¦ÄÜ: workerÏß³ÌµÄÊ±¼ä»Øµ÷º¯Êı¡£
- * ²ÎÊı: @el
- *       @id£¬Ê±¼äÊÂ¼şid
- *       @privdata£¬workerÖ¸Õë
- * ËµÃ÷: 
- *       ±éÀúclientsÊı×é£¬ÕÒ³öÂú×ã³¬Ê±Ìõ¼şµÄclient½Úµã
- *       ¹Ø±ÕÖ®,Ã¿·ÖÖÓÔËĞĞÒ»´Î 
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: workerçº¿ç¨‹çš„æ—¶é—´å›è°ƒå‡½æ•°ã€‚
+ * å‚æ•°: @el
+ *       @idï¼Œæ—¶é—´äº‹ä»¶id
+ *       @privdataï¼ŒworkeræŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       éå†clientsæ•°ç»„ï¼Œæ‰¾å‡ºæ»¡è¶³è¶…æ—¶æ¡ä»¶çš„clientèŠ‚ç‚¹
+ *       å…³é—­ä¹‹,æ¯åˆ†é’Ÿè¿è¡Œä¸€æ¬¡ 
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 static int msd_thread_worker_cron(msd_ae_event_loop *el, long long id, void *privdate) 
 {
@@ -614,7 +614,7 @@ static int msd_thread_worker_cron(msd_ae_event_loop *el, long long id, void *pri
     while ((node = msd_dlist_next(&iter))) 
     {
         cli = node->value;
-        /* client³¬Ê±ÅĞ¶Ï£¬Ä¬ÈÏÊÇ60Ãë³¬Ê± */
+        /* clientè¶…æ—¶åˆ¤æ–­ï¼Œé»˜è®¤æ˜¯60ç§’è¶…æ—¶ */
         if ( unix_clock - cli->access_time > worker->pool->client_timeout) 
         {
             MSD_DEBUG_LOG("Connection %s:%d timeout closed", 
@@ -627,15 +627,15 @@ static int msd_thread_worker_cron(msd_ae_event_loop *el, long long id, void *pri
 }
 
 /**
- * ¹¦ÄÜ: ¹Ø±Õ×Ô¼º¸ºÔğµÄÈ«²¿client
- * ²ÎÊı: @el
- *       @id£¬Ê±¼äÊÂ¼şid
- *       @privdata£¬workerÖ¸Õë
- * ËµÃ÷: 
- *       1. ±éÀúclientsÊı×é£¬¹Ø±ÕÈ«²¿client 
- *       2. Ïú»ÙËùÓĞ³ÉÔ±µÄ×ÊÔ´
- *       3. Ïß³ÌÍË³ö
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: å…³é—­è‡ªå·±è´Ÿè´£çš„å…¨éƒ¨client
+ * å‚æ•°: @el
+ *       @idï¼Œæ—¶é—´äº‹ä»¶id
+ *       @privdataï¼ŒworkeræŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. éå†clientsæ•°ç»„ï¼Œå…³é—­å…¨éƒ¨client 
+ *       2. é”€æ¯æ‰€æœ‰æˆå‘˜çš„èµ„æº
+ *       3. çº¿ç¨‹é€€å‡º
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 static void msd_thread_worker_shut_down(msd_thread_worker_t *worker)
 {
@@ -645,7 +645,7 @@ static void msd_thread_worker_shut_down(msd_thread_worker_t *worker)
 
     MSD_INFO_LOG("Worker[%d] begin to shutdown! Client count:%d", worker->idx, worker->client_list->len);
     worker->status = W_STOPING;
-    /* ±éÀú */
+    /* éå† */
     msd_dlist_rewind(worker->client_list, &iter);
     while ((node = msd_dlist_next(&iter))) 
     {
@@ -654,7 +654,7 @@ static void msd_thread_worker_shut_down(msd_thread_worker_t *worker)
     }
     MSD_INFO_LOG("Worker[%d] end shutdown! Client count:%d", worker->idx, worker->client_list->len);    
 
-    /* È¥³ıÊÂ¼ş£¬²¢½«AEÍ£Ö¹ */
+    /* å»é™¤äº‹ä»¶ï¼Œå¹¶å°†AEåœæ­¢ */
     msd_ae_delete_file_event(worker->t_ael, worker->notify_read_fd, MSD_AE_READABLE | MSD_AE_WRITABLE);
     msd_ae_stop(worker->t_ael);
     close(worker->notify_read_fd);
@@ -662,8 +662,8 @@ static void msd_thread_worker_shut_down(msd_thread_worker_t *worker)
 }
 
 /**
- * ¹¦ÄÜ: ¸ù¾İworkerµÄid£¬»ñµÃworker¾ä±ú
- * ·µ»Ø: ³É¹¦:worker¾ä±ú; Ê§°Ü:-x
+ * åŠŸèƒ½: æ ¹æ®workerçš„idï¼Œè·å¾—workerå¥æŸ„
+ * è¿”å›: æˆåŠŸ:workerå¥æŸ„; å¤±è´¥:-x
  **/
 msd_thread_worker_t * msd_get_worker(int worker_id)
 {
@@ -684,15 +684,15 @@ msd_thread_worker_t * msd_get_worker(int worker_id)
 int g_int = 0;
 int fd;
 
-//²âÊÔÏß³ÌËø
-//Èç¹û²»¼ÓËø£¬Ôò×îÖÕµÄÎÄ¼ş¿ÉÄÜĞĞÊı²»¹»£¬»òÕßË³Ğò²»¶Ô
-//Èç¹û¼ÓËø£¬Ôò×îÖÕµÄÎÄ¼ş¿ÉÄÜĞĞÊı»òÕßË³Ğò¶¼ÍêÈ«ÕıÈ·
+//æµ‹è¯•çº¿ç¨‹é”
+//å¦‚æœä¸åŠ é”ï¼Œåˆ™æœ€ç»ˆçš„æ–‡ä»¶å¯èƒ½è¡Œæ•°ä¸å¤Ÿï¼Œæˆ–è€…é¡ºåºä¸å¯¹
+//å¦‚æœåŠ é”ï¼Œåˆ™æœ€ç»ˆçš„æ–‡ä»¶å¯èƒ½è¡Œæ•°æˆ–è€…é¡ºåºéƒ½å®Œå…¨æ­£ç¡®
 void* task(void* arg) 
 {
     msd_thread_worker_t *worker = (msd_thread_worker_t *)arg;
     
     MSD_LOCK_LOCK(worker->pool->thread_lock);
-    msd_thread_sleep(worker->idx); // Ë¯Ãß
+    msd_thread_sleep(worker->idx); // ç¡çœ 
     g_int++;
     printf("I am thread %d, I get the g_int:%d. My tid:%lu, pool:%lu\n", worker->idx, g_int, (long unsigned int)worker->tid, (long unsigned int)worker->pool);
     write(fd, "hello\n", 6);
@@ -709,10 +709,10 @@ int main(int argc, char *argv[])
     msd_log_init("./","thread.log", 4, 10*1024*1024, 1, 0); 
     //msd_thread_pool_create(1000, 1024*1024, task);
     msd_thread_pool_t *pool = msd_thread_pool_create(10, 1024*1024, task);
-    msd_thread_sleep(1);//Ë¯ÃßÒ»Ãë£¬ÈÃÏß³Ì³ä·ÖÆô¶¯ÆğÀ´£¡
+    msd_thread_sleep(1);//ç¡çœ ä¸€ç§’ï¼Œè®©çº¿ç¨‹å……åˆ†å¯åŠ¨èµ·æ¥ï¼
     
-    /* ×¢Òâ£¬Èç¹ûÏß³ÌÊÇdetache×´Ì¬£¬ÏÂÃæµÄjoin½«Ê§Ğ§
-     * µ«ÊÇ£¬detachedµÄÏß³Ì£¬²»»áÒòÎªÖ÷Ïß³ÌÍË³ö¶øÍË³ö£¡£¡£¡
+    /* æ³¨æ„ï¼Œå¦‚æœçº¿ç¨‹æ˜¯detacheçŠ¶æ€ï¼Œä¸‹é¢çš„joinå°†å¤±æ•ˆ
+     * ä½†æ˜¯ï¼Œdetachedçš„çº¿ç¨‹ï¼Œä¸ä¼šå› ä¸ºä¸»çº¿ç¨‹é€€å‡ºè€Œé€€å‡ºï¼ï¼ï¼
      */
     for(i=0; i<10; i++)
     {

@@ -17,14 +17,14 @@
 #include "msd_core.h"
  
 /**
- * ¹¦ÄÜ: Initialize a new list.
- * ²ÎÊı: @
- * ÃèÊö:
+ * åŠŸèƒ½: Initialize a new list.
+ * å‚æ•°: @
+ * æè¿°:
  *      1. The initalized list should be freed with dlist_destroy(), 
  *         but private value of each node need to be freed by the 
  *         user before to call dlist_destroy if list's 'free' pointer
  *         is NULL.
- * ·µ»Ø: ³É¹¦£¬dlist½á¹¹Ö¸Õë£¬ Ê§°Ü£¬NULL
+ * è¿”å›: æˆåŠŸï¼Œdlistç»“æ„æŒ‡é’ˆï¼Œ å¤±è´¥ï¼ŒNULL
  **/
 msd_dlist_t *msd_dlist_init(void) 
 {
@@ -45,9 +45,9 @@ msd_dlist_t *msd_dlist_init(void)
 }
 
 /**
- * ¹¦ÄÜ: Destroy the whole list. 
- * ²ÎÊı: @dl£¬dlist½á¹¹µØÖ·
- * ÃèÊö:
+ * åŠŸèƒ½: Destroy the whole list. 
+ * å‚æ•°: @dlï¼Œdlistç»“æ„åœ°å€
+ * æè¿°:
  *      1. If the list's 'free' pointer is not NULL, 
  *         the value will be freed automately first.
  **/
@@ -71,14 +71,14 @@ void msd_dlist_destroy(msd_dlist_t *dl)
 }
 
 /**
- * ¹¦ÄÜ: Add a new node to the list's head, containing the specified 
+ * åŠŸèƒ½: Add a new node to the list's head, containing the specified 
  *       'value' pointer as value. 
- * ²ÎÊı: @dl, dlist½á¹¹Ö¸Õë
- *       @value, valueÖ¸Õë
- * ÃèÊö:
- *      1. Í·²¿²åÈëÒ»¸ö½Úµã£¨ÎŞÍ·½áµã£©
- *      2. ·µ»ØµÄÖµÊÇ´«ÈëÊ±ºòµÄÖ¸Õë
- * ·µ»Ø: ³É¹¦£¬dlist½á¹¹Ö¸Õë,Ê§°Ü£¬NULL
+ * å‚æ•°: @dl, dlistç»“æ„æŒ‡é’ˆ
+ *       @value, valueæŒ‡é’ˆ
+ * æè¿°:
+ *      1. å¤´éƒ¨æ’å…¥ä¸€ä¸ªèŠ‚ç‚¹ï¼ˆæ— å¤´ç»“ç‚¹ï¼‰
+ *      2. è¿”å›çš„å€¼æ˜¯ä¼ å…¥æ—¶å€™çš„æŒ‡é’ˆ
+ * è¿”å›: æˆåŠŸï¼Œdlistç»“æ„æŒ‡é’ˆ,å¤±è´¥ï¼ŒNULL
  **/
 msd_dlist_t *msd_dlist_add_node_head(msd_dlist_t *dl, void *value) 
 {
@@ -95,7 +95,7 @@ msd_dlist_t *msd_dlist_add_node_head(msd_dlist_t *dl, void *value)
 
     if (dl->len == 0) 
     {
-        /* µÚÒ»´Î */
+        /* ç¬¬ä¸€æ¬¡ */
         dl->head = node;
         dl->tail = node;
         node->prev = NULL;
@@ -113,12 +113,12 @@ msd_dlist_t *msd_dlist_add_node_head(msd_dlist_t *dl, void *value)
 }
  
 /**
- * ¹¦ÄÜ: Add a new node to the list's tail, containing the specified
+ * åŠŸèƒ½: Add a new node to the list's tail, containing the specified
  *       'value' pointer as value.
- * ²ÎÊı: @
- * ÃèÊö:
+ * å‚æ•°: @
+ * æè¿°:
  *      1. 
- * ·µ»Ø: ³É¹¦£¬dlist½á¹¹Ö¸Õë,Ê§°Ü£¬NULL
+ * è¿”å›: æˆåŠŸï¼Œdlistç»“æ„æŒ‡é’ˆ,å¤±è´¥ï¼ŒNULL
  **/
 msd_dlist_t *msd_dlist_add_node_tail(msd_dlist_t *dl, void *value) 
 {
@@ -135,7 +135,7 @@ msd_dlist_t *msd_dlist_add_node_tail(msd_dlist_t *dl, void *value)
 
     if (dl->len == 0) 
     {
-        /* µÚÒ»´Î */
+        /* ç¬¬ä¸€æ¬¡ */
         dl->head = node;
         dl->tail = node;
         node->prev = NULL;
@@ -153,12 +153,12 @@ msd_dlist_t *msd_dlist_add_node_tail(msd_dlist_t *dl, void *value)
 }
 
 /**
- * ¹¦ÄÜ: Add a new node to the list's midle, 
- * ²ÎÊı: @dl @mid_node @value @after
- * ÃèÊö:
- *      1. mid_node²åÈë»ù×¼µã£¬after==1£¬ÔòÔÚ»ù×¼Ö®ºó²åÈë
- *         after==0 ÔÚ»ù×¼µãÖ®Ç°²åÈë
- * ·µ»Ø: ³É¹¦ £¬ Ê§°Ü£¬
+ * åŠŸèƒ½: Add a new node to the list's midle, 
+ * å‚æ•°: @dl @mid_node @value @after
+ * æè¿°:
+ *      1. mid_nodeæ’å…¥åŸºå‡†ç‚¹ï¼Œafter==1ï¼Œåˆ™åœ¨åŸºå‡†ä¹‹åæ’å…¥
+ *         after==0 åœ¨åŸºå‡†ç‚¹ä¹‹å‰æ’å…¥
+ * è¿”å›: æˆåŠŸ ï¼Œ å¤±è´¥ï¼Œ
  **/
 msd_dlist_t *msd_dlist_insert_node(msd_dlist_t *dl, msd_dlist_node_t *mid_node, 
         void *value, int after) 
@@ -170,7 +170,7 @@ msd_dlist_t *msd_dlist_insert_node(msd_dlist_t *dl, msd_dlist_node_t *mid_node,
     node->value = value;
     if (after) 
     {
-        /*»ùµãÖ®ºó²åÈë*/
+        /*åŸºç‚¹ä¹‹åæ’å…¥*/
         node->prev = mid_node;
         node->next = mid_node->next;
         if (dl->tail == mid_node) 
@@ -180,7 +180,7 @@ msd_dlist_t *msd_dlist_insert_node(msd_dlist_t *dl, msd_dlist_node_t *mid_node,
     } 
     else 
     {
-        /*»ùµãÖ®Ç°²åÈë*/
+        /*åŸºç‚¹ä¹‹å‰æ’å…¥*/
         node->next = mid_node;
         node->prev = mid_node->prev;
         if (dl->head == mid_node) 
@@ -203,9 +203,9 @@ msd_dlist_t *msd_dlist_insert_node(msd_dlist_t *dl, msd_dlist_node_t *mid_node,
 }
 
 /**
- * ¹¦ÄÜ: Remove the specified node from the specified list.
- * ²ÎÊı: @dl @node
- * ÃèÊö:
+ * åŠŸèƒ½: Remove the specified node from the specified list.
+ * å‚æ•°: @dl @node
+ * æè¿°:
  *      1. If the list's 'free' pointer is not NULL, 
  *         the value will be freed automately first.
  **/
@@ -239,12 +239,12 @@ void msd_dlist_delete_node(msd_dlist_t *dl, msd_dlist_node_t *node)
 }
 
 /**
- * ¹¦ÄÜ: create a list iterator.
- * ²ÎÊı: @dl
- *       @direction£¬·½Ïò£ºÍ·->Î²/Î²->Í·
- * ÃèÊö:
+ * åŠŸèƒ½: create a list iterator.
+ * å‚æ•°: @dl
+ *       @directionï¼Œæ–¹å‘ï¼šå¤´->å°¾/å°¾->å¤´
+ * æè¿°:
  *      1. 
- * ·µ»Ø: ³É¹¦£¬iter½á¹¹Ö¸Õë£¬Ê§°Ü£¬NULL
+ * è¿”å›: æˆåŠŸï¼Œiterç»“æ„æŒ‡é’ˆï¼Œå¤±è´¥ï¼ŒNULL
  **/
 msd_dlist_iter_t *msd_dlist_get_iterator(msd_dlist_t *dl, int direction) 
 {
@@ -262,7 +262,7 @@ msd_dlist_iter_t *msd_dlist_get_iterator(msd_dlist_t *dl, int direction)
 }
 
 /**
- * ¹¦ÄÜ: Release the iterator memory.
+ * åŠŸèƒ½: Release the iterator memory.
  **/
 void msd_dlist_destroy_iterator(msd_dlist_iter_t *iter) 
 {
@@ -271,7 +271,7 @@ void msd_dlist_destroy_iterator(msd_dlist_iter_t *iter)
 }
 
 /**
- * ¹¦ÄÜ: Create an iterator in the list iterator structure.
+ * åŠŸèƒ½: Create an iterator in the list iterator structure.
  **/
 void msd_dlist_rewind(msd_dlist_t *dl, msd_dlist_iter_t *iter) 
 {
@@ -280,7 +280,7 @@ void msd_dlist_rewind(msd_dlist_t *dl, msd_dlist_iter_t *iter)
 }
 
 /**
- * ¹¦ÄÜ: Create an iterator in the list iterator structure.
+ * åŠŸèƒ½: Create an iterator in the list iterator structure.
  **/
 void msd_dlist_rewind_tail(msd_dlist_t *dl, msd_dlist_iter_t *iter) 
 {
@@ -289,16 +289,16 @@ void msd_dlist_rewind_tail(msd_dlist_t *dl, msd_dlist_iter_t *iter)
 }
 
 /**
- * ¹¦ÄÜ: °´ÕÕÖ¸ÕëµÄ·½Ïò£¬ÒÆ¶¯Ö¸Õë.
- * ²ÎÊı: @iter
- * ÃèÊö:
- *      1. ·µ»ØÖµÊÇÖ¸Õë³õÊ¼Ö¸ÏòµÄÔªËØ
+ * åŠŸèƒ½: æŒ‰ç…§æŒ‡é’ˆçš„æ–¹å‘ï¼Œç§»åŠ¨æŒ‡é’ˆ.
+ * å‚æ•°: @iter
+ * æè¿°:
+ *      1. è¿”å›å€¼æ˜¯æŒ‡é’ˆåˆå§‹æŒ‡å‘çš„å…ƒç´ 
  *      2. the classical usage patter is:
  *      iter = msd_dlist_get_iterator(dl, <direction>);
  *      while ((node = msd_dlist_next(iter)) != NULL) {
  *          do_something(dlist_node_value(node));
  *      }
- * ·µ»Ø: ³É¹¦£¬node½á¹¹Ö¸Õë£¬Ê§°Ü£¬NULL
+ * è¿”å›: æˆåŠŸï¼Œnodeç»“æ„æŒ‡é’ˆï¼Œå¤±è´¥ï¼ŒNULL
  **/
 msd_dlist_node_t *msd_dlist_next(msd_dlist_iter_t *iter) 
 {
@@ -314,11 +314,11 @@ msd_dlist_node_t *msd_dlist_next(msd_dlist_iter_t *iter)
 }
 
 /**
- * ¹¦ÄÜ: Search the list for a node matching a given key.
- * ²ÎÊı: @dl @key
- * ÃèÊö:
- *      1. Èç¹ûmatchº¯Êı´æÔÚ£¬ÔòÓÃmatchº¯Êı±È½Ï£¬·ñÔòÖ±½Ó±È½ÏvalueÖ¸ÕëºÍkey
- * ·µ»Ø: ³É¹¦£¬nodeÖ¸Õë,Ê§°Ü£¬NULL
+ * åŠŸèƒ½: Search the list for a node matching a given key.
+ * å‚æ•°: @dl @key
+ * æè¿°:
+ *      1. å¦‚æœmatchå‡½æ•°å­˜åœ¨ï¼Œåˆ™ç”¨matchå‡½æ•°æ¯”è¾ƒï¼Œå¦åˆ™ç›´æ¥æ¯”è¾ƒvalueæŒ‡é’ˆå’Œkey
+ * è¿”å›: æˆåŠŸï¼ŒnodeæŒ‡é’ˆ,å¤±è´¥ï¼ŒNULL
  **/
 msd_dlist_node_t *msd_dlist_search_key(msd_dlist_t *dl, void *key) 
 {
@@ -349,13 +349,13 @@ msd_dlist_node_t *msd_dlist_search_key(msd_dlist_t *dl, void *key)
 }
 
 /**
- * ¹¦ÄÜ: Duplicate the whole list. 
- * ²ÎÊı: @orig
- * ÃèÊö:
+ * åŠŸèƒ½: Duplicate the whole list. 
+ * å‚æ•°: @orig
+ * æè¿°:
  *      1. The 'dup' method set with dlist_set_dup() function is used to copy the
  *         node value.Other wise the same pointer value of the original node is 
  *         used as value of the copied node. 
- * ·µ»Ø: ³É¹¦£¬ĞÂµÄdlist½á¹¹Ö¸Õë£¬Ê§°Ü£¬NULL
+ * è¿”å›: æˆåŠŸï¼Œæ–°çš„dlistç»“æ„æŒ‡é’ˆï¼Œå¤±è´¥ï¼ŒNULL
  **/
 msd_dlist_t *msd_dlist_dup(msd_dlist_t *orig) 
 {
@@ -401,14 +401,14 @@ msd_dlist_t *msd_dlist_dup(msd_dlist_t *orig)
 }
 
 /**
- * ¹¦ÄÜ: ´ÓÍ·»òÎ²£¬Ïòºó»òÏòÇ°ÕÒµ½µÚindex¸öÔªËØ£¬·µ»ØÖ¸Õë 
- * ²ÎÊı: @
- * ÃèÊö:
+ * åŠŸèƒ½: ä»å¤´æˆ–å°¾ï¼Œå‘åæˆ–å‘å‰æ‰¾åˆ°ç¬¬indexä¸ªå…ƒç´ ï¼Œè¿”å›æŒ‡é’ˆ 
+ * å‚æ•°: @
+ * æè¿°:
  *      1. index where 0 is the head, 1 is the element next
  *         to head and so on. Negative integers are used in 
  *         order to count from the tail, -1 is the last element,
  *         -2 the penultimante and so on. 
- * ·µ»Ø: ³É¹¦£¬nodeÖ¸Õë,Ê§°Ü£¬NULL
+ * è¿”å›: æˆåŠŸï¼ŒnodeæŒ‡é’ˆ,å¤±è´¥ï¼ŒNULL
  **/
 msd_dlist_node_t *msd_dlist_index(msd_dlist_t *dl, int index) 
 {
@@ -416,7 +416,7 @@ msd_dlist_node_t *msd_dlist_index(msd_dlist_t *dl, int index)
 
     if (index < 0) 
     {
-        /* indexĞ¡ÓÚ0£¬Ôò´ÓÎ²²¿ÏòÇ°ÕÒ */
+        /* indexå°äº0ï¼Œåˆ™ä»å°¾éƒ¨å‘å‰æ‰¾ */
         index = (-index) - 1;
         node = dl->tail;
         while (index-- && node) 

@@ -21,13 +21,13 @@
 #include "msd_core.h"
 
 /**
- * ¹¦ÄÜ: Éú³Éae_loop->api_dataµÄ½á¹¹£¬²¢³õÊ¼»¯Ö®
- * ²ÎÊı: @el, ae_loopÖ¸Õë
- * ×¢Òâ:
- *      1. epoll²»Ö§³ÖÎÄ¼şµÄÃèÊö·û¼àÌı£¬Ö»ÄÜÓÃÓÚÍøÂç£¬Èç¹ûĞèÒª¼àÌıÎÄ¼ş
- *         £¬ĞèÒªÊ¹ÓÃselect¡£¾­²âÊÔ£¬Èç¹ûepoll¼àÌıÎÄ¼ş£¬»á±¨´íEPERM
+ * åŠŸèƒ½: ç”Ÿæˆae_loop->api_dataçš„ç»“æ„ï¼Œå¹¶åˆå§‹åŒ–ä¹‹
+ * å‚æ•°: @el, ae_loopæŒ‡é’ˆ
+ * æ³¨æ„:
+ *      1. epollä¸æ”¯æŒæ–‡ä»¶çš„æè¿°ç¬¦ç›‘å¬ï¼Œåªèƒ½ç”¨äºç½‘ç»œï¼Œå¦‚æœéœ€è¦ç›‘å¬æ–‡ä»¶
+ *         ï¼Œéœ€è¦ä½¿ç”¨selectã€‚ç»æµ‹è¯•ï¼Œå¦‚æœepollç›‘å¬æ–‡ä»¶ï¼Œä¼šæŠ¥é”™EPERM
  *         (perror:Operation not permitted)
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬NULL
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼ŒNULL
  **/
 #ifdef MSD_EPOLL_MODE
 
@@ -64,8 +64,8 @@ static int msd_ae_api_create(msd_ae_event_loop *el)
 #endif
 
 /**
- * ¹¦ÄÜ: Éú³Éae_loop½á¹¹Ìå£¬²¢³õÊ¼»¯Ö®
- * ·µ»Ø: ³É¹¦£¬ae_lopp½á¹¹ÌåÖ¸Õë, Ê§°Ü£¬NULL
+ * åŠŸèƒ½: ç”Ÿæˆae_loopç»“æ„ä½“ï¼Œå¹¶åˆå§‹åŒ–ä¹‹
+ * è¿”å›: æˆåŠŸï¼Œae_loppç»“æ„ä½“æŒ‡é’ˆ, å¤±è´¥ï¼ŒNULL
  **/
 msd_ae_event_loop *msd_ae_create_event_loop(void) 
 {
@@ -98,8 +98,8 @@ msd_ae_event_loop *msd_ae_create_event_loop(void)
 }
 
 /**
- * ¹¦ÄÜ: Îö¹¹api_data
- * ²ÎÊı: @el
+ * åŠŸèƒ½: ææ„api_data
+ * å‚æ•°: @el
  **/
 #ifdef MSD_EPOLL_MODE
 
@@ -121,13 +121,13 @@ static void msd_ae_api_free(msd_ae_event_loop *el)
 #endif
 
 /**
- * ¹¦ÄÜ: Îö¹¹ae_loop½á¹¹
- * ²ÎÊı: @el
+ * åŠŸèƒ½: ææ„ae_loopç»“æ„
+ * å‚æ•°: @el
  **/
 void msd_ae_free_event_loop(msd_ae_event_loop *el) 
 {
     msd_ae_time_event *te, *next;
-    /* Îö¹¹api_data */
+    /* ææ„api_data */
     msd_ae_api_free(el);
 
     /* Delete all time event to avoid memory leak. */
@@ -147,7 +147,7 @@ void msd_ae_free_event_loop(msd_ae_event_loop *el)
 }
 
 /**
- * ¹¦ÄÜ: ae_loopÂÖÑµÔİÍ£
+ * åŠŸèƒ½: ae_loopè½®è®­æš‚åœ
  **/
 void msd_ae_stop(msd_ae_event_loop *el) 
 {
@@ -155,8 +155,8 @@ void msd_ae_stop(msd_ae_event_loop *el)
 }
 
 /**
- * ¹¦ÄÜ: add event
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: add event
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 #ifdef MSD_EPOLL_MODE
 
@@ -170,7 +170,7 @@ static int msd_ae_api_add_event(msd_ae_event_loop *el, int fd, int mask)
         EPOLL_CTL_ADD : EPOLL_CTL_MOD;
     ee.events = 0;
     mask |= el->events[fd].mask; /* Merge old events. */
-    /* Ë®Æ½´¥·¢ */
+    /* æ°´å¹³è§¦å‘ */
     if (mask & MSD_AE_READABLE)
     {
         ee.events |= EPOLLIN;
@@ -208,15 +208,15 @@ static int msd_ae_api_add_event(msd_ae_event_loop *el, int fd, int mask)
 #endif
 
 /**
- * ¹¦ÄÜ: Register a file event. 
- * ²ÎÊı: @el, ae_loop½á¹¹Ö¸Õë
- *       @fd, ÎÄ¼ş»òÃèÊö·ûfd
- *       @mask, ¶Á»òĞ´±ê¼Ç
- *       @proc, »Øµ÷º¯Êı
- *       @client_data, »Øµ÷º¯Êı²ÎÊı
- * ÃèÊö:
- *      1. fd»á×÷Îªel->events[]µÄË÷Òı
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: Register a file event. 
+ * å‚æ•°: @el, ae_loopç»“æ„æŒ‡é’ˆ
+ *       @fd, æ–‡ä»¶æˆ–æè¿°ç¬¦fd
+ *       @mask, è¯»æˆ–å†™æ ‡è®°
+ *       @proc, å›è°ƒå‡½æ•°
+ *       @client_data, å›è°ƒå‡½æ•°å‚æ•°
+ * æè¿°:
+ *      1. fdä¼šä½œä¸ºel->events[]çš„ç´¢å¼•
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 int msd_ae_create_file_event(msd_ae_event_loop *el, int fd, int mask,
         msd_ae_file_proc *proc, void *client_data) 
@@ -245,7 +245,7 @@ int msd_ae_create_file_event(msd_ae_event_loop *el, int fd, int mask,
         fe->w_file_proc = proc;
         fe->write_client_data = client_data;
     } 
-    /* Ae bug. ¶ÁĞ´ÊÂ¼şÓÃÍ¬Ò»¸ö²ÎÊı£¬²»ºÏÀí */
+    /* Ae bug. è¯»å†™äº‹ä»¶ç”¨åŒä¸€ä¸ªå‚æ•°ï¼Œä¸åˆç† */
     //fe->client_data = client_data;
     
     /* Once one file event has been registered, the el->maxfd
@@ -258,8 +258,8 @@ int msd_ae_create_file_event(msd_ae_event_loop *el, int fd, int mask,
 }
 
 /**
- * ¹¦ÄÜ: delete event
- * ·µ»Ø: ³É¹¦£¬0Ê§°Ü£¬-x
+ * åŠŸèƒ½: delete event
+ * è¿”å›: æˆåŠŸï¼Œ0å¤±è´¥ï¼Œ-x
  **/
 #ifdef MSD_EPOLL_MODE
 
@@ -309,8 +309,8 @@ static void msd_ae_api_del_event(msd_ae_event_loop *el, int fd, int mask)
 #endif
 
 /**
- * ¹¦ÄÜ: Unregister a file event
- * ²ÎÊı: el, fd, mask 
+ * åŠŸèƒ½: Unregister a file event
+ * å‚æ•°: el, fd, mask 
  **/
 void msd_ae_delete_file_event(msd_ae_event_loop *el, int fd, int mask) 
 {
@@ -344,8 +344,8 @@ void msd_ae_delete_file_event(msd_ae_event_loop *el, int fd, int mask)
 }
 
 /**
- * ¹¦ÄÜ: Get the file event by fd
- * ·µ»Ø: ³É¹¦£¬MSD_AE_READABLE/MSD_AE_WRITEABLE.Ê§°Ü£¬0
+ * åŠŸèƒ½: Get the file event by fd
+ * è¿”å›: æˆåŠŸï¼ŒMSD_AE_READABLE/MSD_AE_WRITEABLE.å¤±è´¥ï¼Œ0
  **/
 int msd_ae_get_file_events(msd_ae_event_loop *el, int fd) 
 {
@@ -359,24 +359,24 @@ int msd_ae_get_file_events(msd_ae_event_loop *el, int fd)
 }
 
 /**
- * ¹¦ÄÜ: get the now time
- * ²ÎÊı: @seconds, @milliseconds
- * ÃèÊö:
- *      1. µ±Ç°Ê±¼äµÄÃëºÍºÁÃëÊı½«±»¸³Öµ¸ø²ÎÊısecond, milliseconds
+ * åŠŸèƒ½: get the now time
+ * å‚æ•°: @seconds, @milliseconds
+ * æè¿°:
+ *      1. å½“å‰æ—¶é—´çš„ç§’å’Œæ¯«ç§’æ•°å°†è¢«èµ‹å€¼ç»™å‚æ•°second, milliseconds
  **/
 static void msd_ae_get_now_time(long *seconds, long *milliseconds) 
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    *seconds = tv.tv_sec;              /* Ãë */
-    *milliseconds = tv.tv_usec / 1000; /* Î¢Ãë=>ºÁÃë */
+    *seconds = tv.tv_sec;              /* ç§’ */
+    *milliseconds = tv.tv_usec / 1000; /* å¾®ç§’=>æ¯«ç§’ */
 }
 
 /**
- * ¹¦ÄÜ: »ñÈ¡µ±Ç°Ê±¼äÖ®ºóµÄmillisecondsºÁÃëºóµÄÊ±¼ä
- * ²ÎÊı: @milliseconds, @sec, @ms
- * ÃèÊö:
- *      1. Î´À´Ê±¼äµÄÃëºÍºÁÃëÊı½«±»¸³Öµ¸ø²ÎÊısec, ms
+ * åŠŸèƒ½: è·å–å½“å‰æ—¶é—´ä¹‹åçš„millisecondsæ¯«ç§’åçš„æ—¶é—´
+ * å‚æ•°: @milliseconds, @sec, @ms
+ * æè¿°:
+ *      1. æœªæ¥æ—¶é—´çš„ç§’å’Œæ¯«ç§’æ•°å°†è¢«èµ‹å€¼ç»™å‚æ•°sec, ms
  **/
 static void msd_ae_add_milliseconds_to_now(long long milliseconds, 
         long *sec, long *ms) 
@@ -396,16 +396,16 @@ static void msd_ae_add_milliseconds_to_now(long long milliseconds,
 }
 
 /**
- * ¹¦ÄÜ: Register a time event. 
- * ²ÎÊı: @ms£º·¢ÉúÊ±¼ä£¬µ±Ç°Ê±¼äµÄmsºÁÃëÖ®ºó
- *       @proc£ºÊ±¼äµÄ»Øµ÷
- *       @client_data£º»Øµ÷º¯ÊıµÄ²ÎÊı
- *       @finalizer_proc£ºÊ±¼äÊÂ¼şµÄÎö¹¹»Øµ÷
- * ÃèÊö:
- *      1. time_event_next_id´Ó0¿ªÊ¼×ÔÔö£¬µÚÒ»¸öÊ±¼äÊÂ¼şid=0
- *      2. Ê±¼äÊÂ¼şÊÇÒ»¸öÁ´±í½á¹¹£¬Ã¿¸ö½ÚµãÊÇÒ»¸öÊÂ¼ş
- *      3. Ã¿ĞÂÔöÒ»¸öÊ±¼äÊÂ¼ş½Úµã£¬²åÈëµ½Á´±íÍ·²¿
- * ·µ»Ø: ³É¹¦£¬Ê±¼äÊÂ¼şµÄidºÅ¡£Ê§°Ü£¬-x
+ * åŠŸèƒ½: Register a time event. 
+ * å‚æ•°: @msï¼šå‘ç”Ÿæ—¶é—´ï¼Œå½“å‰æ—¶é—´çš„msæ¯«ç§’ä¹‹å
+ *       @procï¼šæ—¶é—´çš„å›è°ƒ
+ *       @client_dataï¼šå›è°ƒå‡½æ•°çš„å‚æ•°
+ *       @finalizer_procï¼šæ—¶é—´äº‹ä»¶çš„ææ„å›è°ƒ
+ * æè¿°:
+ *      1. time_event_next_idä»0å¼€å§‹è‡ªå¢ï¼Œç¬¬ä¸€ä¸ªæ—¶é—´äº‹ä»¶id=0
+ *      2. æ—¶é—´äº‹ä»¶æ˜¯ä¸€ä¸ªé“¾è¡¨ç»“æ„ï¼Œæ¯ä¸ªèŠ‚ç‚¹æ˜¯ä¸€ä¸ªäº‹ä»¶
+ *      3. æ¯æ–°å¢ä¸€ä¸ªæ—¶é—´äº‹ä»¶èŠ‚ç‚¹ï¼Œæ’å…¥åˆ°é“¾è¡¨å¤´éƒ¨
+ * è¿”å›: æˆåŠŸï¼Œæ—¶é—´äº‹ä»¶çš„idå·ã€‚å¤±è´¥ï¼Œ-x
  **/
 long long msd_ae_create_time_event(msd_ae_event_loop *el, long long ms, 
         msd_ae_time_proc *proc, void *client_data,
@@ -431,11 +431,11 @@ long long msd_ae_create_time_event(msd_ae_event_loop *el, long long ms,
 }
 
 /**
- * ¹¦ÄÜ: Unregister a time event.
- * ²ÎÊı: @el, @id:Ê±¼äÊÂ¼şid 
- * ÃèÊö:
- *      1. el->time_event_next_id²»ĞèÒªÓĞÏà¹ØµÄ²Ù×÷£¬ÒòÎªidÖ»ÊÇÒ»¸öºÅ
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: Unregister a time event.
+ * å‚æ•°: @el, @id:æ—¶é—´äº‹ä»¶id 
+ * æè¿°:
+ *      1. el->time_event_next_idä¸éœ€è¦æœ‰ç›¸å…³çš„æ“ä½œï¼Œå› ä¸ºidåªæ˜¯ä¸€ä¸ªå·
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 int msd_ae_delete_time_event(msd_ae_event_loop *el, long long id) 
 {
@@ -457,7 +457,7 @@ int msd_ae_delete_time_event(msd_ae_event_loop *el, long long id)
             }
             if (te->finalizer_proc) 
             {
-                /* Ô¤·ÀÄÚ´æĞ¹Â¶ */
+                /* é¢„é˜²å†…å­˜æ³„éœ² */
                 te->finalizer_proc(el, te->client_data);
             }
             free(te);
@@ -470,9 +470,9 @@ int msd_ae_delete_time_event(msd_ae_event_loop *el, long long id)
 }
 
 /**
- * ¹¦ÄÜ: ±éÀúÊ±¼äÊÂ¼şÁ´±í£¬ÕÒµ½×îÏÈµÄÓ¦¸Ã´¥·¢µÄÊ±¼äÊÂ¼ş¡£
- * ²ÎÊı: @el
- * ÃèÊö:
+ * åŠŸèƒ½: éå†æ—¶é—´äº‹ä»¶é“¾è¡¨ï¼Œæ‰¾åˆ°æœ€å…ˆçš„åº”è¯¥è§¦å‘çš„æ—¶é—´äº‹ä»¶ã€‚
+ * å‚æ•°: @el
+ * æè¿°:
  *      1. This operation is useful to know how many time the select can be
  *         put in sleep without to delay any event. If there are no timers 
  *         NULL is returned.
@@ -482,7 +482,7 @@ int msd_ae_delete_time_event(msd_ae_event_loop *el, long long id)
  *            Much better but still insertion or deletion of timer is O(N).
  *         2) Use a skiplist to have this operation as O(1) and insertion as
  *            O(log(N)).
- * ·µ»Ø: ³É¹¦£¬Ê±¼äÊÂ¼ş½ÚµãÖ¸Õë Ê§°Ü£¬
+ * è¿”å›: æˆåŠŸï¼Œæ—¶é—´äº‹ä»¶èŠ‚ç‚¹æŒ‡é’ˆ å¤±è´¥ï¼Œ
  **/
 static msd_ae_time_event *msd_ae_search_nearest_timer(msd_ae_event_loop *el) 
 {
@@ -503,18 +503,18 @@ static msd_ae_time_event *msd_ae_search_nearest_timer(msd_ae_event_loop *el)
 }
 
 /**
- * ¹¦ÄÜ: Process time events.
- * ²ÎÊı: @el
- * ÃèÊö:
- *      1. time_procº¯Êı²»ÄÜº¬ÓĞ×èÈû²Ù×÷£¬·ñÔò»áÓ°ÏìÕû¸öÊ±¼ä¶ÓÁĞ´¦Àí
- *      2. time_procº¯ÊıµÄ·µ»ØÖµÊÇÏà¶ÔÓÚµ±Ç°Ê±¼äµã£¬ÏÂÒ»´Î´¥·¢×Ô¼ºµÄºÁÃëÊı
- *      3. time_procº¯ÊıÖĞ¿ÉÄÜ»á×¢²áĞÂµÄÊ±¼äÊÂ¼ş£¬ÎªÁË·ÀÖ¹msd_process_time_events
- *         ÎŞÏŞÑ­»·Ö´ĞĞÏÂÈ¥£¬¼ÇÂ¼maxid£¬±¾ÂÖ²»´¦ÀíĞÂ×¢²áµÄÊ±¼äÊÂ¼ş
- *      4. time_procÈç¹û·µ»Ø0£¬ËµÃ÷ĞèÒª³·Ïú´ËÊ±¼äÊÂ¼ş£¬ÕâÑù¾ÍĞèÒªÉ¾³ı¸Ã½Úµã£¬
- *         ËùÒÔÁ´±í½á¹¹¾Í·¢ÉúÁË±ä»¯£¬ËùÒÔÃ¿´Î´¦ÀíÍê¶¼´ÓÍ·ÔÙ´Î±éÀúÁ´±í
- *      5. ĞÂ°æredisÔö¼ÓÁËÒ»¸ölast_timeµÄ×Ö¶Î£¬×÷ÓÃÊÇ·ÀÖ¹ÏµÍ³Ê±¼ä³öÏÖÎÊÌâ£¬Èç¹û
- *         ³ÌĞò³õÊ¼Ê±ÏµÍ³Ê±¼äÌáÇ°£¬ºóÓÖ±»µ÷»Ø£¬ÔòÇ¿ÆÈËùÓĞÊ±¼äÊÂ¼şÏÈÁ¢¿Ì´¥·¢Ò»´Î
- * ·µ»Ø: ³É¹¦£¬±¾ÂÖ´¦ÀíÊ±¼ä¸öÊı Ê§°Ü£¬
+ * åŠŸèƒ½: Process time events.
+ * å‚æ•°: @el
+ * æè¿°:
+ *      1. time_procå‡½æ•°ä¸èƒ½å«æœ‰é˜»å¡æ“ä½œï¼Œå¦åˆ™ä¼šå½±å“æ•´ä¸ªæ—¶é—´é˜Ÿåˆ—å¤„ç†
+ *      2. time_procå‡½æ•°çš„è¿”å›å€¼æ˜¯ç›¸å¯¹äºå½“å‰æ—¶é—´ç‚¹ï¼Œä¸‹ä¸€æ¬¡è§¦å‘è‡ªå·±çš„æ¯«ç§’æ•°
+ *      3. time_procå‡½æ•°ä¸­å¯èƒ½ä¼šæ³¨å†Œæ–°çš„æ—¶é—´äº‹ä»¶ï¼Œä¸ºäº†é˜²æ­¢msd_process_time_events
+ *         æ— é™å¾ªç¯æ‰§è¡Œä¸‹å»ï¼Œè®°å½•maxidï¼Œæœ¬è½®ä¸å¤„ç†æ–°æ³¨å†Œçš„æ—¶é—´äº‹ä»¶
+ *      4. time_procå¦‚æœè¿”å›0ï¼Œè¯´æ˜éœ€è¦æ’¤é”€æ­¤æ—¶é—´äº‹ä»¶ï¼Œè¿™æ ·å°±éœ€è¦åˆ é™¤è¯¥èŠ‚ç‚¹ï¼Œ
+ *         æ‰€ä»¥é“¾è¡¨ç»“æ„å°±å‘ç”Ÿäº†å˜åŒ–ï¼Œæ‰€ä»¥æ¯æ¬¡å¤„ç†å®Œéƒ½ä»å¤´å†æ¬¡éå†é“¾è¡¨
+ *      5. æ–°ç‰ˆrediså¢åŠ äº†ä¸€ä¸ªlast_timeçš„å­—æ®µï¼Œä½œç”¨æ˜¯é˜²æ­¢ç³»ç»Ÿæ—¶é—´å‡ºç°é—®é¢˜ï¼Œå¦‚æœ
+ *         ç¨‹åºåˆå§‹æ—¶ç³»ç»Ÿæ—¶é—´æå‰ï¼Œååˆè¢«è°ƒå›ï¼Œåˆ™å¼ºè¿«æ‰€æœ‰æ—¶é—´äº‹ä»¶å…ˆç«‹åˆ»è§¦å‘ä¸€æ¬¡
+ * è¿”å›: æˆåŠŸï¼Œæœ¬è½®å¤„ç†æ—¶é—´ä¸ªæ•° å¤±è´¥ï¼Œ
  **/
 static int msd_process_time_events(msd_ae_event_loop *el) 
 {
@@ -543,7 +543,7 @@ static int msd_process_time_events(msd_ae_event_loop *el)
     te = el->time_event_head;
     maxid = el->time_event_next_id - 1;
 
-    /* Ñ­»·±éÀúÊ±¼äÊÂ¼şÁ´±í */
+    /* å¾ªç¯éå†æ—¶é—´äº‹ä»¶é“¾è¡¨ */
     while (te) 
     {
         long now_sec, now_ms;
@@ -559,7 +559,7 @@ static int msd_process_time_events(msd_ae_event_loop *el)
         if (now_sec > te->when_sec ||
             (now_sec == te->when_sec && now_ms >= te->when_ms)) 
         {
-            /* Âú×ã³¬Ê±Ìõ¼ş£¬Ôò´¥·¢³¬Ê±»Øµ÷ */
+            /* æ»¡è¶³è¶…æ—¶æ¡ä»¶ï¼Œåˆ™è§¦å‘è¶…æ—¶å›è°ƒ */
             int ret;
             id = te->id;
             ret = te->time_proc(el, id, te->client_data);
@@ -577,12 +577,12 @@ static int msd_process_time_events(msd_ae_event_loop *el)
              */
             if (ret > 0) 
             {
-                /* Ã»´¦ÀíÍê£¬time_porcÓ¦¸Ã·µ»ØÏÂ´Î´¥·¢Ê±¼ä */
+                /* æ²¡å¤„ç†å®Œï¼Œtime_porcåº”è¯¥è¿”å›ä¸‹æ¬¡è§¦å‘æ—¶é—´ */
                 msd_ae_add_milliseconds_to_now(ret, &te->when_sec, &te->when_ms);
             } 
             else 
             {
-                /* ´¦ÀíÍêÁË£¬ÔòÖ±½ÓÉ¾³ı½Úµã */
+                /* å¤„ç†å®Œäº†ï¼Œåˆ™ç›´æ¥åˆ é™¤èŠ‚ç‚¹ */
                 msd_ae_delete_time_event(el, id);
             }
 
@@ -597,11 +597,11 @@ static int msd_process_time_events(msd_ae_event_loop *el)
 }
 
 /**
- * ¹¦ÄÜ: pollº¯Êı
- * ²ÎÊı: @el£¬@tvp£¬pollµÄ³¬Ê±Ê±¼äÖ¸Õë
- * ÃèÊö:
+ * åŠŸèƒ½: pollå‡½æ•°
+ * å‚æ•°: @elï¼Œ@tvpï¼Œpollçš„è¶…æ—¶æ—¶é—´æŒ‡é’ˆ
+ * æè¿°:
  *      1. 
- * ·µ»Ø: ³É¹¦£¬´¥·¢µÄfileÊÂ¼ş¸öÊı¡£ Ê§°Ü£¬
+ * è¿”å›: æˆåŠŸï¼Œè§¦å‘çš„fileäº‹ä»¶ä¸ªæ•°ã€‚ å¤±è´¥ï¼Œ
  **/
 #ifdef MSD_EPOLL_MODE
 
@@ -640,14 +640,14 @@ static int msd_ae_api_poll(msd_ae_event_loop *el, struct timeval *tvp)
 {
     msd_ae_api_state *state = el->api_data;
     int ret, j, numevents = 0;
-    /* ±¸·İ */
+    /* å¤‡ä»½ */
     memcpy(&state->_rfds, &state->rfds, sizeof(fd_set));
     memcpy(&state->_wfds, &state->wfds, sizeof(fd_set));
 
     ret = select(el->maxfd + 1, &state->_rfds, &state->_wfds, NULL, tvp);
     if (ret > 0) 
     {
-        /* Èç¹ûÔÚ³¬Ê±Ê±¼ätvpÄÚÓĞfileÊÂ¼ş´¥·¢£¬ÔòÓ¦¸ÃĞ´ÈëfiredÊı×éÖĞ */
+        /* å¦‚æœåœ¨è¶…æ—¶æ—¶é—´tvpå†…æœ‰fileäº‹ä»¶è§¦å‘ï¼Œåˆ™åº”è¯¥å†™å…¥firedæ•°ç»„ä¸­ */
         for (j = 0; j <= el->maxfd; ++j) 
         {
             int mask = 0;
@@ -665,7 +665,7 @@ static int msd_ae_api_poll(msd_ae_event_loop *el, struct timeval *tvp)
                 mask |= MSD_AE_WRITABLE;
             }
 
-            /* ½«´¥·¢µÄfileÊÂ¼şÈëfiredÊı×é£¬Í¨¹ımaskÀ´ÅĞ¶Ï´¥·¢ÁË¶Á»¹ÊÇĞ´ */
+            /* å°†è§¦å‘çš„fileäº‹ä»¶å…¥firedæ•°ç»„ï¼Œé€šè¿‡maskæ¥åˆ¤æ–­è§¦å‘äº†è¯»è¿˜æ˜¯å†™ */
             el->fired[numevents].fd = j;
             el->fired[numevents].mask = mask;
             numevents++;
@@ -678,9 +678,9 @@ static int msd_ae_api_poll(msd_ae_event_loop *el, struct timeval *tvp)
 
 
 /**
- * ¹¦ÄÜ: Process every pending event
- * ²ÎÊı: @el, @flag
- * ÃèÊö:
+ * åŠŸèƒ½: Process every pending event
+ * å‚æ•°: @el, @flag
+ * æè¿°:
  *      1. Process every pending time event, then every pending file event
  *         (that may be registered by time event callbacks just processed).
  *         Without special flags the function sleeps until some file event
@@ -692,12 +692,12 @@ static int msd_ae_api_poll(msd_ae_event_loop *el, struct timeval *tvp)
  *          if flags has AE_TIME_EVENTS set, time events are processed.
  *          if flags has AE_DONT_WAIT set the function returns ASAP until all
  *          the events that's possible to process without to wait are processed.
- *      2. Èç¹ûÃ»ÓĞÊ±¼äÊÂ¼ş£¬²¢ÇÒÄ¬ÈÏAE_DONT_WAITÎ´ÉèÖÃ£¬Ôòpoll»áÓÀÔ¶×èÈû£¬Ö±µ½file
- *         ÊÂ¼ş´¥·¢£¬ËùÒÔÓ¦¸Ã¾¡Á¿ÖÁÉÙÉèÖÃÒ»¸öÊ±¼äÊÂ¼ş
- * ×¢Òâ£º
- *      1. ¶ÔÓÚËùÓĞÀàĞÍµÄÊÂ¼ş´¦Àíº¯Êı£¬¶¼Ó¦¸Ã±ÜÃâ³öÏÖ×èÈû£¬·ñÔò»áÍÏÀÛÕû¸öÊ±¼ä
- *         Á´±íÉÏµÄÊÂ¼ş´¥·¢´¦Àí!!!!!!!£¨¼û²âÊÔÓÃÀı£©
- * ·µ»Ø: ³É¹¦£¬the number of events processed. Ê§°Ü£¬
+ *      2. å¦‚æœæ²¡æœ‰æ—¶é—´äº‹ä»¶ï¼Œå¹¶ä¸”é»˜è®¤AE_DONT_WAITæœªè®¾ç½®ï¼Œåˆ™pollä¼šæ°¸è¿œé˜»å¡ï¼Œç›´åˆ°file
+ *         äº‹ä»¶è§¦å‘ï¼Œæ‰€ä»¥åº”è¯¥å°½é‡è‡³å°‘è®¾ç½®ä¸€ä¸ªæ—¶é—´äº‹ä»¶
+ * æ³¨æ„ï¼š
+ *      1. å¯¹äºæ‰€æœ‰ç±»å‹çš„äº‹ä»¶å¤„ç†å‡½æ•°ï¼Œéƒ½åº”è¯¥é¿å…å‡ºç°é˜»å¡ï¼Œå¦åˆ™ä¼šæ‹–ç´¯æ•´ä¸ªæ—¶é—´
+ *         é“¾è¡¨ä¸Šçš„äº‹ä»¶è§¦å‘å¤„ç†!!!!!!!ï¼ˆè§æµ‹è¯•ç”¨ä¾‹ï¼‰
+ * è¿”å›: æˆåŠŸï¼Œthe number of events processed. å¤±è´¥ï¼Œ
  **/
 int msd_ae_process_events(msd_ae_event_loop *el, int flags) 
 {
@@ -715,7 +715,7 @@ int msd_ae_process_events(msd_ae_event_loop *el, int flags)
     if (el->maxfd != -1 ||
         ((flags & MSD_AE_TIME_EVENTS) && !(flags & MSD_AE_DONT_WAIT))) 
     {
-        /* ÓĞfileÊÂ¼ş±»×¢²á£¬»òÕß(ÒªµÈ´ıÊ±¼äÊ±¼äÇÒ²»ÊÇÁ¢¼´ÍË³öµÄ) */
+        /* æœ‰fileäº‹ä»¶è¢«æ³¨å†Œï¼Œæˆ–è€…(è¦ç­‰å¾…æ—¶é—´æ—¶é—´ä¸”ä¸æ˜¯ç«‹å³é€€å‡ºçš„) */
         int j;
         msd_ae_time_event *shortest = NULL;
         struct timeval tv, *tvp;
@@ -725,9 +725,9 @@ int msd_ae_process_events(msd_ae_event_loop *el, int flags)
             shortest = msd_ae_search_nearest_timer(el);
         } 
         /* 
-         *  »ù±¾Ô­Àí:ÏÈÕÒ³öÒ»¼ş×î½ü¾Í»á·¢ÉúµÄÊÂÇé£¬È»ºóËã³öÀë´Ë¿ÌµÄÊ±¼ä¾àÀë£¬ÔÚ´Ë¾àÀëÄÚ¿ÉÒÔÓÃselect×èÈû
-         *           µÈ¹ıÁËÕâ¸öÊ±¼ä¾àÀë£¬Èç¹ûÈÔÈ»Ã»ÓĞfileÊÂ¼ş£¬select×Ô¶¯½â¿ª×èÈû£¬È¥´¦ÀíÊ±¼äÊÂ¼ş¡£
-         *           Õâ¸ö²ÎÊıtv¾ÍÊÇÕâ¸öÊ±¼ä¾àÀëtvpÊÇÖ¸ÏòtvµÄÖ¸Õë¡£
+         *  åŸºæœ¬åŸç†:å…ˆæ‰¾å‡ºä¸€ä»¶æœ€è¿‘å°±ä¼šå‘ç”Ÿçš„äº‹æƒ…ï¼Œç„¶åç®—å‡ºç¦»æ­¤åˆ»çš„æ—¶é—´è·ç¦»ï¼Œåœ¨æ­¤è·ç¦»å†…å¯ä»¥ç”¨selecté˜»å¡
+         *           ç­‰è¿‡äº†è¿™ä¸ªæ—¶é—´è·ç¦»ï¼Œå¦‚æœä»ç„¶æ²¡æœ‰fileäº‹ä»¶ï¼Œselectè‡ªåŠ¨è§£å¼€é˜»å¡ï¼Œå»å¤„ç†æ—¶é—´äº‹ä»¶ã€‚
+         *           è¿™ä¸ªå‚æ•°två°±æ˜¯è¿™ä¸ªæ—¶é—´è·ç¦»tvpæ˜¯æŒ‡å‘tvçš„æŒ‡é’ˆã€‚
          */
         if (shortest) 
         {
@@ -760,9 +760,9 @@ int msd_ae_process_events(msd_ae_event_loop *el, int flags)
         } 
         else 
         {
-            /* Èç¹ûÃ»ÓĞÊ±¼äÊÂ¼ş£¬²»ÍÆ¼ö!! */ 
-            /* Ä¬ÈÏÇé¿öÏÂMSD_AE_DONT_WAITÎ´ÉèÖÃ£¬poll»áÒ»Ö±×èÈûÖ±µ½fileÊÂ¼ş´¥·¢£¬
-             * ÈôÉèÖÃÁËÁ¢¿ÌÍË³ö£¬Ôòtv±»ÖÃÎª0£¬select»áÁ¢¿ÌÍË³ö */
+            /* å¦‚æœæ²¡æœ‰æ—¶é—´äº‹ä»¶ï¼Œä¸æ¨è!! */ 
+            /* é»˜è®¤æƒ…å†µä¸‹MSD_AE_DONT_WAITæœªè®¾ç½®ï¼Œpollä¼šä¸€ç›´é˜»å¡ç›´åˆ°fileäº‹ä»¶è§¦å‘ï¼Œ
+             * è‹¥è®¾ç½®äº†ç«‹åˆ»é€€å‡ºï¼Œåˆ™tvè¢«ç½®ä¸º0ï¼Œselectä¼šç«‹åˆ»é€€å‡º */
             /* If we have to check for events but need to return
                ASAP because of AE_DONT_WAIT we need to set the 
                timeout to zero. */
@@ -774,29 +774,29 @@ int msd_ae_process_events(msd_ae_event_loop *el, int flags)
             else 
             {
                 /* Otherwise we can block. */
-                tvp = NULL; /* wait forever£¬×èÈûÎŞ³¬Ê± */
+                tvp = NULL; /* wait foreverï¼Œé˜»å¡æ— è¶…æ—¶ */
             }
         }
 
-        /* block£¬µ÷ÓÃselect/epool´¦ÀífileÊ±¼ä£¬tvpÖ¸Ê¾µÄÊ±¼ä£¬±íÊ¾×î¶à¿ÉÒÔ×èÈûµÄÊ±¼ä */
+        /* blockï¼Œè°ƒç”¨select/epoolå¤„ç†fileæ—¶é—´ï¼ŒtvpæŒ‡ç¤ºçš„æ—¶é—´ï¼Œè¡¨ç¤ºæœ€å¤šå¯ä»¥é˜»å¡çš„æ—¶é—´ */
         numevents = msd_ae_api_poll(el, tvp);
         
-        /* ´¦ÀíÍêËùÓĞµÄfileÊÂ¼ş(ÔÚº¯Êımsd_ae_api_pollÖĞ£¬fired[]ÊÇ²»¶Ï¸²¸ÇµÄ) */
+        /* å¤„ç†å®Œæ‰€æœ‰çš„fileäº‹ä»¶(åœ¨å‡½æ•°msd_ae_api_pollä¸­ï¼Œfired[]æ˜¯ä¸æ–­è¦†ç›–çš„) */
         for (j = 0; j < numevents; ++j) 
         {
             msd_ae_file_event *fe = &el->events[el->fired[j].fd];
             
             int mask = el->fired[j].mask;
             int fd   = el->fired[j].fd;
-            int rfired = 0;/* ÊÇ·ñ´¥·¢ÁË¶ÁÊÂ¼ş */
+            int rfired = 0;/* æ˜¯å¦è§¦å‘äº†è¯»äº‹ä»¶ */
             
             /* Note the fe->mask & mask & ... code: maybe an already
                processed event removed an element that fired and we
                still didn't processed, so we check if the events is 
                still valid. */
             /* 
-             * ·­Òë:eventsÊı×éÖĞµÄÔªËØ£¬¿ÉÄÜ±»Ò»¸öÒÑ¾­´¦ÀíÁËµÄÊÂ¼şĞŞ¸ÄÁË£¬´ËÊ±
-             * firedÊÂ¼ş»¹Ã»´¦ÀíÄØ£¬ËùÒÔÒªÏÈÑéÖ¤Ò»ÏÂeventsÊı×é¶ÔÓ¦ÔªËØ×´Ì¬
+             * ç¿»è¯‘:eventsæ•°ç»„ä¸­çš„å…ƒç´ ï¼Œå¯èƒ½è¢«ä¸€ä¸ªå·²ç»å¤„ç†äº†çš„äº‹ä»¶ä¿®æ”¹äº†ï¼Œæ­¤æ—¶
+             * firedäº‹ä»¶è¿˜æ²¡å¤„ç†å‘¢ï¼Œæ‰€ä»¥è¦å…ˆéªŒè¯ä¸€ä¸‹eventsæ•°ç»„å¯¹åº”å…ƒç´ çŠ¶æ€
              */   
             if (fe->mask & mask & MSD_AE_READABLE) 
             {
@@ -806,7 +806,7 @@ int msd_ae_process_events(msd_ae_event_loop *el, int flags)
 
             if (fe->mask & mask & MSD_AE_WRITABLE) 
             {
-                /* È·±£Èç¹û¶ÁºÍĞ´ÊÇÍ¬Ò»¸öº¯ÊıµÄÊ±ºò£¬²»»áÖØ¸´Ö´ĞĞ */
+                /* ç¡®ä¿å¦‚æœè¯»å’Œå†™æ˜¯åŒä¸€ä¸ªå‡½æ•°çš„æ—¶å€™ï¼Œä¸ä¼šé‡å¤æ‰§è¡Œ */
                 if (!rfired || fe->w_file_proc != fe->r_file_proc) 
                 {
                     fe->w_file_proc(el, fd, fe->write_client_data, mask);
@@ -817,7 +817,7 @@ int msd_ae_process_events(msd_ae_event_loop *el, int flags)
         }
     }
     /* Check time events */
-    /* ´¦ÀíËùÓĞµÄÊ±¼äÊÂ¼ş */
+    /* å¤„ç†æ‰€æœ‰çš„æ—¶é—´äº‹ä»¶ */
     if (flags & MSD_AE_TIME_EVENTS) 
     {
         processed += msd_process_time_events(el);
@@ -827,12 +827,12 @@ int msd_ae_process_events(msd_ae_event_loop *el, int flags)
     return processed; 
 }
 /**
- * ¹¦ÄÜ: Wait for milliseconds until the given file descriptior becomes
+ * åŠŸèƒ½: Wait for milliseconds until the given file descriptior becomes
  *       writable/readable/exception
- * ²ÎÊı: @
- * ÃèÊö:
- *      1. µ¥¶À¶ÔÄ³¸öÎÄ¼şµÄfd×öselect£¬µÈ´ımillisecondsºÁÃë
- * ·µ»Ø: ³É¹¦£¬ Ê§°Ü£¬
+ * å‚æ•°: @
+ * æè¿°:
+ *      1. å•ç‹¬å¯¹æŸä¸ªæ–‡ä»¶çš„fdåšselectï¼Œç­‰å¾…millisecondsæ¯«ç§’
+ * è¿”å›: æˆåŠŸï¼Œ å¤±è´¥ï¼Œ
  **/
 int msd_ae_wait(int fd, int mask, long long milliseconds) 
 {
@@ -875,10 +875,10 @@ int msd_ae_wait(int fd, int mask, long long milliseconds)
 }
 
 /**
- * ¹¦ÄÜ: main loop of the event-driven framework 
- * ²ÎÊı: @el
- * ÃèÊö:
- *      1. Èç¹ûbefore_sleep·Ç¿Õ£¬ÔòÏÈµ÷ÓÃÖ®£¬È»ºó½øÈëÖ÷Ìåloop
+ * åŠŸèƒ½: main loop of the event-driven framework 
+ * å‚æ•°: @el
+ * æè¿°:
+ *      1. å¦‚æœbefore_sleepéç©ºï¼Œåˆ™å…ˆè°ƒç”¨ä¹‹ï¼Œç„¶åè¿›å…¥ä¸»ä½“loop
  **/
 void msd_ae_main_loop(msd_ae_event_loop *el) 
 {
@@ -894,8 +894,8 @@ void msd_ae_main_loop(msd_ae_event_loop *el)
 }
  
 /**
- * ¹¦ÄÜ: set before_sleep_proc
- * ²ÎÊı: @el, @before_sleep
+ * åŠŸèƒ½: set before_sleep_proc
+ * å‚æ•°: @el, @before_sleep
  */
 void msd_ae_set_before_sleep_proc(msd_ae_event_loop *el, 
         msd_ae_before_sleep_proc *before_sleep) 
@@ -941,7 +941,7 @@ int output_result(msd_ae_event_loop *el, long long id, void *client_data)
     return 0;
 }
 
-/*Ìí¼ÓÊ±¼äÊÂ¼ş*/
+/*æ·»åŠ æ—¶é—´äº‹ä»¶*/
 void add_all(msd_ae_event_loop *el) 
 {
     int i = 0;
@@ -957,7 +957,7 @@ void add_all(msd_ae_event_loop *el)
     }
 }
 
-/*É¾³ıÊ±¼äÊÂ¼ş*/
+/*åˆ é™¤æ—¶é—´äº‹ä»¶*/
 void delete_all(msd_ae_event_loop *el) 
 {
     int i = 0;
@@ -970,8 +970,8 @@ void delete_all(msd_ae_event_loop *el)
     }
 }
 
-/* fileÊÂ¼ş 
- * ÊÂ¼şµÄ´¦ÀíÓ¦±ÜÃâ×èÈû£¡£¡£¡£¡£¡
+/* fileäº‹ä»¶ 
+ * äº‹ä»¶çš„å¤„ç†åº”é¿å…é˜»å¡ï¼ï¼ï¼ï¼ï¼
  */
 void file_process(struct msd_ae_event_loop *el, int fd, void *client_data, int mask)
 {
@@ -979,7 +979,7 @@ void file_process(struct msd_ae_event_loop *el, int fd, void *client_data, int m
     if(mask & MSD_AE_WRITABLE)
     {
         write( fd, client_data, strlen(client_data));
-        /* Ä£Äâ×èÈûµÄÇé¿ö */
+        /* æ¨¡æ‹Ÿé˜»å¡çš„æƒ…å†µ */
         //sleep(1);
     }
     
@@ -987,7 +987,7 @@ void file_process(struct msd_ae_event_loop *el, int fd, void *client_data, int m
     {
         read(fd, buf, 1000);
         //printf("read:%s\n", buf);
-        //sleep(2);/* Ä£Äâ×èÈûµÄÇé¿ö */
+        //sleep(2);/* æ¨¡æ‹Ÿé˜»å¡çš„æƒ…å†µ */
     }
 }
 
@@ -1001,7 +1001,7 @@ int main(int argc, char *argv[])
     mask = MSD_AE_WRITABLE | MSD_AE_READABLE;
     msd_ae_event_loop *el = msd_ae_create_event_loop();
     add_all(el);
-    /* Èç¹ûÊÇepoll£¬²»Ö§³Ö */
+    /* å¦‚æœæ˜¯epollï¼Œä¸æ”¯æŒ */
     msd_ae_create_file_event(el, fd, mask, file_process, "hello\n");
     msd_ae_main_loop(el);
     delete_all(el);

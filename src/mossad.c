@@ -16,14 +16,14 @@
  **/
 #include "msd_core.h"
 
-/* Æô¶¯·½Ê½ */
+/* å¯åŠ¨æ–¹å¼ */
 typedef enum start_mode{
     PROGRAM_START,
     PROGRAM_STOP,
     PROGRAM_RESTART
 }start_mode_t;
 
-/* ³¤²ÎÊıÁĞ±í */
+/* é•¿å‚æ•°åˆ—è¡¨ */
 static struct option const long_options[] = {
     {"config",  required_argument, NULL, 'c'},
     {"help",    no_argument,       NULL, 'h'},
@@ -36,7 +36,7 @@ msd_instance_t  *g_ins;
 start_mode_t     g_start_mode;
 msd_so_func_t    g_so;
 
-/* Master»áÀûÓÃsymsÊµÏÖ¶Ôso¸÷¸öº¯ÊıµÄ±éÀú³õÊ¼»¯ */
+/* Masterä¼šåˆ©ç”¨symså®ç°å¯¹soå„ä¸ªå‡½æ•°çš„éå†åˆå§‹åŒ– */
 static msd_so_symbol_t syms[] = 
 {
     /* symbol_name,     function pointer,         optional */
@@ -46,14 +46,14 @@ static msd_so_symbol_t syms[] =
     {"msd_handle_fini",             (void **)&g_so.handle_fini,             1}, 
     {"msd_handle_open",             (void **)&g_so.handle_open,             1}, 
     {"msd_handle_close",            (void **)&g_so.handle_close,            1}, 
-    {"msd_handle_prot_len",         (void **)&g_so.handle_prot_len,         0},  /* ±ØÑ¡ */
-    {"msd_handle_process",          (void **)&g_so.handle_process,          0},  /* ±ØÑ¡ */
+    {"msd_handle_prot_len",         (void **)&g_so.handle_prot_len,         0},  /* å¿…é€‰ */
+    {"msd_handle_process",          (void **)&g_so.handle_process,          0},  /* å¿…é€‰ */
     {NULL, NULL, 0}
 };
 
 /**
- * ¹¦ÄÜ: ³õÊ¼»¯instance
- * ·µ»Ø£º³É¹¦£ºinstance Ö¸Õë
+ * åŠŸèƒ½: åˆå§‹åŒ–instance
+ * è¿”å›ï¼šæˆåŠŸï¼šinstance æŒ‡é’ˆ
  **/
 static msd_instance_t * msd_create_instance()
 {
@@ -84,38 +84,38 @@ static msd_instance_t * msd_create_instance()
 }
 
 /**
- * ¹¦ÄÜ: Ïú»Ùinstance
+ * åŠŸèƒ½: é”€æ¯instance
  **/
 static void msd_destroy_instance(msd_instance_t *instance)
 {
     msd_str_free(instance->pid_file);
     msd_str_free(instance->so_file);
 
-    /* Ïú»ÙÅäÖÃ */
+    /* é”€æ¯é…ç½® */
     msd_str_free(instance->conf_path);
     msd_conf_free(instance->conf);
     free(instance->conf);
     MSD_INFO_LOG("Conf destroy!");
     
-    /* Ïú»ÙÈÕÖ¾ */
+    /* é”€æ¯æ—¥å¿— */
     msd_log_close();
     MSD_INFO_LOG("Log destroy!");
     
-    /* Ïú»ÙÏß³Ì³Ø */
+    /* é”€æ¯çº¿ç¨‹æ±  */
     msd_thread_pool_destroy(instance->pool);
 
-    /* Ïú»Ùmaster */
+    /* é”€æ¯master */
     msd_master_destroy(instance->master);
     
-    /* Ïú»ÙÏßĞÅºÅÏß³Ì */
+    /* é”€æ¯çº¿ä¿¡å·çº¿ç¨‹ */
     free(instance->sig_worker);
     MSD_INFO_LOG("Instance destroy!");
     
-    /* Ïú»Ùso¾ä±ú */
+    /* é”€æ¯soå¥æŸ„ */
     msd_unload_so(&(instance->so_handle));              
     MSD_INFO_LOG("So destroy!");
     
-    /* Ïú»ÙËø */
+    /* é”€æ¯é” */
     MSD_LOCK_DESTROY(instance->thread_woker_list_lock);
     MSD_LOCK_DESTROY(instance->client_conn_vec_lock);
 
@@ -123,7 +123,7 @@ static void msd_destroy_instance(msd_instance_t *instance)
 }
 
 /**
- * ¹¦ÄÜ: ´òÓ¡"¹ØÓÚ"ĞÅÏ¢
+ * åŠŸèƒ½: æ‰“å°"å…³äº"ä¿¡æ¯
  **/
 static void msd_print_info() 
 {
@@ -135,7 +135,7 @@ static void msd_print_info()
 }
 
 /**
- * ¹¦ÄÜ: ´òÓ¡"°æ±¾"ĞÅÏ¢
+ * åŠŸèƒ½: æ‰“å°"ç‰ˆæœ¬"ä¿¡æ¯
  **/
 static void msd_print_version()
 {
@@ -143,7 +143,7 @@ static void msd_print_version()
 }
 
 /**
- * ¹¦ÄÜ£º´òÓ¡usage
+ * åŠŸèƒ½ï¼šæ‰“å°usage
  **/
 static void msd_usage(int status) 
 {
@@ -160,7 +160,7 @@ static void msd_usage(int status)
 }
 
 /**
- * ¹¦ÄÜ£º½âÎöÑ¡Ïî
+ * åŠŸèƒ½ï¼šè§£æé€‰é¡¹
  **/
 static void msd_get_options(int argc, char **argv) 
 {
@@ -232,7 +232,7 @@ int main(int argc, char **argv)
     
     msd_get_options(argc, argv);
     
-    /* ³õÊ¼»¯conf */
+    /* åˆå§‹åŒ–conf */
     if(!g_ins->conf_path)
     {
         if(!(g_ins->conf_path = msd_str_new("./mossad.conf")))
@@ -249,7 +249,7 @@ int main(int argc, char **argv)
     MSD_BOOT_SUCCESS("Mossad Begin To Init");
     MSD_BOOT_SUCCESS("Init Configure File");
 
-    /* ³õÊ¼»¯log */
+    /* åˆå§‹åŒ–log */
     if (msd_log_init(msd_conf_get_str_value(g_ins->conf, "log_path", "./"),
             msd_conf_get_str_value(g_ins->conf, "log_name", MSD_PROG_NAME".log"),
             msd_conf_get_int_value(g_ins->conf, "log_level", MSD_LOG_LEVEL_ALL),
@@ -273,7 +273,7 @@ int main(int argc, char **argv)
         //fprintf(stderr, "Can you see me?\n");
     }
     
-    /* »ñÈ¡pid */
+    /* è·å–pid */
     g_ins->pid_file = msd_str_new(msd_conf_get_str_value(g_ins->conf, "pid_file", "/tmp/mossad.pid"));
     if((pid = msd_pid_file_running(g_ins->pid_file->buf)) == -1) 
     {
@@ -281,7 +281,7 @@ int main(int argc, char **argv)
         MSD_BOOT_FAILED("Checking Running Daemon:%s", strerror(errno));
     }
     
-    /* ¸ù¾İÆô¶¯ÃüÁî·ÖÎö£¬ÊÇstart»¹ÊÇstop */
+    /* æ ¹æ®å¯åŠ¨å‘½ä»¤åˆ†æï¼Œæ˜¯startè¿˜æ˜¯stop */
     if (g_start_mode == PROGRAM_START) 
     {
         MSD_BOOT_SUCCESS("Begin To Start");
@@ -313,7 +313,7 @@ int main(int argc, char **argv)
         }
 
         /* 
-         * ¸ù¾İpid_fileÎÄ¼ş¼ÇÔØµÄpid£¬·¢ËÍSIGTERMĞÅºÅ£¬ÖÕÖ¹³ÌĞò 
+         * æ ¹æ®pid_fileæ–‡ä»¶è®°è½½çš„pidï¼Œå‘é€SIGTERMä¿¡å·ï¼Œç»ˆæ­¢ç¨‹åº 
          **/
         if (kill(pid, SIGTERM) != 0) 
         {
@@ -325,7 +325,7 @@ int main(int argc, char **argv)
     } 
     else if(g_start_mode == PROGRAM_RESTART)
     {
-        /* ¹Ø±Õ */
+        /* å…³é—­ */
         MSD_BOOT_SUCCESS("Begin To Restart");
         MSD_INFO_LOG("Begin To Restart");
         
@@ -348,7 +348,7 @@ int main(int argc, char **argv)
         }
         write(1, "\n", 1);
         
-        /* Æô¶¯ */
+        /* å¯åŠ¨ */
         if ((msd_pid_file_create(g_ins->pid_file->buf)) != 0) 
         {
             MSD_ERROR_LOG("Create pid file failed: %s", strerror(errno));
@@ -364,7 +364,7 @@ int main(int argc, char **argv)
         return 0;
     }    
     
-    /* ¼ÓÔØso¶¯Ì¬¿â£¬ÓÃ»§µÄÂß¼­¶¼Ğ´ÔÚÁËsoÖĞ */
+    /* åŠ è½½soåŠ¨æ€åº“ï¼Œç”¨æˆ·çš„é€»è¾‘éƒ½å†™åœ¨äº†soä¸­ */
     g_ins->so_file = msd_str_new(msd_conf_get_str_value(g_ins->conf, "so_file", NULL));
     if (msd_load_so(&(g_ins->so_handle), syms, g_ins->so_file->buf) < 0) 
     {
@@ -373,7 +373,7 @@ int main(int argc, char **argv)
     }
     g_ins->so_func = &g_so;
     
-    /* µ÷ÓÃhandle_init */
+    /* è°ƒç”¨handle_init */
     if (g_ins->so_func->handle_init) 
     {
         if (g_ins->so_func->handle_init(g_ins->conf) != MSD_OK) 
@@ -385,12 +385,12 @@ int main(int argc, char **argv)
     MSD_BOOT_SUCCESS("Load So File:%s", g_ins->so_file->buf);
     MSD_INFO_LOG("Load So File:%s Success", g_ins->so_file->buf);
     
-    /* ·Å¿ª×ÊÔ´ÏŞÖÆ */
+    /* æ”¾å¼€èµ„æºé™åˆ¶ */
     msd_rlimit_reset();
     MSD_BOOT_SUCCESS("Reset Limit");
     MSD_INFO_LOG("Reset Limit Success");
 
-    /* ³£ÓÃĞÅºÅ×¢²á¼°³õÊ¼»¯ĞÅºÅ´¦ÀíÏß³Ì */
+    /* å¸¸ç”¨ä¿¡å·æ³¨å†ŒåŠåˆå§‹åŒ–ä¿¡å·å¤„ç†çº¿ç¨‹ */
     if(MSD_OK != msd_init_private_signals())
     {
         MSD_ERROR_LOG("Init private signals failed");
@@ -407,7 +407,7 @@ int main(int argc, char **argv)
     MSD_BOOT_SUCCESS("Start Public Signals Thread");
     MSD_INFO_LOG("Start Public Signals Thread Success");
     
-    /* ³õÊ¼»¯Ïß³Ì³Ø */
+    /* åˆå§‹åŒ–çº¿ç¨‹æ±  */
     if(!(g_ins->pool = msd_thread_pool_create(
             msd_conf_get_int_value(g_ins->conf, "worker_num", 5),
             msd_conf_get_int_value(g_ins->conf, "stack_size", 10*1024*1024),
@@ -419,7 +419,7 @@ int main(int argc, char **argv)
     MSD_BOOT_SUCCESS("Create Threadpool");
     MSD_INFO_LOG("Create Threadpool Success");
 
-    /* ×îÖÕ×¼±¸¹¤×÷ */
+    /* æœ€ç»ˆå‡†å¤‡å·¥ä½œ */
     if (g_ins->so_func->handle_last_preparation) 
     {
         if (g_ins->so_func->handle_last_preparation(g_ins->conf, g_ins->pool) != MSD_OK) 
@@ -431,19 +431,19 @@ int main(int argc, char **argv)
         MSD_INFO_LOG("Last prepareation Success");
     }
 
-    /* ĞŞ¸Ä½ø³ÌµÄTitle */
+    /* ä¿®æ”¹è¿›ç¨‹çš„Title */
     saved_argv = msd_set_program_name(argc, argv, msd_conf_get_str_value(g_ins->conf, "pro_name", "Mossad"));
 
     MSD_BOOT_SUCCESS("Mossad Begin To Run. Program name:%s", msd_conf_get_str_value(g_ins->conf, "pro_name", "Mossad"));
     MSD_INFO_LOG("Mossad Begin To Run Program name:%s", msd_conf_get_str_value(g_ins->conf, "pro_name", "Mossad"));
-    /* ÖØ¶¨ÏòSTDIN_FILENO, STDOUT_FILENO, STDERR_FILENO */
+    /* é‡å®šå‘STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO */
     int org_fd = msd_redirect_std();
     fprintf(stderr, "You will never see me!\n");
     
-    /* Master¿ªÊ¼¹¤×÷ */ 
+    /* Masterå¼€å§‹å·¥ä½œ */ 
     if(MSD_OK != msd_master_cycle())
     {
-        /* »Ö¸´±ê×¼Êä³ö */
+        /* æ¢å¤æ ‡å‡†è¾“å‡º */
         dup2(org_fd, STDOUT_FILENO);
         MSD_ERROR_LOG("Create Master Failed");
         MSD_BOOT_FAILED("Create Master Failed");

@@ -20,24 +20,24 @@
 #include "msd_core.h"
 
 /**
- * ¹¦ÄÜ: Ä¬ÈÏsetº¯Êı
+ * åŠŸèƒ½: é»˜è®¤setå‡½æ•°
  **/
 void *msd_hash_def_set(const void *key){    return strdup((char *)key); }
 
 /**
- * ¹¦ÄÜ: Ä¬ÈÏfreeº¯Êı
+ * åŠŸèƒ½: é»˜è®¤freeå‡½æ•°
  **/
 void msd_hash_def_free(void *key){ if(!key) free(key); }
 
 /**
- * ¹¦ÄÜ: Ä¬ÈÏcmpº¯Êı
+ * åŠŸèƒ½: é»˜è®¤cmpå‡½æ•°
  **/
 int msd_hash_def_cmp(const void *key1, const void *key2) { return strcmp((char *)key1, (char *)key2) == 0; }
 
 /**
- * ¹¦ÄÜ: get the minimun 2'n which is biger than size
- * ²ÎÊı: @size:³õÊ¼¸ø¶¨´óĞ¡ 
- * ·µ»Ø: the minimun 2'n which is biger than size
+ * åŠŸèƒ½: get the minimun 2'n which is biger than size
+ * å‚æ•°: @size:åˆå§‹ç»™å®šå¤§å° 
+ * è¿”å›: the minimun 2'n which is biger than size
  **/
 static unsigned long msd_next_power(unsigned long size)
 {
@@ -59,9 +59,9 @@ static unsigned long msd_next_power(unsigned long size)
 }
 
 /**
- * ¹¦ÄÜ: hashÉ¢ÁĞº¯Êı
- * ²ÎÊı: @key  
- * ·µ»Ø: É¢ÁĞ½á¹û
+ * åŠŸèƒ½: hashæ•£åˆ—å‡½æ•°
+ * å‚æ•°: @key  
+ * è¿”å›: æ•£åˆ—ç»“æœ
  **/
 static unsigned int msd_hash_func(const void *key)
 {
@@ -76,10 +76,10 @@ static unsigned int msd_hash_func(const void *key)
 }
 
 /**
- * ¹¦ÄÜ: nitialize an allocated hash table
- * ²ÎÊı: @ht, ÒÑ¾­·ÖÅäºÃ¿Õ¼äÁËµÄhash½á¹¹
- *       @slots, ²ÛÎ»Êı 
- * ·µ»Ø: ³É¹¦£¬ 0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: nitialize an allocated hash table
+ * å‚æ•°: @ht, å·²ç»åˆ†é…å¥½ç©ºé—´äº†çš„hashç»“æ„
+ *       @slots, æ§½ä½æ•° 
+ * è¿”å›: æˆåŠŸï¼Œ 0 å¤±è´¥ï¼Œ-x
  **/
 static int msd_hash_init(msd_hash_t *ht, unsigned int slots)
 {
@@ -97,9 +97,9 @@ static int msd_hash_init(msd_hash_t *ht, unsigned int slots)
 }
 
 /**
- * ¹¦ÄÜ: create a new hash table and init which immediately
- * ²ÎÊı: @slots,³õÊ¼²ÛÎ»Êı
- * ·µ»Ø:³É¹¦£¬msd_hash_tµØÖ·£¬Ê§°Ü£¬NULL
+ * åŠŸèƒ½: create a new hash table and init which immediately
+ * å‚æ•°: @slots,åˆå§‹æ§½ä½æ•°
+ * è¿”å›:æˆåŠŸï¼Œmsd_hash_tåœ°å€ï¼Œå¤±è´¥ï¼ŒNULL
  **/
 msd_hash_t *msd_hash_create(unsigned int slots)
 {
@@ -120,11 +120,11 @@ msd_hash_t *msd_hash_create(unsigned int slots)
 }
 
 /**
- * ¹¦ÄÜ: double site of the table when not enough slots
- * ²ÎÊı: @ht, ´ıÀ©ÈİµÄhash½á¹¹µØÖ·
- * ÃèÊö:
+ * åŠŸèƒ½: double site of the table when not enough slots
+ * å‚æ•°: @ht, å¾…æ‰©å®¹çš„hashç»“æ„åœ°å€
+ * æè¿°:
  *      1. static
- * ·µ»Ø: ³É¹¦£¬ 0 Ê§°Ü£¬-x
+ * è¿”å›: æˆåŠŸï¼Œ 0 å¤±è´¥ï¼Œ-x
  **/
 static int msd_hash_resize(msd_hash_t *ht)
 {
@@ -136,13 +136,13 @@ static int msd_hash_resize(msd_hash_t *ht)
     ht->data = NULL;
     old_slots = ht->slots;
 
-    /*À©ÈİÁ½±¶*/
+    /*æ‰©å®¹ä¸¤å€*/
     if((ret = msd_hash_init(ht, old_slots*2)) !=0 )
     {
         return MSD_FAILED;
     }
 
-    /*ÀÏhashÖĞµÄÔªËØ°¤¸ö²åÈë*/
+    /*è€hashä¸­çš„å…ƒç´ æŒ¨ä¸ªæ’å…¥*/
     for(i=0; i<old_slots; i++)
     {
         if((he = tmp[i]))
@@ -165,11 +165,11 @@ static int msd_hash_resize(msd_hash_t *ht)
 }
 
 /**
- * ¹¦ÄÜ: insert a key/value pair into a hash table 
- * ²ÎÊı:@ 
- * ÃèÊö:
- *      1. Èç¹ûkey´æÔÚ£¬ÔòÌæ»»£¬·ñÔò²åÈë
- * ·µ»Ø:
+ * åŠŸèƒ½: insert a key/value pair into a hash table 
+ * å‚æ•°:@ 
+ * æè¿°:
+ *      1. å¦‚æœkeyå­˜åœ¨ï¼Œåˆ™æ›¿æ¢ï¼Œå¦åˆ™æ’å…¥
+ * è¿”å›:
  **/
 int msd_hash_insert(msd_hash_t *ht, const void *key, const void *val)
 {
@@ -227,12 +227,12 @@ int msd_hash_insert(msd_hash_t *ht, const void *key, const void *val)
 }
 
 /**
- * ¹¦ÄÜ: remove an entry from a hash table
- * ²ÎÊı: @ht,hash½á¹¹ÌåµØÖ·
- *       @key£¬ÓûremoveµÄkey
- * ÃèÊö:
- *      1. ·ÀÖ¹ÄÚ´æĞ¹Â¶£¬ĞèÒª·Ö±ğµ÷ÓÃFREE_KEY\FREE_VAL\free(he)
- * ·µ»Ø:³É¹¦£¬0£¬Ê§°Ü, -x
+ * åŠŸèƒ½: remove an entry from a hash table
+ * å‚æ•°: @ht,hashç»“æ„ä½“åœ°å€
+ *       @keyï¼Œæ¬²removeçš„key
+ * æè¿°:
+ *      1. é˜²æ­¢å†…å­˜æ³„éœ²ï¼Œéœ€è¦åˆ†åˆ«è°ƒç”¨FREE_KEY\FREE_VAL\free(he)
+ * è¿”å›:æˆåŠŸï¼Œ0ï¼Œå¤±è´¥, -x
  **/
 int msd_hash_remove_entry(msd_hash_t *ht, const void *key)
 {
@@ -255,7 +255,7 @@ int msd_hash_remove_entry(msd_hash_t *ht, const void *key)
                 }
                 else
                 {
-                    ht->data[index] = he->next;/*µÚÒ»¸öÔªËØ*/
+                    ht->data[index] = he->next;/*ç¬¬ä¸€ä¸ªå…ƒç´ */
                 }
 
                 MSD_HASH_FREE_KEY(ht, he);
@@ -274,14 +274,14 @@ int msd_hash_remove_entry(msd_hash_t *ht, const void *key)
 }
 
 /**
- * ¹¦ÄÜ: execute the provided function fro each entry
- * ²ÎÊı: @ht, hash½á¹¹ÌåµØÖ·
- *       @foreach, º¯ÊıÖ¸Õë£¬½«×÷ÓÃÓÚÃ¿Ò»¸öentry
- *                 µÚÒ»¸ö²ÎÊıÊÇentryÖ¸Õë£¬µÚ¶ş¸ö²ÎÊıÊÇÍâ´øÊı¾İ
- *       @userptr, Íâ´øÊı¾İ£¬ÓÃ»§´«µİ¸øforeach
- * ÃèÊö: 
- *      1. ±éÀúÃ¿Ò»¸öentry£¬·Ö±ğÖ´ĞĞ¸ø¶¨º¯Êı
- * ·µ»Ø: ³É¹¦£¬0,Ê§°Ü£¬-x
+ * åŠŸèƒ½: execute the provided function fro each entry
+ * å‚æ•°: @ht, hashç»“æ„ä½“åœ°å€
+ *       @foreach, å‡½æ•°æŒ‡é’ˆï¼Œå°†ä½œç”¨äºæ¯ä¸€ä¸ªentry
+ *                 ç¬¬ä¸€ä¸ªå‚æ•°æ˜¯entryæŒ‡é’ˆï¼Œç¬¬äºŒä¸ªå‚æ•°æ˜¯å¤–å¸¦æ•°æ®
+ *       @userptr, å¤–å¸¦æ•°æ®ï¼Œç”¨æˆ·ä¼ é€’ç»™foreach
+ * æè¿°: 
+ *      1. éå†æ¯ä¸€ä¸ªentryï¼Œåˆ†åˆ«æ‰§è¡Œç»™å®šå‡½æ•°
+ * è¿”å›: æˆåŠŸï¼Œ0,å¤±è´¥ï¼Œ-x
  **/
 int msd_hash_foreach(msd_hash_t *ht,
         int (*foreach)(const msd_hash_entry_t *, void *userptr),
@@ -292,7 +292,7 @@ int msd_hash_foreach(msd_hash_t *ht,
 
     assert(foreach);
     
-    /* ±éÀúÃ¿Ò»¸öentry */
+    /* éå†æ¯ä¸€ä¸ªentry */
     for(i=0; i<ht->slots; i++)
     {
         if((he=ht->data[i]))
@@ -312,12 +312,12 @@ int msd_hash_foreach(msd_hash_t *ht,
 }
 
 /**
- * ¹¦ÄÜ: get a value by key
- * ²ÎÊı: @ht,hash½á¹¹ÌåµØÖ·
- *       @key£¬Óû²éÑ¯key
- * ÃèÊö:
- *      1. ¸ù¾İhashËã·¨£¬ÕÒµ½¶ÔÓ¦²ÛÎ»£¬È»ºó´Ë²ÛÎ»ÉÏ±éÀúÃ¿¸öentry
- * ·µ»Ø: ³É¹¦£¬·µ»ØvalµÄµØÖ·£¬Ê§°ÜNULL
+ * åŠŸèƒ½: get a value by key
+ * å‚æ•°: @ht,hashç»“æ„ä½“åœ°å€
+ *       @keyï¼Œæ¬²æŸ¥è¯¢key
+ * æè¿°:
+ *      1. æ ¹æ®hashç®—æ³•ï¼Œæ‰¾åˆ°å¯¹åº”æ§½ä½ï¼Œç„¶åæ­¤æ§½ä½ä¸Šéå†æ¯ä¸ªentry
+ * è¿”å›: æˆåŠŸï¼Œè¿”å›valçš„åœ°å€ï¼Œå¤±è´¥NULL
  **/
 void *msd_hash_get_val(msd_hash_t *ht, const void *key)
 {
@@ -342,13 +342,13 @@ void *msd_hash_get_val(msd_hash_t *ht, const void *key)
 }
 
 /**
- * ¹¦ÄÜ: the foreach function to be used by qbh_hash_destroy
- * ²ÎÊı: @ he,´ıÉ¾³ıµÄentryµØÖ·
- *       @ ht£¬hash½á¹¹µØÖ·
- * ÃèÊö:
- *      1. ¸Ãº¯ÊıµÄ´æÔÚ£¬Ö÷ÒªÊÇÒòÎªmsd_hash_foreachµÄµÚ¶ş²ÎÊı
- *         ÊÇÒ»¸öĞèÒªµÚÒ»¸ö²ÎÊıÊÇ¸öheµÄº¯Êı
- * ·µ»Ø: ³É¹¦£¬0,Ê§°Ü£¬-x
+ * åŠŸèƒ½: the foreach function to be used by qbh_hash_destroy
+ * å‚æ•°: @ he,å¾…åˆ é™¤çš„entryåœ°å€
+ *       @ htï¼Œhashç»“æ„åœ°å€
+ * æè¿°:
+ *      1. è¯¥å‡½æ•°çš„å­˜åœ¨ï¼Œä¸»è¦æ˜¯å› ä¸ºmsd_hash_foreachçš„ç¬¬äºŒå‚æ•°
+ *         æ˜¯ä¸€ä¸ªéœ€è¦ç¬¬ä¸€ä¸ªå‚æ•°æ˜¯ä¸ªheçš„å‡½æ•°
+ * è¿”å›: æˆåŠŸï¼Œ0,å¤±è´¥ï¼Œ-x
  **/
 static int msd_hash_delete_foreach(const msd_hash_entry_t *he, void *ht)
 {
@@ -361,30 +361,30 @@ static int msd_hash_delete_foreach(const msd_hash_entry_t *he, void *ht)
 }
 
 /**
- * ¹¦ÄÜ: clear a hash table
- * ²ÎÊı: @ hash½á¹¹µØÖ·
- * ÃèÊö:
- *      1. Ïú»ÙhashµÄÊı¾İ£¬µ«ÊÇhash½á¹¹±¾Éí²»Ïú»Ù
- *      2. ²¢ÇÒht->data¶ÑÊı×é²»Ïú»Ù£¬µ«»áÇå0£¬hashÆäËû»Øµ÷¹³×Óº¯Êı¾ù±£Áô
+ * åŠŸèƒ½: clear a hash table
+ * å‚æ•°: @ hashç»“æ„åœ°å€
+ * æè¿°:
+ *      1. é”€æ¯hashçš„æ•°æ®ï¼Œä½†æ˜¯hashç»“æ„æœ¬èº«ä¸é”€æ¯
+ *      2. å¹¶ä¸”ht->dataå †æ•°ç»„ä¸é”€æ¯ï¼Œä½†ä¼šæ¸…0ï¼Œhashå…¶ä»–å›è°ƒé’©å­å‡½æ•°å‡ä¿ç•™
  **/
 void msd_hash_clear(msd_hash_t *ht)
 {
-    msd_hash_foreach(ht, msd_hash_delete_foreach, ht); /*½«Ã¿¸öÔªËØÇå³ı*/
+    msd_hash_foreach(ht, msd_hash_delete_foreach, ht); /*å°†æ¯ä¸ªå…ƒç´ æ¸…é™¤*/
     memset(ht->data, 0, ht->slots * sizeof(msd_hash_entry_t *)); 
     ht->count = 0;
 }
 
 /**
- * ¹¦ÄÜ: destroy a hash table
- * ²ÎÊı: @ hash½á¹¹µØÖ·
- * ÃèÊö:
- *      1. Ïú»ÙhashµÄÊı¾İ£¬µ«ÊÇhash½á¹¹±¾Éí²»Ïú»Ù
- *      2. ²¢ÇÒht->data¶ÑÊı×é»áÏú»Ù
+ * åŠŸèƒ½: destroy a hash table
+ * å‚æ•°: @ hashç»“æ„åœ°å€
+ * æè¿°:
+ *      1. é”€æ¯hashçš„æ•°æ®ï¼Œä½†æ˜¯hashç»“æ„æœ¬èº«ä¸é”€æ¯
+ *      2. å¹¶ä¸”ht->dataå †æ•°ç»„ä¼šé”€æ¯
  **/
 void msd_hash_destroy(msd_hash_t *ht)
 {
-    msd_hash_foreach(ht, msd_hash_delete_foreach, ht); /*½«Ã¿¸öÔªËØÇå³ı*/
-    free(ht->data); /*dataÊı×éÇå³ı*/
+    msd_hash_foreach(ht, msd_hash_delete_foreach, ht); /*å°†æ¯ä¸ªå…ƒç´ æ¸…é™¤*/
+    free(ht->data); /*dataæ•°ç»„æ¸…é™¤*/
     ht->data = NULL;
     ht->count = 0;
     ht->slots = 0;
@@ -396,19 +396,19 @@ void msd_hash_destroy(msd_hash_t *ht)
     ht->free_val = NULL;
 }
 /**
- * ¹¦ÄÜ: free a hash table
- * ²ÎÊı:@ hash½á¹¹µØÖ·
- * ÃèÊö:
- *      1. Ïú»ÙÈ«²¿£¬°üÀ¨hash½á¹¹±¾Éí
+ * åŠŸèƒ½: free a hash table
+ * å‚æ•°:@ hashç»“æ„åœ°å€
+ * æè¿°:
+ *      1. é”€æ¯å…¨éƒ¨ï¼ŒåŒ…æ‹¬hashç»“æ„æœ¬èº«
  **/
 void msd_hash_free(msd_hash_t *ht)
 {
-    msd_hash_destroy(ht);/*ht½á¹¹Çå³ı£¬¶Å¾øĞ¹Â¶*/
+    msd_hash_destroy(ht);/*htç»“æ„æ¸…é™¤ï¼Œæœç»æ³„éœ²*/
     free(ht);
 }
 
 /**
- * ¹¦ÄÜ: the froeach handler to duplicate the hash table
+ * åŠŸèƒ½: the froeach handler to duplicate the hash table
  **/
 static int msd_hash_dup_foreach(const msd_hash_entry_t *he, void *copy)
 {
@@ -421,9 +421,9 @@ static int msd_hash_dup_foreach(const msd_hash_entry_t *he, void *copy)
 }
 
 /**
- * ¹¦ÄÜ: duplicate a hash table
- * ²ÎÊı: @ ´ı¿½±´¹şÏ£½á¹¹µØÖ·
- * ·µ»Ø: ³É¹¦£¬ĞÂhash½á¹¹µØÖ·£¬Ê§°ÜNULL
+ * åŠŸèƒ½: duplicate a hash table
+ * å‚æ•°: @ å¾…æ‹·è´å“ˆå¸Œç»“æ„åœ°å€
+ * è¿”å›: æˆåŠŸï¼Œæ–°hashç»“æ„åœ°å€ï¼Œå¤±è´¥NULL
  **/
 msd_hash_t *msd_hash_duplicate(msd_hash_t *ht)
 {
@@ -445,7 +445,7 @@ msd_hash_t *msd_hash_duplicate(msd_hash_t *ht)
 }
 
 /**
- * ¹¦ÄÜ: init a new hash iterator struct
+ * åŠŸèƒ½: init a new hash iterator struct
  **/
 static int msd_hash_iter_init(msd_hash_iter_t *iter, msd_hash_t *ht)
 {
@@ -459,9 +459,9 @@ static int msd_hash_iter_init(msd_hash_iter_t *iter, msd_hash_t *ht)
 }
 
 /**
- * ¹¦ÄÜ: create a new hash iteratior, and then init it
- * ²ÎÊı: @ ht, hash½á¹¹ÌåµØÖ·
- * ·µ»Ø: ³É¹¦£¬iter½á¹¹ÌåµØÖ·£¬Ê§°Ü£¬NULL
+ * åŠŸèƒ½: create a new hash iteratior, and then init it
+ * å‚æ•°: @ ht, hashç»“æ„ä½“åœ°å€
+ * è¿”å›: æˆåŠŸï¼Œiterç»“æ„ä½“åœ°å€ï¼Œå¤±è´¥ï¼ŒNULL
  **/
 msd_hash_iter_t *msd_hash_iter_new(msd_hash_t *ht)
 {
@@ -480,12 +480,12 @@ msd_hash_iter_t *msd_hash_iter_new(msd_hash_t *ht)
 }
 
 /**
- * ¹¦ÄÜ: move to the next position in the table
- * ²ÎÊı: @ iter
- * ÃèÊö:
- *      1. Èç¹ûiter´¦ÓÚÄ³¸ö²ÛÎ»¶ÔÓ¦µÄÁ´±íµÄ×îºóÎ»ÖÃ£¬ÔòÏÂÒ»¸öÎ»ÖÃ
- *         ±ØÈ»ÊÇÎ»ÓÚÏÂÒ»¸ö·É¿Õ²ÛÎ»µÄÆğÊ¼Î»ÖÃ
- * ·µ»Ø: ³É¹¦£¬0£¬Ê§°Ü-x
+ * åŠŸèƒ½: move to the next position in the table
+ * å‚æ•°: @ iter
+ * æè¿°:
+ *      1. å¦‚æœiterå¤„äºæŸä¸ªæ§½ä½å¯¹åº”çš„é“¾è¡¨çš„æœ€åä½ç½®ï¼Œåˆ™ä¸‹ä¸€ä¸ªä½ç½®
+ *         å¿…ç„¶æ˜¯ä½äºä¸‹ä¸€ä¸ªé£ç©ºæ§½ä½çš„èµ·å§‹ä½ç½®
+ * è¿”å›: æˆåŠŸï¼Œ0ï¼Œå¤±è´¥-x
  **/
 int msd_hash_iter_move_next(msd_hash_iter_t *iter)
 {
@@ -499,7 +499,7 @@ int msd_hash_iter_move_next(msd_hash_iter_t *iter)
             iter->depth++;
             return MSD_OK;
         }
-        else /* iter´¦ÓÚÄ³¸ö²ÛÎ»¶ÔÓ¦µÄÁ´±íµÄ×îºóÎ»ÖÃ */
+        else /* iterå¤„äºæŸä¸ªæ§½ä½å¯¹åº”çš„é“¾è¡¨çš„æœ€åä½ç½® */
         {
             iter->pos++;
         }
@@ -521,11 +521,11 @@ int msd_hash_iter_move_next(msd_hash_iter_t *iter)
 }
 
 /**
- * ¹¦ÄÜ: move to the prev position in the table
- * ²ÎÊı: @ iter 
- * ÃèÊö:
- *      1. Õâ¸öº¯Êı»¹ÓĞµãÎÊÌâÓĞÇ±ÔÚbug!!!
- * ·µ»Ø:³É¹¦£¬0£¬Ê§°Ü-x
+ * åŠŸèƒ½: move to the prev position in the table
+ * å‚æ•°: @ iter 
+ * æè¿°:
+ *      1. è¿™ä¸ªå‡½æ•°è¿˜æœ‰ç‚¹é—®é¢˜æœ‰æ½œåœ¨bug!!!
+ * è¿”å›:æˆåŠŸï¼Œ0ï¼Œå¤±è´¥-x
  **/
 int msd_hash_iter_move_prev(msd_hash_iter_t *iter)
 {
@@ -566,7 +566,7 @@ int msd_hash_iter_move_prev(msd_hash_iter_t *iter)
 }
 
 /**
- * ¹¦ÄÜ:destroy a hash iterator
+ * åŠŸèƒ½:destroy a hash iterator
  **/
 static void msd_hash_iter_destroy(msd_hash_iter_t *iter)
 {
@@ -579,7 +579,7 @@ static void msd_hash_iter_destroy(msd_hash_iter_t *iter)
 }
 
 /**
- * ¹¦ÄÜ: reset the iter
+ * åŠŸèƒ½: reset the iter
  **/
 int msd_hash_iter_reset(msd_hash_iter_t *iter)
 {
@@ -590,7 +590,7 @@ int msd_hash_iter_reset(msd_hash_iter_t *iter)
 }
  
 /**
- * ¹¦ÄÜ: free a hash iterator
+ * åŠŸèƒ½: free a hash iterator
  **/
 void msd_hash_iter_free(msd_hash_iter_t *iter)
 {
@@ -662,9 +662,9 @@ int main()
 
     /*
     //test mem leak
-    //Ò»¸öÆæ¹ÖÏÖÏó£¬freeÓ¦¸ÃÊÇÉúĞ§ÁË£¬µ«ÊÇÈ·²»»á¸Ä±ätopÏÔÊ¾µÄÏûºÄµÄÄÚ´æÁ¿
-    //µ±¶àÅú´ÎÉêÇëµÄÊ±ºò£¬Èç¹ûÖĞ¼ä²»free¿ÉÒÔ¿´µ½ÄÚ´æÒ»Ö±ÔÚÔö³¤
-    //Èç¹ûfreeµÄ»°£¬ÔòÄÚ´æÖ»»áÕÇµ½Ã¿Åú´ÎµÄ·åÖµ
+    //ä¸€ä¸ªå¥‡æ€ªç°è±¡ï¼Œfreeåº”è¯¥æ˜¯ç”Ÿæ•ˆäº†ï¼Œä½†æ˜¯ç¡®ä¸ä¼šæ”¹å˜topæ˜¾ç¤ºçš„æ¶ˆè€—çš„å†…å­˜é‡
+    //å½“å¤šæ‰¹æ¬¡ç”³è¯·çš„æ—¶å€™ï¼Œå¦‚æœä¸­é—´ä¸freeå¯ä»¥çœ‹åˆ°å†…å­˜ä¸€ç›´åœ¨å¢é•¿
+    //å¦‚æœfreeçš„è¯ï¼Œåˆ™å†…å­˜åªä¼šæ¶¨åˆ°æ¯æ‰¹æ¬¡çš„å³°å€¼
     srand(time(NULL));
     ht = msd_hash_create(2);
     MSD_HASH_SET_SET_KEY(ht,  _demo_dup);

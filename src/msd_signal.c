@@ -7,10 +7,10 @@
  *
  *    Filename :  Msd_signal.h 
  * 
- * Description :  Msd_signal, Mossad�źŴ�����ص�����.
- *                �źŴ�����Ϊ��������:
- *                1.������Ϊ�����߼���Ҫ���������źţ���ר�ŵ��źŴ����߳�ͬ�����д���
- *                2.�Իᵼ�³���������ֹ���ź���SIGSEGV/SIGBUS�ȣ��ɸ����߳��Լ��첽����
+ * Description :  Msd_signal, Mossad信号处理相关的内容.
+ *                信号处理分为两个部分:
+ *                1.对于因为程序逻辑需要而产生的信号，由专门的信号处理线程同步进行处理
+ *                2.对会导致程序运行终止的信号如SIGSEGV/SIGBUS等，由各个线程自己异步处理
  * 
  *     Version :  1.0.0
  * 
@@ -42,11 +42,11 @@ static void* msd_signal_thread_cycle(void *arg);
 static void msd_public_signal_handler(int signo, msd_thread_signal_t *sig_worker);
 
 /**
- * ����: �����ź���ֵ��ȡ�ź�����
- * ����: @sig,�ź���
- * ˵��: 
- *       �����ȡ�������򷵻�NULL
- * ����:�ɹ�:�ź���; ʧ��:NULL
+ * 功能: 根据信号数值获取信号名称
+ * 参数: @sig,信号数
+ * 说明: 
+ *       如果获取不到，则返回NULL
+ * 返回:成功:信号名; 失败:NULL
  **/
 static const char *msd_get_sig_name(int sig)
 {
@@ -63,20 +63,20 @@ static const char *msd_get_sig_name(int sig)
 }
 
 /**
- * ����: ˽���źų�ʼ��
- * ˵��: 
- *       ����SIGSEGV/SIGBUS/SIGFPE/SIGILL���ĸ��ź�
- *       �ɸ����߳����в�����
- * ����:�ɹ�:0; ʧ��:-x
+ * 功能: 私有信号初始化
+ * 说明: 
+ *       对于SIGSEGV/SIGBUS/SIGFPE/SIGILL这四个信号
+ *       由各个线程自行捕获处理
+ * 返回:成功:0; 失败:-x
  **/
 int msd_init_private_signals() 
 {
     struct sigaction sa;
 
-    /* �����źŴ�������ʹ�õ�ջ�ĵ�ַ�����û�б����ù�����Ĭ�ϻ�ʹ���������û�ջ 
-     * ע��: 
-     *      �����Ƿ����ö���ջ�����յ�SIGSEGV�ź�֮���ܷ��ӡ��ջ����һ��������
-     *      ����ԭ�����
+    /* 设置信号处理程序使用的栈的地址，如果没有被设置过，则默认会使用正常的用户栈 
+     * 注意: 
+     *      无论是否设置额外栈，当收到SIGSEGV信号之后，能否打印出栈，是一个随机结果
+     *      具体原因待查
      **/
     /*
     static char alt_stack[SIGSTKSZ];
@@ -87,42 +87,42 @@ int msd_init_private_signals()
     sigaltstack(&ss, NULL);
     */
 
-    /* ��װ�ź�
-     * SA_SIGINFO  :�źŴ�������������������� 
-     * SA_RESETHAND:�������źŴ���������Ϻ󣬽��źŵĴ�����������ΪȱʡֵSIG_DFL
-     * SA_NODEFER  :һ������£� ���źŴ�����������ʱ���ں˽������ø����źš�
-     *              ������������� SA_NODEFER��ǣ� ��ô�ڸ��źŴ�����������ʱ���ں˽������������ź�
-     * SA_ONSTACK  :��������˸ñ�־����ʹ��sigaltstack������sigstack���������˱����źŶ�ջ���źŽ�
-     *              �ᴫ�ݸ��ö�ջ�еĵ��ý��̣������ź��ڵ�ǰ��ջ�ϴ��ݡ�
-     * SA_RESTART  :�Ƿ��������жϵ�ϵͳ����
+    /* 安装信号
+     * SA_SIGINFO  :信号处理函数，还有外带参数 
+     * SA_RESETHAND:当调用信号处理函数完毕后，将信号的处理函数重置为缺省值SIG_DFL
+     * SA_NODEFER  :一般情况下， 当信号处理函数运行时，内核将阻塞该给定信号。
+     *              但是如果设置了 SA_NODEFER标记， 那么在该信号处理函数运行时，内核将不会阻塞该信号
+     * SA_ONSTACK  :如果设置了该标志，并使用sigaltstack（）或sigstack（）声明了备用信号堆栈，信号将
+     *              会传递给该堆栈中的调用进程，否则信号在当前堆栈上传递。
+     * SA_RESTART  :是否重启被中断的系统调用
      **/
-    sigemptyset(&sa.sa_mask);/* �źŴ�����ʱ���������κ������ź� */
+    sigemptyset(&sa.sa_mask);/* 信号处理中时，不阻塞任何其他信号 */
     //sa.sa_flags = SA_NODEFER | SA_ONSTACK | SA_RESETHAND | SA_SIGINFO | SA_RESTART;
     sa.sa_flags = SA_RESETHAND | SA_SIGINFO | SA_RESTART;
     sa.sa_sigaction = msd_sig_segv_handler;
-    sigaction(SIGSEGV, &sa, NULL); /* �����δ����ʱ���յ����ź� */
-    sigaction(SIGBUS, &sa, NULL);  /* ���ߴ��󣬷Ƿ���ַ, �����ڴ��ַ����(alignment)���� */
-    sigaction(SIGFPE, &sa, NULL);  /* �ڷ��������������������ʱ����,�����쳣 */
-    sigaction(SIGILL, &sa, NULL);  /* ִ���˷Ƿ�ָ��. ͨ������Ϊ��ִ���ļ��������ִ���, ������ͼִ�� 
-                                    * ���ݶ�. ��ջ���ʱҲ�п��ܲ�������ź�
+    sigaction(SIGSEGV, &sa, NULL); /* 发生段错误的时候收到此信号 */
+    sigaction(SIGBUS, &sa, NULL);  /* 总线错误，非法地址, 包括内存地址对齐(alignment)出错 */
+    sigaction(SIGFPE, &sa, NULL);  /* 在发生致命的算术运算错误时发出,浮点异常 */
+    sigaction(SIGILL, &sa, NULL);  /* 执行了非法指令. 通常是因为可执行文件本身出现错误, 或者试图执行 
+                                    * 数据段. 堆栈溢出时也有可能产生这个信号
                                     */
     return MSD_OK;
 }
 
 /**
- * ����: ˽���źŴ�������
- * ����: @sig,�ź���
- *       @info,�������
+ * 功能: 私有信号处理函数
+ * 参数: @sig,信号数
+ *       @info,外带参数
  *       @secret?
- * ˵��: 
- *       ����SIGSEGV/SIGBUS/SIGFPE/SIGILL���ĸ��ź�
- *       �������������ȴ�ӡ��ջ��Ϣ��Ȼ��ָ����źŵ�
- *       Ĭ�ϲ���֮���ٷ��Ͳ�����һ���ź�
- * ע��:
- *       1. ��Ϊע���źŵ�ʱ��ָ����SA_NODEFER���������Կ�����
- *          �źŴ��������У��ٴν��յ����źţ���������
- *       2. ����˽���źŵ����ִ������Ǵ�ͳ��"�첽"��ʽ
- * ����:�ɹ�:0; ʧ��:-x
+ * 说明: 
+ *       对于SIGSEGV/SIGBUS/SIGFPE/SIGILL这四个信号
+ *       处理函数，首先打印堆栈信息，然后恢复成信号的
+ *       默认操作之后，再发送并处理一次信号
+ * 注意:
+ *       1. 因为注册信号的时候，指定了SA_NODEFER参数，所以可以在
+ *          信号处理函数中，再次接收到此信号，不会阻塞
+ *       2. 对于私有信号的这种处理，是传统的"异步"方式
+ * 返回:成功:0; 失败:-x
  **/
 static void msd_sig_segv_handler(int sig, siginfo_t *info, void *secret) 
 {
@@ -143,7 +143,7 @@ static void msd_sig_segv_handler(int sig, siginfo_t *info, void *secret)
     trace_size = backtrace(trace, 100);
     messages = backtrace_symbols(trace, trace_size);
     MSD_FATAL_LOG("--- STACK TRACE BEGIN--- ");
-    /* ��־�д�ӡ������ĵ���ջ */
+    /* 日志中打印出程序的调用栈 */
     for (i = 0; i < trace_size; ++i) 
     {
         MSD_FATAL_LOG("%s", messages[i]);
@@ -151,23 +151,23 @@ static void msd_sig_segv_handler(int sig, siginfo_t *info, void *secret)
     MSD_FATAL_LOG("--- STACK TRACE END--- ");
 
     
-    /* �źź����ٳ���Ĭ�ϲ�����Ϊ�˷�ֹĬ�ϲ�����ʲô��ҪЧ��������
-     * ������Ҫ����ע��һ��Ĭ�ϲ������ٷ���һ���ź�
+    /* 信号函数劫持了默认操作，为了防止默认操作有什么重要效果被忽略
+     * 所以需要重新注册一次默认操作，再发送一次信号
      */
     sigemptyset(&sa.sa_mask);
     //sa.sa_flags = SA_NODEFER | SA_ONSTACK | SA_RESETHAND;
     sa.sa_flags = SA_NODEFER | SA_RESETHAND;
     sa.sa_handler = SIG_DFL;
     sigaction(sig, &sa, NULL);
-    raise(sig); /* raise��������������������źš��ɹ�����0��ʧ�ܷ���-1�� */
+    raise(sig); /* raise：用于向进程自身发送信号。成功返回0，失败返回-1。 */
 }
 
 /**
- * ����: �����źų�ʼ��
- * ˵��:   
- *   1. ���߳������ź����룬����ϣ��ͬ���������ź�(���̵߳��ź�����ᱻ�䴴�����̼̳߳�)
- *   2. ���̴߳����źŴ����̣߳��źŴ����߳̽�ϣ��ͬ���������źż���Ϊ sigwait�����ĵ�һ������
- * ����:�ɹ�:0; ʧ��:-x
+ * 功能: 公共信号初始化
+ * 说明:   
+ *   1. 主线程设置信号掩码，阻塞希望同步处理的信号(主线程的信号掩码会被其创建的线程继承)
+ *   2. 主线程创建信号处理线程；信号处理线程将希望同步处理的信号集设为 sigwait（）的第一个参数
+ * 返回:成功:0; 失败:-x
  **/
 int msd_init_public_signals() 
 {
@@ -185,8 +185,8 @@ int msd_init_public_signals()
     g_ins->sig_worker = sig_worker;
     
     /* 
-     * ����ͨ�Źܵ�
-     * signal��ȡ���ź�֮�󣬽���Ӧ����д��master
+     * 创建通信管道
+     * signal读取出信号之后，将相应操作写给master
      **/
     int fds[2];
     if (pipe(fds) != 0)
@@ -197,7 +197,7 @@ int msd_init_public_signals()
     sig_worker->notify_read_fd  = fds[0];
     sig_worker->notify_write_fd = fds[1];
 
-    /* �ܵ�������������! */
+    /* 管道不能是阻塞的! */
     if((MSD_OK != msd_anet_nonblock(error_buf,  sig_worker->notify_read_fd))
         || (MSD_OK != msd_anet_nonblock(error_buf,  sig_worker->notify_write_fd)))
     {
@@ -207,7 +207,7 @@ int msd_init_public_signals()
         return MSD_ERR;        
     }
 
-    /* ���������ź� */    
+    /* 阻塞公共信号 */    
     sigemptyset(&bset);    
     sigaddset(&bset, SIGTERM);   
     sigaddset(&bset, SIGHUP); 
@@ -221,7 +221,7 @@ int msd_init_public_signals()
         return MSD_ERR;
     }
 
-    /* ����רְ�źŴ����߳� */  
+    /* 创建专职信号处理线程 */  
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);    
     pthread_create(&ppid, NULL, msd_signal_thread_cycle, sig_worker);      
@@ -231,13 +231,13 @@ int msd_init_public_signals()
 }
 
 /**
- * ����: רְ�źŴ����߳�
- * ˵��: 
- *      1.������߳������������źţ�ȫ�����뵽�Լ��ļ�����������
- *      2.����ѭ���������������ȴ��Լ��������źŵ���
- * ע��:
- *      1. ���ڹ����źŵ����ִ�������"ͬ��"��ʽ
- * ����:�ɹ�:0; ʧ��:-x
+ * 功能: 专职信号处理线程
+ * 说明: 
+ *      1.将别的线程阻塞起来的信号，全部加入到自己的监听掩码中来
+ *      2.无限循环，阻塞起来，等待自己监听的信号到来
+ * 注意:
+ *      1. 对于共有信号的这种处理，是"同步"方式
+ * 返回:成功:0; 失败:-x
  **/
 static void* msd_signal_thread_cycle(void *arg)
 {    
@@ -248,7 +248,7 @@ static void* msd_signal_thread_cycle(void *arg)
     
     MSD_INFO_LOG("Worker[Signal] begin to work");
     
-    /* ������߳��������źţ�ȫ�������Լ��ļ�����Χ */
+    /* 将别的线程阻塞的信号，全部加入自己的监听范围 */
     sigemptyset(&waitset);
     sigaddset(&waitset, SIGTERM);    
     sigaddset(&waitset, SIGQUIT);
@@ -257,13 +257,13 @@ static void* msd_signal_thread_cycle(void *arg)
     sigaddset(&waitset, SIGINT);
     sigaddset(&waitset, SIGHUP);
 
-    /* ����ѭ���������ȴ��źŵ��� */
+    /* 无线循环阻塞，等待信号到来 */
     while (1)  
     {       
         rc = sigwaitinfo(&waitset, &info);        
         if (rc != MSD_ERR) 
         {   
-            /* ͬ�������ź� */
+            /* 同步处理信号 */
             msd_public_signal_handler(info.si_signo, sig_worker);
         } 
         else 
@@ -272,18 +272,18 @@ static void* msd_signal_thread_cycle(void *arg)
         }    
 
      }
-    //free(sig_worker);//msd_destroy_instance�л�ͳһ�ͷ���Դ
+    //free(sig_worker);//msd_destroy_instance中会统一释放资源
     return (void *)NULL;
 }
 
 /**
-  * ����: ͬ���źŴ���
-  * ����: @�ź���ֵ
-  * ˵��: 
-  *      1.����յ�SIGPIPE/SIGCHLD�źţ�����
-  *      2.����յ�SIGQUIT/SIGTERM/SIGINT��֪ͨmaster��worker�˳�
-  *      3.�ڴ�ͳ���źŴ��������У���Ҫ����ϵͳ�����ǿ�����ģ���
-  *        ��������ͬ���źŴ������������ÿ���
+  * 功能: 同步信号处理
+  * 参数: @信号数值
+  * 说明: 
+  *      1.如果收到SIGPIPE/SIGCHLD信号，忽略
+  *      2.如果收到SIGQUIT/SIGTERM/SIGINT则通知master和worker退出
+  *      3.在传统的信号处理函数中，需要考虑系统调用是可重入的，但
+  *        本函数是同步信号处理函数，不用考虑
   **/
 static void msd_public_signal_handler(int signo, msd_thread_signal_t *sig_worker) 
 {
@@ -315,7 +315,7 @@ static void msd_public_signal_handler(int signo, msd_thread_signal_t *sig_worker
 
     if(to_stop)
     {
-        /* ֪ͨmaster�رգ�����Ҫ����write����������� */
+        /* 通知master关闭，不需要考虑write可重入的问题 */
         if(4 != write(sig_worker->notify_write_fd, "stop", 4))
         {
             if(errno == EINTR)
@@ -331,7 +331,7 @@ static void msd_public_signal_handler(int signo, msd_thread_signal_t *sig_worker
         }
         else
         {
-            /* �������֮��signal�߳����ʹ�����˳� */
+            /* 发送完成之后，signal线程完成使命，退出 */
             MSD_INFO_LOG("Worker[signal] exit!");
             pthread_exit(0);
         }
@@ -360,7 +360,7 @@ void* phtread_SIGSEGV(void *arg)
     msd_thread_sleep(1);
     int a = 0;
     printf("a=%d", a);
-    /* ����δ��� */
+    /* 制造段错误 */
     segment_fault();
 
     return (void *)NULL;
@@ -383,13 +383,13 @@ void sig_int_handler(int sig)
 int sig_int_action()
 {
     struct sigaction sa;
-    sigemptyset(&sa.sa_mask);/* �źŴ�����ʱ���������κ������ź� */
+    sigemptyset(&sa.sa_mask);/* 信号处理中时，不阻塞任何其他信号 */
 
-    /* ����SA_RESETHAND��Ч�����û�д˱�־���յ�SIGINT��Σ��͵���sig_int_handler��Σ�����ֻ�ܵ���һ�� */ 
+    /* 测试SA_RESETHAND功效，如果没有此标志，收到SIGINT多次，就调用sig_int_handler多次，否则只能调用一次 */ 
     sa.sa_flags = SA_RESTART;
     //sa.sa_flags = SA_RESETHAND | SA_RESTART;
     sa.sa_handler = sig_int_handler;
-    sigaction(SIGINT, &sa, NULL); /* �����δ����ʱ���յ����ź� */ 
+    sigaction(SIGINT, &sa, NULL); /* 发生段错误的时候收到此信号 */ 
     return 0;
 }
 
@@ -410,14 +410,14 @@ int main(int argc, char *argv[])
     msd_log_init( "./", "signal.log", 4, 100000000, 1, 0);
     MSD_INFO_LOG("Init ret:%d", ret);
     
-    /* ����1�����̶߳δ��� */
+    /* 用例1，单线程段错误 */
     /*
     char *ptr = NULL;
     // *ptr = 'c';
     printf("%c", *ptr);      
     */
 
-    /* ����2�����̶߳δ����Ƿ��ܴ�ӡ��ջ����������ԭ����ʱ���� */
+    /* 用例2，多线程段错误，是否能打印出栈，结果随机，原因暂时不明 */
     /*
     int i;
     char *ptr = NULL;
@@ -439,12 +439,12 @@ int main(int argc, char *argv[])
     }
     
     pthread_attr_destroy(&attr);
-    //���̶߳δ��������ߣ������̷߳����δ���
+    //主线程段错误，先休眠，让子线程发生段错误
     msd_thread_sleep(10);
     printf("%c", *ptr); 
     */
 
-    /* ����3�����Ե��߳��յ�SIGINT��˳�����SA_RESETHANDЧ�� */
+    /* 用例3，测试单线程收到SIGINT，顺便测试SA_RESETHAND效果 */
     /*
     sig_int_action();
     msd_thread_sleep(100);
@@ -453,10 +453,10 @@ int main(int argc, char *argv[])
     printf("After receive sigint2\n");
     */
     
-    /* ����4���ڲ����޶�������£��鿴�����źŵ��߳��Ƿ�������� */
+    /* 用例4，在不做限定的情况下，查看接收信号的线程是否是随机的 */
     /*
-    //���Խ����ʾ��ò����Զ�����߳̽��յ��źţ������Ͻ���������
-    //�����޷�ȷ�����Ƿ��Ǳ�Ȼ����
+    //测试结果显示，貌似永远是主线程接收到信号，和资料介绍有区别
+    //但是无法确定这是否是必然现象
     sig_int_action();
     pthread_t      ppid;    
     pthread_attr_t attr;
@@ -476,12 +476,12 @@ int main(int argc, char *argv[])
         }
     }
     pthread_attr_destroy(&attr);
-    //���ߣ��鿴�����ĸ��߳��ܹ��յ��ź�
+    //休眠，查看到底哪个线程能够收到信号
     while(1)
         msd_thread_sleep(100);
     */
 
-    /* ����5������ר���ź��̣߳������߳������ź� */
+    /* 用例5，启动专用信号线程，其他线程阻塞信号 */
     msd_init_public_signals();
     
     pthread_t      ppid;    
@@ -502,12 +502,12 @@ int main(int argc, char *argv[])
         }
     }
     pthread_attr_destroy(&attr);
-    //���ߣ��鿴�����ĸ��߳��ܹ��յ��ź�
+    //休眠，查看到底哪个线程能够收到信号
     while(1)
     {
         msd_thread_sleep(10);
         printf("%lu\n", pthread_self());
-        /* ���Թ����źź�˽���źŶ����ڵ���� */
+        /* 测试共有信号和私有信号都存在的情况 */
         //char *ptr = NULL;
         //*ptr = 'c';
     }

@@ -18,10 +18,10 @@
 #include "msd_core.h"
  
 /**
- * ¹¦ÄÜ: str2int
- * ²ÎÊı: @strval
- *       @def,Ä¬ÈÏÖµ
- * ·µ»Ø: ³É¹¦£¬ 0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: str2int
+ * å‚æ•°: @strval
+ *       @def,é»˜è®¤å€¼
+ * è¿”å›: æˆåŠŸï¼Œ 0 å¤±è´¥ï¼Œ-x
  **/
 static int msd_str2int(const char *strval, int def)
 {
@@ -75,7 +75,7 @@ static int msd_str2int(const char *strval, int def)
 }
 
 /**
- * ¹¦ÄÜ: key_dup
+ * åŠŸèƒ½: key_dup
  **/
 static void *msd_key_dup(const void *key)
 {
@@ -83,10 +83,10 @@ static void *msd_key_dup(const void *key)
 }
 
 /**
- * ¹¦ÄÜ: key_cmp
- * ÃèÊö:
- *      1. ×¢Òâ·µ»ØÖµ£¬ºÍstrcmpµÄÒâÒåÏà·´
- * ·µ»Ø: ÏàÍ¬£¬1 ²»Í¬£¬0
+ * åŠŸèƒ½: key_cmp
+ * æè¿°:
+ *      1. æ³¨æ„è¿”å›å€¼ï¼Œå’Œstrcmpçš„æ„ä¹‰ç›¸å
+ * è¿”å›: ç›¸åŒï¼Œ1 ä¸åŒï¼Œ0
  **/
 static int msd_key_cmp(const void *key1, const void *key2)
 {
@@ -94,7 +94,7 @@ static int msd_key_cmp(const void *key1, const void *key2)
 }
 
 /**
- * ¹¦ÄÜ: free_key
+ * åŠŸèƒ½: free_key
  **/
 static void msd_free_key(void *key)
 {
@@ -102,10 +102,10 @@ static void msd_free_key(void *key)
 }
 
 /**
- * ¹¦ÄÜ: free the hash entry val for hash_table
- * ²ÎÊı: @hash±íÖĞµÄÄ³Ò»¸öÖµµÄÖ¸Õë
- * ÃèÊö:
- *      1. Ã¿¸öblock¶¼ÊÇÒ»¸ö»ú¹ñµÄconf£¬½á¹¹£¬ËùÒÔĞèÒªµ÷ÓÃmsd_conf_free
+ * åŠŸèƒ½: free the hash entry val for hash_table
+ * å‚æ•°: @hashè¡¨ä¸­çš„æŸä¸€ä¸ªå€¼çš„æŒ‡é’ˆ
+ * æè¿°:
+ *      1. æ¯ä¸ªblockéƒ½æ˜¯ä¸€ä¸ªæœºæŸœçš„confï¼Œç»“æ„ï¼Œæ‰€ä»¥éœ€è¦è°ƒç”¨msd_conf_free
  **/
 static void msd_free_val(void *val)
 {
@@ -115,7 +115,7 @@ static void msd_free_val(void *val)
     {
         msd_conf_entry_t *ce, *next;
         ce = (msd_conf_entry_t *)cv->value;
-        while (ce)/*É¾³ıÁ´±í*/
+        while (ce)/*åˆ é™¤é“¾è¡¨*/
         {
             next = ce->next;
             free(ce->value);
@@ -130,7 +130,7 @@ static void msd_free_val(void *val)
         while(cb)
         {
             next_cb = cb->next;
-            /*É¾³ıÁ´±í(µİ¹é)*/
+            /*åˆ é™¤é“¾è¡¨(é€’å½’)*/
             msd_conf_free(&cb->block);
             free(cb);
             cb = next_cb;
@@ -145,22 +145,22 @@ static void msd_free_val(void *val)
 }
 
 /**
- * ¹¦ÄÜ: parse included file in the conf
- * ²ÎÊı: @conf, conf½á¹¹µØÖ·
- *       @cur_file, µ±Ç°ÎÄ¼ş
- *       @inc_file, °üº¬µÄÎÄ¼ş
- * ÃèÊö:
- *      1. ¸ù¾İinclude_file½øĞĞ·ÖÎö£¬²ğ·Ö³ö¸ÃÎÄ¼şµÄÂ·¾¶ºÍÎÄ¼şÃû
- *      2. ±éÀú¸ÃÂ·¾¶ÏÂÃæµÄËùÓĞÎÄ¼ş£¬Ìø¹ıÄ¿Â¼£¬ºÍcur_file×ÔÉí
- *      3. ÕÒµ½´ıincludeµÄÎÄ¼ş£¬È»ºóconf_init
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * åŠŸèƒ½: parse included file in the conf
+ * å‚æ•°: @conf, confç»“æ„åœ°å€
+ *       @cur_file, å½“å‰æ–‡ä»¶
+ *       @inc_file, åŒ…å«çš„æ–‡ä»¶
+ * æè¿°:
+ *      1. æ ¹æ®include_fileè¿›è¡Œåˆ†æï¼Œæ‹†åˆ†å‡ºè¯¥æ–‡ä»¶çš„è·¯å¾„å’Œæ–‡ä»¶å
+ *      2. éå†è¯¥è·¯å¾„ä¸‹é¢çš„æ‰€æœ‰æ–‡ä»¶ï¼Œè·³è¿‡ç›®å½•ï¼Œå’Œcur_fileè‡ªèº«
+ *      3. æ‰¾åˆ°å¾…includeçš„æ–‡ä»¶ï¼Œç„¶åconf_init
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 static int msd_conf_parse_include(msd_conf_t *conf, char *cur_file, char *inc_file)
 {
     char dirc[PATH_MAX];    /* PATH_MAX 4095 */
     char basec[PATH_MAX];
-    char *dname;            /* Ä¿Â¼Ãû */
-    char *bname;            /* ÎÄ¼şÃû */
+    char *dname;            /* ç›®å½•å */
+    char *bname;            /* æ–‡ä»¶å */
     DIR *dir = NULL;
     struct dirent *entry;
     int ret = 0, rc;
@@ -168,11 +168,11 @@ static int msd_conf_parse_include(msd_conf_t *conf, char *cur_file, char *inc_fi
 
     strncpy(dirc, (const char *)inc_file, PATH_MAX);
     strncpy(basec, (const char *)inc_file, PATH_MAX);
-    dname = dirname(dirc);      /* include <libgen.h>£¬·µ»ØÂ·¾¶ÖĞÄ¿Â¼²¿·Ö */
-    bname = basename(basec);    /* inlcude <libgen.h>£¬·µ»ØÂ·¾¶ÖĞµÄÎÄ¼şÃû²¿·Ö */
+    dname = dirname(dirc);      /* include <libgen.h>ï¼Œè¿”å›è·¯å¾„ä¸­ç›®å½•éƒ¨åˆ† */
+    bname = basename(basec);    /* inlcude <libgen.h>ï¼Œè¿”å›è·¯å¾„ä¸­çš„æ–‡ä»¶åéƒ¨åˆ† */
 
     if(!strcmp(bname, ".") || !strcmp(bname, "..")
-            || !strcmp(bname, "/"))/* Èç¹ûÎÄ¼şÃûµÈÓÚ.»òÕß..»òÕß/ */
+            || !strcmp(bname, "/"))/* å¦‚æœæ–‡ä»¶åç­‰äº.æˆ–è€…..æˆ–è€…/ */
     {
         fprintf(stderr, "invalid include directive:%s\n", inc_file);
         return MSD_ERR;
@@ -210,7 +210,7 @@ static int msd_conf_parse_include(msd_conf_t *conf, char *cur_file, char *inc_fi
         snprintf(fullpath, PATH_MAX-1, "%s/%s", dname, entry->d_name);
 
         /*
-         * realpath()ÓÃÀ´½«²ÎÊıpathËùÖ¸µÄÏà¶ÔÂ·¾¶×ª»»³É¾ø¶ÔÂ·¾¶ºó´æÓÚ²ÎÊıresolved_pathËùÖ¸µÄ×Ö·û´®Êı×é»òÖ¸ÕëÖĞ
+         * realpath()ç”¨æ¥å°†å‚æ•°pathæ‰€æŒ‡çš„ç›¸å¯¹è·¯å¾„è½¬æ¢æˆç»å¯¹è·¯å¾„åå­˜äºå‚æ•°resolved_pathæ‰€æŒ‡çš„å­—ç¬¦ä¸²æ•°ç»„æˆ–æŒ‡é’ˆä¸­
          */
         if(!realpath(fullpath, resolved_path))/* realpath, success then return the pointer of resolved_path else return null*/
         {
@@ -267,22 +267,22 @@ static int msd_conf_parse_include(msd_conf_t *conf, char *cur_file, char *inc_fi
 }
 
  /**
- * ¹¦ÄÜ: parse the conf file
- * ²ÎÊı: @conf ½á¹¹µØÖ·
- *       @resolved_path µ±Ç°ÎÄ¼şÃû×Ö
- *       @fp µ±Ç°ÎÄ¼şµÄFILEÁ÷Ö¸Õë
- *       @bolck µ±Ç°ÊÇ·ñÎª¿é
- * ÃèÊö:
- *      1. block±ê¼ÇÎ»: 0--is not block  1--is block
- *      2. Èç¹û¶ÔÓ¦µÄkey²»´æÔÚ£¬Ôò»áĞÂÔökey/val¶Ô£¬val¿ÉÄÜÊÇblock»òÕßentryÁ½ÀàÖ®Ò»
- *      3. Èç¹û¶ÔÓ¦µÄkey´æÔÚ£¬Ôò»áÅĞ¶Ï¸ÃkeyµÄÀàĞÍ£¬ºÍµ±Ç°ÀàĞÍÊÇ·ñÒ»ÖÂ
- *         Èç¹ûÒ»ÖÂ£¬Ôò»á½«µ±Ç°Öµ²åÈëÁ´±íÍ·²¿£¬Èç¹û²»Ò»ÖÂ£¬Ôò±¨´í
- *      4. Í¨³£Ö»»á¶ÁÈ¡µÚÁ´±íµÄµÚÒ»¸önode£¬ËùÒÔºó¶ÁÈ¡µÄ»á"¸²¸Ç"ÏÈ¶ÁÈ¡µÄ
+ * åŠŸèƒ½: parse the conf file
+ * å‚æ•°: @conf ç»“æ„åœ°å€
+ *       @resolved_path å½“å‰æ–‡ä»¶åå­—
+ *       @fp å½“å‰æ–‡ä»¶çš„FILEæµæŒ‡é’ˆ
+ *       @bolck å½“å‰æ˜¯å¦ä¸ºå—
+ * æè¿°:
+ *      1. blockæ ‡è®°ä½: 0--is not block  1--is block
+ *      2. å¦‚æœå¯¹åº”çš„keyä¸å­˜åœ¨ï¼Œåˆ™ä¼šæ–°å¢key/valå¯¹ï¼Œvalå¯èƒ½æ˜¯blockæˆ–è€…entryä¸¤ç±»ä¹‹ä¸€
+ *      3. å¦‚æœå¯¹åº”çš„keyå­˜åœ¨ï¼Œåˆ™ä¼šåˆ¤æ–­è¯¥keyçš„ç±»å‹ï¼Œå’Œå½“å‰ç±»å‹æ˜¯å¦ä¸€è‡´
+ *         å¦‚æœä¸€è‡´ï¼Œåˆ™ä¼šå°†å½“å‰å€¼æ’å…¥é“¾è¡¨å¤´éƒ¨ï¼Œå¦‚æœä¸ä¸€è‡´ï¼Œåˆ™æŠ¥é”™
+ *      4. é€šå¸¸åªä¼šè¯»å–ç¬¬é“¾è¡¨çš„ç¬¬ä¸€ä¸ªnodeï¼Œæ‰€ä»¥åè¯»å–çš„ä¼š"è¦†ç›–"å…ˆè¯»å–çš„
  *                
- * ×¢Òâ£º 
- *         ÅäÖÃÎÄ¼ş¸ñÊ½ÒªÇó£¬Èç¹ûÊÇblock£¬ÔòÒ»¶¨Òª:" block_name { "
- *         'block name' ºÍ '{' ±ØĞëÒªÔÚÍ¬Ò»ĞĞ£¬²¢¿Õ¸ñ¸ô¿ª
- * ·µ»Ø: ³É¹¦£¬0  Ê§°Ü£¬-x
+ * æ³¨æ„ï¼š 
+ *         é…ç½®æ–‡ä»¶æ ¼å¼è¦æ±‚ï¼Œå¦‚æœæ˜¯blockï¼Œåˆ™ä¸€å®šè¦:" block_name { "
+ *         'block name' å’Œ '{' å¿…é¡»è¦åœ¨åŒä¸€è¡Œï¼Œå¹¶ç©ºæ ¼éš”å¼€
+ * è¿”å›: æˆåŠŸï¼Œ0  å¤±è´¥ï¼Œ-x
  **/
 static int msd_conf_parse(msd_conf_t *conf, char *resolved_path,
         FILE *fp, int block)
@@ -395,7 +395,7 @@ static int msd_conf_parse(msd_conf_t *conf, char *resolved_path,
                     }
                     
                     /* recursion */
-                    if(msd_conf_parse(&cb->block, resolved_path, fp, 1) != MSD_OK)/*Õâ¸öµØ·½»á½Ó×ÅfpµÄÖ¸Õë¼ÌĞøÏòÏÂÒ»ĞĞ¶ÁÈ¡*/
+                    if(msd_conf_parse(&cb->block, resolved_path, fp, 1) != MSD_OK)/*è¿™ä¸ªåœ°æ–¹ä¼šæ¥ç€fpçš„æŒ‡é’ˆç»§ç»­å‘ä¸‹ä¸€è¡Œè¯»å–*/
                     {
                         free(cb);
                         ret = MSD_ERR;
@@ -407,13 +407,13 @@ static int msd_conf_parse(msd_conf_t *conf, char *resolved_path,
                     cv->value = (void *)cb;
                 }
             }/* if(!cv) */
-            else /* ÒÑ¾­´æÔÚÏàÍ¬µÄkey */
+            else /* å·²ç»å­˜åœ¨ç›¸åŒçš„key */
             {
                 if( cv->type == MSD_CONF_TYPE_ENTRY )
                 {
                     msd_conf_entry_t *ce;
                     
-                    /* key¶ÔÓ¦µÄÊÇentry£¬Èç¹û´Ë¿ÌĞÂÀ´Ò»¸öblock£¬Ôò±¨´í */
+                    /* keyå¯¹åº”çš„æ˜¯entryï¼Œå¦‚æœæ­¤åˆ»æ–°æ¥ä¸€ä¸ªblockï¼Œåˆ™æŠ¥é”™ */
                     if(is_block)
                     {
                         ret = MSD_ERR;
@@ -434,7 +434,7 @@ static int msd_conf_parse(msd_conf_t *conf, char *resolved_path,
                 else
                 {
                     msd_conf_block_t *cb = NULL;
-                    /* key¶ÔÓ¦µÄÊÇblock£¬Èç¹û´Ë¿ÌĞÂÀ´Ò»¸öentry£¬Ôò±¨´í */
+                    /* keyå¯¹åº”çš„æ˜¯blockï¼Œå¦‚æœæ­¤åˆ»æ–°æ¥ä¸€ä¸ªentryï¼Œåˆ™æŠ¥é”™ */
                     if(!is_block)
                     {
                         ret = MSD_ERR;
@@ -449,7 +449,7 @@ static int msd_conf_parse(msd_conf_t *conf, char *resolved_path,
                     }
 
                     /* recursion */
-                    if(msd_conf_parse(&cb->block, resolved_path, fp, 1) != MSD_OK)/*Õâ¸öµØ·½»á½Ó×ÅfpµÄÖ¸Õë¼ÌĞøÏòÏÂÒ»ĞĞ¶ÁÈ¡*/
+                    if(msd_conf_parse(&cb->block, resolved_path, fp, 1) != MSD_OK)/*è¿™ä¸ªåœ°æ–¹ä¼šæ¥ç€fpçš„æŒ‡é’ˆç»§ç»­å‘ä¸‹ä¸€è¡Œè¯»å–*/
                     {
                         free(cb);
                         ret = MSD_ERR;
@@ -490,7 +490,7 @@ error:
 }
 
 /**
- * ¹¦ÄÜ: free conf ½á¹¹
+ * åŠŸèƒ½: free conf ç»“æ„
  **/
 void msd_conf_free(msd_conf_t *conf)
 {
@@ -498,13 +498,13 @@ void msd_conf_free(msd_conf_t *conf)
 } 
  
 /**
- * ¹¦ÄÜ: init conf struct
- * ²ÎÊı: @conf conf½á¹¹Ö¸Õë
- *       @filename ÅäÖÃÎÄ¼şµØÖ·
- * ×¢Òâ:
+ * åŠŸèƒ½: init conf struct
+ * å‚æ•°: @conf confç»“æ„æŒ‡é’ˆ
+ *       @filename é…ç½®æ–‡ä»¶åœ°å€
+ * æ³¨æ„:
  *      1. before calling this function first time,please initialize 
  *       the msd_conf_t' struct with zero. such as msd_conf_t conf = {};
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-1
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-1
  **/
 int msd_conf_init(msd_conf_t *conf, const char *filename)
 {
@@ -533,12 +533,12 @@ int msd_conf_init(msd_conf_t *conf, const char *filename)
 }
 
 /**
- * ¹¦ÄÜ: ¶ÔÓÚconfµÄÄ³¸ökey¶ÔÓ¦µÄentryÁ´±íÖĞµÄÃ¿¸öÔªËØ½øĞĞÄ³¸öº¯Êı
- * ²ÎÊı: @conf
+ * åŠŸèƒ½: å¯¹äºconfçš„æŸä¸ªkeyå¯¹åº”çš„entryé“¾è¡¨ä¸­çš„æ¯ä¸ªå…ƒç´ è¿›è¡ŒæŸä¸ªå‡½æ•°
+ * å‚æ•°: @conf
  *       @key
  *       @foreach
  *       @userptr
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 static int msd_conf_entry_foreach(msd_conf_t *conf, char *key,
         int (*foreach)(void *key, void* value, void *userptr),
@@ -571,12 +571,12 @@ static int msd_conf_entry_foreach(msd_conf_t *conf, char *key,
 }
 
 /**
- * ¹¦ÄÜ: ¶ÔÓÚconfµÄÄ³¸ökey¶ÔÓ¦µÄblockÁ´±íÖĞµÄÃ¿¸öÔªËØ½øĞĞÄ³¸öº¯Êı
- * ²ÎÊı: @conf
+ * åŠŸèƒ½: å¯¹äºconfçš„æŸä¸ªkeyå¯¹åº”çš„blocké“¾è¡¨ä¸­çš„æ¯ä¸ªå…ƒç´ è¿›è¡ŒæŸä¸ªå‡½æ•°
+ * å‚æ•°: @conf
  *       @key
  *       @foreach
  *       @userptr
- * ·µ»Ø: ³É¹¦£¬0 Ê§°Ü£¬-x
+ * è¿”å›: æˆåŠŸï¼Œ0 å¤±è´¥ï¼Œ-x
  **/
 static int msd_conf_block_foreach(msd_conf_t *conf, char *key,
         int (*foreach)(void *key, msd_conf_block_t* block, void *userptr),
@@ -609,14 +609,14 @@ static int msd_conf_block_foreach(msd_conf_t *conf, char *key,
 }
 
 /**
- * ¹¦ÄÜ: get value in integer
- * ²ÎÊı: @conf conf½á¹¹Ìå
+ * åŠŸèƒ½: get value in integer
+ * å‚æ•°: @conf confç»“æ„ä½“
  *       @key key
- *       @def Ä¬ÈÏÖµ
- * ÃèÊö:
+ *       @def é»˜è®¤å€¼
+ * æè¿°:
  *      1. when key not found in conf, default value was returned
- *      2. Í¬Ò»¸ökey¶ÔÓ¦µÄÖµ£¬¿ÉÄÜÊÇÒ»¸öÁ´±í£¬Ö»È¡µÃµÚÒ»¸ö
- * ·µ»Ø: ³É¹¦£¬val  Ê§°Ü£¬def
+ *      2. åŒä¸€ä¸ªkeyå¯¹åº”çš„å€¼ï¼Œå¯èƒ½æ˜¯ä¸€ä¸ªé“¾è¡¨ï¼Œåªå–å¾—ç¬¬ä¸€ä¸ª
+ * è¿”å›: æˆåŠŸï¼Œval  å¤±è´¥ï¼Œdef
  **/
 int msd_conf_get_int_value(msd_conf_t *conf, const char *key, int def)
 {
@@ -634,7 +634,7 @@ int msd_conf_get_int_value(msd_conf_t *conf, const char *key, int def)
     }
     else if(cv->type == MSD_CONF_TYPE_ENTRY)
     {
-        ce = (msd_conf_entry_t *)cv->value; /*cv->value ÊÇÒ»¸öÁ´±í£¬Ö»È¡µÚÒ»¸ö*/
+        ce = (msd_conf_entry_t *)cv->value; /*cv->value æ˜¯ä¸€ä¸ªé“¾è¡¨ï¼Œåªå–ç¬¬ä¸€ä¸ª*/
     }
     else
     {
@@ -650,14 +650,14 @@ int msd_conf_get_int_value(msd_conf_t *conf, const char *key, int def)
 }
  
  /**
- * ¹¦ÄÜ: get value in string
- * ²ÎÊı: @conf conf½á¹¹Ìå
+ * åŠŸèƒ½: get value in string
+ * å‚æ•°: @conf confç»“æ„ä½“
  *       @key key
- *       @def Ä¬ÈÏÖµ
- * ÃèÊö:
+ *       @def é»˜è®¤å€¼
+ * æè¿°:
  *      1. when key not found in conf, default value was returned
- *      2. Í¬Ò»¸ökey¶ÔÓ¦µÄÖµ£¬¿ÉÄÜÊÇÒ»¸öÁ´±í£¬Ö»È¡µÃµÚÒ»¸ö
- * ·µ»Ø: ³É¹¦£¬×Ö·û´®Ö¸Õë£¬Ê§°Ü£¬def
+ *      2. åŒä¸€ä¸ªkeyå¯¹åº”çš„å€¼ï¼Œå¯èƒ½æ˜¯ä¸€ä¸ªé“¾è¡¨ï¼Œåªå–å¾—ç¬¬ä¸€ä¸ª
+ * è¿”å›: æˆåŠŸï¼Œå­—ç¬¦ä¸²æŒ‡é’ˆï¼Œå¤±è´¥ï¼Œdef
  **/
 char * msd_conf_get_str_value(msd_conf_t *conf, const char *key, char *def)
 {
@@ -691,11 +691,11 @@ char * msd_conf_get_str_value(msd_conf_t *conf, const char *key, char *def)
 }
  
 /**
- * ¹¦ÄÜ: get value in block
- * ²ÎÊı: @
- * ÃèÊö:
- *      1. Í¬Ò»¸ökey¶ÔÓ¦µÄÖµ£¬¿ÉÄÜÊÇÒ»¸öÁ´±í£¬Ö»È¡µÃµÚÒ»¸ö
- * ·µ»Ø: ³É¹¦£¬block_t  Ê§°Ü£¬NULL
+ * åŠŸèƒ½: get value in block
+ * å‚æ•°: @
+ * æè¿°:
+ *      1. åŒä¸€ä¸ªkeyå¯¹åº”çš„å€¼ï¼Œå¯èƒ½æ˜¯ä¸€ä¸ªé“¾è¡¨ï¼Œåªå–å¾—ç¬¬ä¸€ä¸ª
+ * è¿”å›: æˆåŠŸï¼Œblock_t  å¤±è´¥ï¼ŒNULL
  **/
 msd_conf_block_t *msd_conf_get_block(msd_conf_t *conf, char *key)
 {
@@ -723,7 +723,7 @@ static int msd_print_conf(void *key, void *value, void *userptr)
 static int msd_print_block_conf(void *key, msd_conf_block_t *cb, void *userptr)
 {
     printf("%s {\n", (char *)key);
-    msd_conf_dump(&cb->block);/*µİ¹é*/
+    msd_conf_dump(&cb->block);/*é€’å½’*/
     printf("}\n");
     return 0;
 }
@@ -763,7 +763,7 @@ int main(int argc, char *argv[])
     printf("%d\n", msd_str2int("disable",0));
     printf("%d\n", msd_str2int("yes",0));
     */
-    msd_conf_t conf = {};// init conf ,gccÈÏÕâÖÖ·½Ê½£¬Ò»¶Ô»¨À¨ºÅ
+    msd_conf_t conf = {};// init conf ,gccè®¤è¿™ç§æ–¹å¼ï¼Œä¸€å¯¹èŠ±æ‹¬å·
     if(argc < 2)
     {
         fprintf(stderr, "useage: ./a.out <conf_file>\n");
