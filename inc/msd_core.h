@@ -59,18 +59,18 @@
 /* -------------------CONFIG------------------- */
 /* Lock mode */
 #ifdef __MSD_PTHREAD_LOCK_MODE__
-    #define MSD_PTHREAD_LOCK_MODE        //Ïß³ÌMutex
+    #define MSD_PTHREAD_LOCK_MODE        //çº¿ç¨‹Mutex
 #elif defined __MSD_SYSVSEM_LOCK_MODE__
     #define MSD_SYSVSEM_LOCK_MODE        //SYSVSEM
 #elif defined __MSD_FCNTL_LOCK_MODE__
-    #define MSD_FCNTL_LOCK_MODE          //ÎÄ¼şËø
+    #define MSD_FCNTL_LOCK_MODE          //æ–‡ä»¶é”
 #endif
 
 /* Log mode */
 #ifdef __MSD_LOG_MODE_THREAD__
-    #define MSD_LOG_MODE_THREAD         //Ïß³ÌÄ£Ê½
+    #define MSD_LOG_MODE_THREAD         //çº¿ç¨‹æ¨¡å¼
 #elif defined __MSD_LOG_MODE_PROCESS__
-    #define MSD_LOG_MODE_PROCESS        //½ø³ÌÄ£Ê½
+    #define MSD_LOG_MODE_PROCESS        //è¿›ç¨‹æ¨¡å¼
 #endif
 
 /* Multiplexing I/O mode */
@@ -111,43 +111,43 @@
 
 /* --------Structure--------- */
 
-/* °üº¬ÁËÈ«²¿soµÄº¯ÊıµÄÈİÆ÷£¬soº¯ÊıÓÉÓÃ»§±àĞ´µÄ */
+/* åŒ…å«äº†å…¨éƒ¨soçš„å‡½æ•°çš„å®¹å™¨ï¼Œsoå‡½æ•°ç”±ç”¨æˆ·ç¼–å†™çš„ */
 typedef struct msd_so_func_struct 
 {
-    int (*handle_init)(void *);                              /* µ±½ø³Ì³õÊ¼»¯µÄÊ±ºò¾ù»áµ÷ÓÃ£¬²ÎÊıÊÇÈ«¾Ö±äÁ¿g_conf£¬´Ëº¯Êı¿ÉÑ¡ */
-    int (*handle_worker_init)(void *, void*);                /* workerÏß³Ì³õÊ¼»¯µÄÊ±ºò¾ù»áµ÷ÓÃ£¬²ÎÊıÊÇworker¾ä±ú£¬´Ëº¯Êı¿ÉÑ¡ */
-    int (*handle_last_preparation)(void *, void*);           /* ËùÓĞµÄworker¾ÍĞ÷Ö®ºó£¬¿ÉÄÜ»áÓĞ×îÖÕµÄÒ»Ğ©¹¤×÷Òª×ö£¬±ÈÈçÔÙÉú³ÉÒ»¸ö·ÇworkerÏß³ÌµÄÆäËûÏß³Ì£¬´Ëº¯Êı¿ÉÑ¡ */
-    int (*handle_fini)(void *);                              /* µ±½ø³ÌÍË³öµÄÊ±ºò¾ù»áµ÷ÓÃ£¬²ÎÊıÊÇÈ«¾Ö±äÁ¿g_conf£¬´Ëº¯Êı¿ÉÑ¡ */
+    int (*handle_init)(void *);                              /* å½“è¿›ç¨‹åˆå§‹åŒ–çš„æ—¶å€™å‡ä¼šè°ƒç”¨ï¼Œå‚æ•°æ˜¯å…¨å±€å˜é‡g_confï¼Œæ­¤å‡½æ•°å¯é€‰ */
+    int (*handle_worker_init)(void *, void*);                /* workerçº¿ç¨‹åˆå§‹åŒ–çš„æ—¶å€™å‡ä¼šè°ƒç”¨ï¼Œå‚æ•°æ˜¯workerå¥æŸ„ï¼Œæ­¤å‡½æ•°å¯é€‰ */
+    int (*handle_last_preparation)(void *, void*);           /* æ‰€æœ‰çš„workerå°±ç»ªä¹‹åï¼Œå¯èƒ½ä¼šæœ‰æœ€ç»ˆçš„ä¸€äº›å·¥ä½œè¦åšï¼Œæ¯”å¦‚å†ç”Ÿæˆä¸€ä¸ªéworkerçº¿ç¨‹çš„å…¶ä»–çº¿ç¨‹ï¼Œæ­¤å‡½æ•°å¯é€‰ */
+    int (*handle_fini)(void *);                              /* å½“è¿›ç¨‹é€€å‡ºçš„æ—¶å€™å‡ä¼šè°ƒç”¨ï¼Œå‚æ•°æ˜¯å…¨å±€å˜é‡g_confï¼Œæ­¤å‡½æ•°å¯é€‰ */
     int (*handle_open)(msd_conn_client_t *);
-    int (*handle_close)(msd_conn_client_t *, const char *);  /* µ±¹Ø±ÕÓëÄ³¸öclientµÄÁ¬½ÓµÄÊ±ºòµ÷ÓÃ£¬µÚÒ»¸ö²ÎÊıclient ip, µÚ¶ş¸öclient port£¬´Ëº¯Êı¿ÉÑ¡ */                                             
-    int (*handle_prot_len)(msd_conn_client_t *);             /* ÓÃÀ´»ñÈ¡client·¢ËÍÇëÇóÏûÏ¢µÄ¾ßÌå³¤¶È£¬¼´µÃµ½Ğ­Òé³¤¶È
-                                                                       * mossad»ñÈ¡µ½´Ë³¤¶ÈÖ®ºó´Ó½ÓÊÕ»º³åÇøÖĞ¶ÁÈ¡ÏàÓ¦³¤¶ÈµÄÇëÇóÊı¾İ£¬½»¸øhandle_processÀ´´¦Àí
-                                                                       * µÚÒ»¸ö²ÎÊıÊÇ½ÓÊÕ»º³åÇø£¬µÚ¶ş¸ö½ÓÊÕ»º³åÇø³¤¶È£¬µÚÈı¸öclient ip, µÚËÄ¸öclient port 
+    int (*handle_close)(msd_conn_client_t *, const char *);  /* å½“å…³é—­ä¸æŸä¸ªclientçš„è¿æ¥çš„æ—¶å€™è°ƒç”¨ï¼Œç¬¬ä¸€ä¸ªå‚æ•°client ip, ç¬¬äºŒä¸ªclient portï¼Œæ­¤å‡½æ•°å¯é€‰ */                                             
+    int (*handle_prot_len)(msd_conn_client_t *);             /* ç”¨æ¥è·å–clientå‘é€è¯·æ±‚æ¶ˆæ¯çš„å…·ä½“é•¿åº¦ï¼Œå³å¾—åˆ°åè®®é•¿åº¦
+                                                                       * mossadè·å–åˆ°æ­¤é•¿åº¦ä¹‹åä»æ¥æ”¶ç¼“å†²åŒºä¸­è¯»å–ç›¸åº”é•¿åº¦çš„è¯·æ±‚æ•°æ®ï¼Œäº¤ç»™handle_processæ¥å¤„ç†
+                                                                       * ç¬¬ä¸€ä¸ªå‚æ•°æ˜¯æ¥æ”¶ç¼“å†²åŒºï¼Œç¬¬äºŒä¸ªæ¥æ”¶ç¼“å†²åŒºé•¿åº¦ï¼Œç¬¬ä¸‰ä¸ªclient ip, ç¬¬å››ä¸ªclient port 
                                                                        */
-    int (*handle_process)(msd_conn_client_t *);              /* Worker½ø³Ì×¨ÓÃ£¬ÓÃÀ´¸ù¾İclientµÄÊäÈë£¬²úÉú³öÊä³ö£¬ÍÂ³öÊı¾İ
-                                                                       * ²ÎÊı:µÚÒ»¸öÊÇ½ÓÊÕ»º³åÇø£¬µÚ¶ş¸öÊÇ½ÓÊÕÄÚÈİ³¤¶È
-                                                                       *      µÚÈı¸öÊÇ·¢ËÍ»º³åÇø£¬µÚËÄ¸öÊÇ·¢ËÍÄÚÈİµÄ³¤¶ÈÒıÓÃ
-                                                                       *      µÚÎå¸ö²ÎÊıclient ip, µÚÁù¸öclient port
+    int (*handle_process)(msd_conn_client_t *);              /* Workerè¿›ç¨‹ä¸“ç”¨ï¼Œç”¨æ¥æ ¹æ®clientçš„è¾“å…¥ï¼Œäº§ç”Ÿå‡ºè¾“å‡ºï¼Œåå‡ºæ•°æ®
+                                                                       * å‚æ•°:ç¬¬ä¸€ä¸ªæ˜¯æ¥æ”¶ç¼“å†²åŒºï¼Œç¬¬äºŒä¸ªæ˜¯æ¥æ”¶å†…å®¹é•¿åº¦
+                                                                       *      ç¬¬ä¸‰ä¸ªæ˜¯å‘é€ç¼“å†²åŒºï¼Œç¬¬å››ä¸ªæ˜¯å‘é€å†…å®¹çš„é•¿åº¦å¼•ç”¨
+                                                                       *      ç¬¬äº”ä¸ªå‚æ•°client ip, ç¬¬å…­ä¸ªclient port
                                                                        */
 } msd_so_func_t;
 
-/* mossadÊµÀı½á¹¹ */
+/* mossadå®ä¾‹ç»“æ„ */
 typedef struct _msd_instance_t{
     msd_str_t           *pid_file;
     msd_str_t           *conf_path;
     msd_conf_t          *conf;
     //msd_log_t           *log;
 
-    msd_master_t        *master;                 /* masterÏß³Ì¾ä±ú */ 
-    msd_thread_pool_t   *pool;                   /* workerÏß³Ì³Ø¾ä±ú */ 
-    msd_thread_signal_t *sig_worker;             /* signal workerÏß³Ì¾ä±ú */ 
+    msd_master_t        *master;                 /* masterçº¿ç¨‹å¥æŸ„ */ 
+    msd_thread_pool_t   *pool;                   /* workerçº¿ç¨‹æ± å¥æŸ„ */ 
+    msd_thread_signal_t *sig_worker;             /* signal workerçº¿ç¨‹å¥æŸ„ */ 
 
-    msd_str_t           *so_file;                /* soÎÄ¼şÂ·¾¶ */
-    msd_so_func_t       *so_func;                /* ×°ÔØÁËÈ«²¿soµÄº¯ÊıµÄÈİÆ÷ */
-    void                *so_handle;              /* so¾ä±úÖ¸Õë */
+    msd_str_t           *so_file;                /* soæ–‡ä»¶è·¯å¾„ */
+    msd_so_func_t       *so_func;                /* è£…è½½äº†å…¨éƒ¨soçš„å‡½æ•°çš„å®¹å™¨ */
+    void                *so_handle;              /* soå¥æŸ„æŒ‡é’ˆ */
 
-    msd_lock_t          *thread_woker_list_lock; /* woker list Ëø */
-    msd_lock_t          *client_conn_vec_lock;   /* client vector Ëø */
+    msd_lock_t          *thread_woker_list_lock; /* woker list é” */
+    msd_lock_t          *client_conn_vec_lock;   /* client vector é” */
 }msd_instance_t;
 #endif
 

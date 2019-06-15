@@ -33,18 +33,18 @@ typedef struct msd_dlist_node
 
 typedef struct msd_dlist 
 {
-    unsigned int len;                     /* ÔªËØ¸öÊı */
-    msd_dlist_node_t *head;               /* µÚÒ»¸ö½Úµã */
-    msd_dlist_node_t *tail;               /* ×îºóÒ»¸ö½Úµã */
+    unsigned int len;                     /* å…ƒç´ ä¸ªæ•° */
+    msd_dlist_node_t *head;               /* ç¬¬ä¸€ä¸ªèŠ‚ç‚¹ */
+    msd_dlist_node_t *tail;               /* æœ€åä¸€ä¸ªèŠ‚ç‚¹ */
     void *(*dup)(void *ptr);            
-    void (*free)(void *ptr);              /* freeÃ¿¸ö½Úµã */
+    void (*free)(void *ptr);              /* freeæ¯ä¸ªèŠ‚ç‚¹ */
     int (*match)(void *ptr, void *key);
 
 } msd_dlist_t;
 
 typedef struct msd_dlist_iter 
 {
-    msd_dlist_node_t *node; /* ¸Ãµü´úÆ÷¶ÔÓ¦µÄÔªËØµÄµØÖ· */
+    msd_dlist_node_t *node; /* è¯¥è¿­ä»£å™¨å¯¹åº”çš„å…ƒç´ çš„åœ°å€ */
     int direction;
 } msd_dlist_iter_t;
 

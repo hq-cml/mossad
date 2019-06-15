@@ -29,46 +29,46 @@ typedef enum msd_master_stat{
 }msd_master_stat_t;
 
 typedef enum msd_client_stat{
-    C_COMMING,                  /* Á¬½Ó¸ÕÀ´µ½ */
-    C_DISPATCHING,              /* Á¬½ÓÕıÔÚ·ÖÅäÖĞ */
-    C_WAITING,                  /* Á¬½ÓÒÑ¾­·ÖÅäµ½ÁË¾ßÌåwokerÖĞ£¬µÈ´ırequestµ½À´ */
-    C_RECEIVING,                /* requestµ½À´£¬µ«ÊÇÎ´´Õ×ãÒ»¸öÍêÕûµÄĞ­Òé°ü£¬¼ÌĞøµÈ´ı */
-    C_PROCESSING,               /* request³¤¶È×ã¹»ÍêÕû£¬¿ªÊ¼´¦Àí */
-    C_CLOSING                   /* Á¬½Ó¹Ø±ÕÖĞ */
+    C_COMMING,                  /* è¿æ¥åˆšæ¥åˆ° */
+    C_DISPATCHING,              /* è¿æ¥æ­£åœ¨åˆ†é…ä¸­ */
+    C_WAITING,                  /* è¿æ¥å·²ç»åˆ†é…åˆ°äº†å…·ä½“wokerä¸­ï¼Œç­‰å¾…requeståˆ°æ¥ */
+    C_RECEIVING,                /* requeståˆ°æ¥ï¼Œä½†æ˜¯æœªå‡‘è¶³ä¸€ä¸ªå®Œæ•´çš„åè®®åŒ…ï¼Œç»§ç»­ç­‰å¾… */
+    C_PROCESSING,               /* requesté•¿åº¦è¶³å¤Ÿå®Œæ•´ï¼Œå¼€å§‹å¤„ç† */
+    C_CLOSING                   /* è¿æ¥å…³é—­ä¸­ */
 }msd_client_stat_t;
 
 
 typedef struct msd_master
 {
     int                 listen_fd;
-    int                 client_limit;   /* client½Úµã¸öÊıÏŞÖÆ */
-    int                 poll_interval;  /* MasterÏß³ÌCronÆµÂÊ */
-    msd_master_stat_t   status;         /* MasterÏß³Ì×´Ì¬ */
+    int                 client_limit;   /* clientèŠ‚ç‚¹ä¸ªæ•°é™åˆ¶ */
+    int                 poll_interval;  /* Masterçº¿ç¨‹Croné¢‘ç‡ */
+    msd_master_stat_t   status;         /* Masterçº¿ç¨‹çŠ¶æ€ */
     
-    int                 cur_conn;       /* ÉÏÒ»´ÎĞÂÔöclientÔÚclient_vecµÄÎ»ÖÃ */
-    int                 cur_thread;     /* ÉÏÒ»´ÎĞÂÔöclientÊ±·ÖÅäµÄÏß³ÌºÅ */
-    int                 total_clients;  /* µ±Ç°clientµÄ×Ü¸öÊı */
+    int                 cur_conn;       /* ä¸Šä¸€æ¬¡æ–°å¢clientåœ¨client_vecçš„ä½ç½® */
+    int                 cur_thread;     /* ä¸Šä¸€æ¬¡æ–°å¢clientæ—¶åˆ†é…çš„çº¿ç¨‹å· */
+    int                 total_clients;  /* å½“å‰clientçš„æ€»ä¸ªæ•° */
     unsigned int        start_time;
-    msd_vector_t        *client_vec;    /* msd_conn_clientÀàĞÍµÄvector£¬ĞÂµÄÁ¬½Ó£¬»áÕÒµ½×Ô¼ºµÄºÏÊÊÎ»ÖÃ */
-    msd_ae_event_loop   *m_ael;         /* ae¾ä±ú£¬ÓÃÓÚlisten_fdºÍsignal_notifyµÄ¼àÌı */
+    msd_vector_t        *client_vec;    /* msd_conn_clientç±»å‹çš„vectorï¼Œæ–°çš„è¿æ¥ï¼Œä¼šæ‰¾åˆ°è‡ªå·±çš„åˆé€‚ä½ç½® */
+    msd_ae_event_loop   *m_ael;         /* aeå¥æŸ„ï¼Œç”¨äºlisten_fdå’Œsignal_notifyçš„ç›‘å¬ */
 }msd_master_t;
 
 typedef struct msd_conn_client
 {
-    int     magic;         /* Ò»¸ö³õÊ¼»¯µÄÊ±ºòÖÃÉÏµÄÄ§»ÃÊı£¬ÓÃÀ´±êÊ¶cliÖ¸ÕëÊÇ·ñ·¢ÉúÒì³£ */
-    int     fd;            /* clientÁ¬½Ó¹ıÀ´Ö®ºó£¬connÕâ±ßÉú³ÉµÄfd (·Ç×èÈûµÄ!) */    
+    int     magic;         /* ä¸€ä¸ªåˆå§‹åŒ–çš„æ—¶å€™ç½®ä¸Šçš„é­”å¹»æ•°ï¼Œç”¨æ¥æ ‡è¯†cliæŒ‡é’ˆæ˜¯å¦å‘ç”Ÿå¼‚å¸¸ */
+    int     fd;            /* clientè¿æ¥è¿‡æ¥ä¹‹åï¼Œconnè¿™è¾¹ç”Ÿæˆçš„fd (éé˜»å¡çš„!) */    
     int     close_conn;    /* whether close connection after send response */
     char    *remote_ip;    /* client ip */
     int     remote_port;   /* client port */
-    int     recv_prot_len; /* ·şÎñ¶ËºÍ¿Í»§¶ËÍ¨ĞÅĞ­Òé¹æ¶¨ºÃµÄ¶ÁÈ¡³¤¶È */
-    msd_str_t  *sendbuf;      /* ·¢ËÍ»º³å */
-    msd_str_t  *recvbuf;      /* ½ÓÊÕ»º³å */
-    time_t  access_time;   /* client×î½üÒ»´ÎÀ´ÁÙÊ±¼ä£¬°üÀ¨:´´½¨Á¬½Ó¡¢¶ÁÈ¡¡¢Ğ´Èë */
-    msd_client_stat_t status; /* clientµÄ×´Ì¬ */
+    int     recv_prot_len; /* æœåŠ¡ç«¯å’Œå®¢æˆ·ç«¯é€šä¿¡åè®®è§„å®šå¥½çš„è¯»å–é•¿åº¦ */
+    msd_str_t  *sendbuf;      /* å‘é€ç¼“å†² */
+    msd_str_t  *recvbuf;      /* æ¥æ”¶ç¼“å†² */
+    time_t  access_time;   /* clientæœ€è¿‘ä¸€æ¬¡æ¥ä¸´æ—¶é—´ï¼ŒåŒ…æ‹¬:åˆ›å»ºè¿æ¥ã€è¯»å–ã€å†™å…¥ */
+    msd_client_stat_t status; /* clientçš„çŠ¶æ€ */
 
 
-    int     idx;           /* Î»ÓÚclient_vecÖĞµÄÎ»ÖÃ */
-    int     worker_id;     /* ÓÉÄÄ¸öwokerÏß³Ì¸ºÔğ´¦Àí¸ÃÁ´½ÓµÄËùÓĞÇëÇó */
+    int     idx;           /* ä½äºclient_vecä¸­çš„ä½ç½® */
+    int     worker_id;     /* ç”±å“ªä¸ªwokerçº¿ç¨‹è´Ÿè´£å¤„ç†è¯¥é“¾æ¥çš„æ‰€æœ‰è¯·æ±‚ */
 }msd_conn_client_t;
 
 int msd_master_cycle();

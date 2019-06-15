@@ -8,16 +8,16 @@
  *    Filename :  Msd_lock.h
  * 
  * Description :  Msd_lock, a generic lock implementation.
- *                �ṩ���������ͣ�pthread_mutex, semaphore, fcntl����������
- *                �Ķ���ӿڶ���ͳһ��
- *                ֻ��Ҫ��Makefile�ж�����Ӧ�ĺ�
- *                LOCK_MODE = -D__MSD_PTHREAD_LOCK_MODE__(�Ƽ�)/-D__MSD_SYSVSEM_LOCK_MODE__/-D__MSD_FCNTL_LOCK_MODE__(�������ڽ���)
+ *                提供三种锁类型：pthread_mutex, semaphore, fcntl，三种锁型
+ *                的对外接口都是统一的
+ *                只需要在Makefile中定义相应的宏
+ *                LOCK_MODE = -D__MSD_PTHREAD_LOCK_MODE__(推荐)/-D__MSD_SYSVSEM_LOCK_MODE__/-D__MSD_FCNTL_LOCK_MODE__(仅适用于进程)
  *
- *                ����pthread_mutexģ�����ڶ���̵�����£���Ҫ���������ڹ����ڴ������Ч
+ *                其中pthread_mutex模型在在多进程的情况下，需要将锁建立在共享内存才能生效
  *
- *                ���÷�Χ��
- *                ���̣�MSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE/MSD_FCNTL_LOCK_MODE
- *                �̣߳�MSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE
+ *                适用范围：
+ *                进程：MSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE/MSD_FCNTL_LOCK_MODE
+ *                线程：MSD_PTHREAD_LOCK_MODE/MSD_SYSVSEM_LOCK_MODE
  *
  *     Version :  1.0.0
  * 

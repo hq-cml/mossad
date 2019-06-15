@@ -54,18 +54,18 @@ typedef struct msd_conf_t
     msd_hash_t  *ht;
 }msd_conf_t;
 
-/* ÆÕÍ¨ÅäÖÃÌõÄ¿ */
+/* æ™®é€šé…ç½®æ¡ç›® */
 typedef struct msd_conf_entry
 {
     char                  *value;
     struct msd_conf_entry *next;
 }msd_conf_entry_t;
 
-/* block:{}ÄÚ²¿µÄÄÚÈİ */
+/* block:{}å†…éƒ¨çš„å†…å®¹ */
 typedef struct msd_conf_block
 {
     msd_conf_t             block;
-    struct msd_conf_block  *next; /* µİ¹é */
+    struct msd_conf_block  *next; /* é€’å½’ */
 }msd_conf_block_t;
 
 int msd_conf_init(msd_conf_t *conf, const char *filename);

@@ -7,10 +7,10 @@
  *
  *    Filename :  Msd_signal.h 
  * 
- * Description :  Msd_signal, MossadĞÅºÅ´¦ÀíÏà¹ØµÄÄÚÈİ.
- *                ĞÅºÅ´¦Àí·ÖÎªÁ½¸ö²¿·Ö:
- *                1.¶ÔÓÚÒòÎª³ÌĞòÂß¼­ĞèÒª¶ø²úÉúµÄĞÅºÅ£¬ÓÉ×¨ÃÅµÄĞÅºÅ´¦ÀíÏß³ÌÍ¬²½½øĞĞ´¦Àí
- *                2.¶Ô»áµ¼ÖÂ³ÌĞòÔËĞĞÖÕÖ¹µÄĞÅºÅÈçSIGSEGV/SIGBUSµÈ£¬ÓÉ¸÷¸öÏß³Ì×Ô¼º´¦Àí
+ * Description :  Msd_signal, Mossadä¿¡å·å¤„ç†ç›¸å…³çš„å†…å®¹.
+ *                ä¿¡å·å¤„ç†åˆ†ä¸ºä¸¤ä¸ªéƒ¨åˆ†:
+ *                1.å¯¹äºå› ä¸ºç¨‹åºé€»è¾‘éœ€è¦è€Œäº§ç”Ÿçš„ä¿¡å·ï¼Œç”±ä¸“é—¨çš„ä¿¡å·å¤„ç†çº¿ç¨‹åŒæ­¥è¿›è¡Œå¤„ç†
+ *                2.å¯¹ä¼šå¯¼è‡´ç¨‹åºè¿è¡Œç»ˆæ­¢çš„ä¿¡å·å¦‚SIGSEGV/SIGBUSç­‰ï¼Œç”±å„ä¸ªçº¿ç¨‹è‡ªå·±å¤„ç†
  * 
  *     Version :  1.0.0
  * 
@@ -26,14 +26,14 @@
 
 typedef struct 
 {
-    int         signo;                 /* ĞÅºÅÊıÖµ */
-    char        *signame;              /* ĞÅºÅºêÃû */
+    int         signo;                 /* ä¿¡å·æ•°å€¼ */
+    char        *signame;              /* ä¿¡å·å®å */
 } msd_signal_t;
 
 typedef struct thread_signal{
-    pthread_t          tid;             /* Ïß³Ìid */
-    int                notify_read_fd;  /* ºÍmasterÏß³ÌÍ¨ĞÅ¹ÜµÀ¶ÁÈ¡¶Ë */
-    int                notify_write_fd; /* ºÍmasterÏß³ÌÍ¨ĞÅ¹ÜµÀĞ´Èë¶Ë */
+    pthread_t          tid;             /* çº¿ç¨‹id */
+    int                notify_read_fd;  /* å’Œmasterçº¿ç¨‹é€šä¿¡ç®¡é“è¯»å–ç«¯ */
+    int                notify_write_fd; /* å’Œmasterçº¿ç¨‹é€šä¿¡ç®¡é“å†™å…¥ç«¯ */
 }msd_thread_signal_t;
 
 int msd_init_public_signals();

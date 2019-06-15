@@ -56,6 +56,6 @@ int msd_anet_tcp_keepalive(char *err, int fd);
 int msd_anet_peer_tostring(char *err, int fd, char *ip, int *port);
 int msd_anet_set_send_buffer(char *err, int fd, int buffsize);
 
-//ÖĞÎÄ
+//ä¸­æ–‡
 #endif /* __MSD_ANET_H_INCLUDED__ */
 

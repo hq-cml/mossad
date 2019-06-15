@@ -90,14 +90,14 @@ typedef struct _hash_t
     int   (*keycmp)(const void *, const void *);
     void *(*set_key)(const void *);
     void *(*set_val)(const void *);
-    void  (*free_key)(void *);/* free_keyº¯Êı±£Ö¤²»·¢ÉúÄÚ´æĞ¹Â¶ */
+    void  (*free_key)(void *);/* free_keyå‡½æ•°ä¿è¯ä¸å‘ç”Ÿå†…å­˜æ³„éœ² */
     void  (*free_val)(void *);
 }msd_hash_t;
 
 typedef struct _hash_iter_t
 {
-    int                 pos;   /*ÔÚdataÊı×éÖĞµÄÎ»ÖÃ*/
-    int                 depth; /*ÔÚdataÄ³ÔªËØµÄÁ´±íÖĞµÄÎ»ÖÃ*/
+    int                 pos;   /*åœ¨dataæ•°ç»„ä¸­çš„ä½ç½®*/
+    int                 depth; /*åœ¨dataæŸå…ƒç´ çš„é“¾è¡¨ä¸­çš„ä½ç½®*/
 
     msd_hash_entry_t    *he;
     msd_hash_t          *ht;

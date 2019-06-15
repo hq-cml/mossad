@@ -8,14 +8,14 @@
  *    Filename :  Msd_vector.h
  * 
  * Description :  Msd_vector, a vector based on array. Support any type.
- *                ÔÚÒ»ÕûÆ¬(size*slots)Á¬ĞøµÄÄÚ´æÖĞ£¬Ä£Äâ³öÊı×éµÄĞĞÎª¡£
+ *                åœ¨ä¸€æ•´ç‰‡(size*slots)è¿ç»­çš„å†…å­˜ä¸­ï¼Œæ¨¡æ‹Ÿå‡ºæ•°ç»„çš„è¡Œä¸ºã€‚
  * 
  *     Created :  Apr 4, 2012
  *     Version :  1.0.0
  * 
  *      Author :  HQ 
  *
- *    Modified :  È¥³ıÁË´æÔÚbugµÄiter
+ *    Modified :  å»é™¤äº†å­˜åœ¨bugçš„iter
  *
  **/
 
@@ -34,15 +34,15 @@
 
 typedef struct msd_vector
 {
-    unsigned int  count; /* vectorÖĞÔªËØ¸öÊı£¬VectorµÄË÷Òı´Ó0¿ªÊ¼. count<=slots 
-                              * ×¢Òâ!Õâ¸öÖµÊÇÓĞÎÊÌâµÄ!Vector²»ÄÜÈ·ÈÏ×¼È·µÄÔªËØ¸öÊı!
-                              * ÒòÎªsetµÄÊ±ºò£¬¿ÉÄÜÖĞ¼ä³öÏÖ¿Õ¶´£¬ÈçºÎÈÏ¶¨count£¬Òª¿´µ÷ÓÃÕßµÄÀí½â
-                              * ËùÒÔ×îºÃÔÚÍâ²¿µ¥¶ÀÎ¬»¤vectorµÄÔªËØÕæÊµÊıÁ¿£¬Õâ¸öµØ·½ºÍunicornÊÇ²»Í¬µÄ£¬ÒòÎª
-                              * unicornÃ»ÓĞset²Ù×÷¡£×ÛÉÏ£¬countÊÇVectorÊÇ×îºóÒ»¸öÓĞĞ§ÔªËØºóÃæµÄË÷Òı!!!
+    unsigned int  count; /* vectorä¸­å…ƒç´ ä¸ªæ•°ï¼ŒVectorçš„ç´¢å¼•ä»0å¼€å§‹. count<=slots 
+                              * æ³¨æ„!è¿™ä¸ªå€¼æ˜¯æœ‰é—®é¢˜çš„!Vectorä¸èƒ½ç¡®è®¤å‡†ç¡®çš„å…ƒç´ ä¸ªæ•°!
+                              * å› ä¸ºsetçš„æ—¶å€™ï¼Œå¯èƒ½ä¸­é—´å‡ºç°ç©ºæ´ï¼Œå¦‚ä½•è®¤å®šcountï¼Œè¦çœ‹è°ƒç”¨è€…çš„ç†è§£
+                              * æ‰€ä»¥æœ€å¥½åœ¨å¤–éƒ¨å•ç‹¬ç»´æŠ¤vectorçš„å…ƒç´ çœŸå®æ•°é‡ï¼Œè¿™ä¸ªåœ°æ–¹å’Œunicornæ˜¯ä¸åŒçš„ï¼Œå› ä¸º
+                              * unicornæ²¡æœ‰setæ“ä½œã€‚ç»¼ä¸Šï¼Œcountæ˜¯Vectoræ˜¯æœ€åä¸€ä¸ªæœ‰æ•ˆå…ƒç´ åé¢çš„ç´¢å¼•!!!
                               */
-    unsigned int  slots; /* dataÊı×é²ÛÎ»ÊıÁ¿£¬¼´¿ÉÈİÄÉÔªËØµÄ×î´ó¸öÊı */
-    unsigned int  size;  /* the size of a member£¬Ã¿¸öÔªËØµÄ´óĞ¡ */
-    void         *data;  /* ÔªËØÊı×é */
+    unsigned int  slots; /* dataæ•°ç»„æ§½ä½æ•°é‡ï¼Œå³å¯å®¹çº³å…ƒç´ çš„æœ€å¤§ä¸ªæ•° */
+    unsigned int  size;  /* the size of a memberï¼Œæ¯ä¸ªå…ƒç´ çš„å¤§å° */
+    void         *data;  /* å…ƒç´ æ•°ç»„ */
 }msd_vector_t;
 
 typedef int (*msd_vector_cmp_t)(const void *, const void *); 

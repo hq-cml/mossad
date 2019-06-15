@@ -49,5 +49,5 @@ void msd_daemonize();
 pid_t msd_pid_file_running(char *pid_file);
 int msd_pid_file_create(char *pid_file);
 
-//ÖÐÎÄ
+//ä¸­æ–‡
 #endif /* __MSD_DAEMON_H_INCLUDED__ */

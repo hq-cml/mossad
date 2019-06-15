@@ -8,9 +8,9 @@
  *    Filename :  Msd_log.h
  * 
  * Description :  Msd_log, a generic log implementation.
- *                Á½¸ö°æ±¾µÄÈÕÖ¾£º½ø³Ì°æ±¾ºÍÏß³Ì°æ±¾¡£
- *                µ±mossad²ÉÓÃ¶à½ø³ÌÊ±£¬ÓÃ½ø³Ì°æ±¾£»²ÉÓÃ¶àÏß³ÌÊ±£¬ÓÃÏß³Ì°æ±¾
- *                ¶ÔÍâ½Ó¿Ú¶¼ÊÇÍ³Ò»µÄ£¬Ö»ÐèÒªÔÚMakefileÖÐ¶¨ÒåÐèÒªÀàÐÍµÄºê
+ *                ä¸¤ä¸ªç‰ˆæœ¬çš„æ—¥å¿—ï¼šè¿›ç¨‹ç‰ˆæœ¬å’Œçº¿ç¨‹ç‰ˆæœ¬ã€‚
+ *                å½“mossadé‡‡ç”¨å¤šè¿›ç¨‹æ—¶ï¼Œç”¨è¿›ç¨‹ç‰ˆæœ¬ï¼›é‡‡ç”¨å¤šçº¿ç¨‹æ—¶ï¼Œç”¨çº¿ç¨‹ç‰ˆæœ¬
+ *                å¯¹å¤–æŽ¥å£éƒ½æ˜¯ç»Ÿä¸€çš„ï¼Œåªéœ€è¦åœ¨Makefileä¸­å®šä¹‰éœ€è¦ç±»åž‹çš„å®
  *                LOG_MODE = -D__MSD_LOG_MODE_THREAD__/-D__MSD_LOG_MODE_PROCESS__
  *
  *     Version :  1.0.0
@@ -80,48 +80,48 @@ typedef struct s_msd_log
 typedef struct msd_log
 {
     //char      *msd_log_buffer = MAP_FAILED; /* -1 */
-    int          msd_log_has_init;           /* ÊÇ·ñÒÑ¾­³õÊ¼»¯ */
-    int          msd_log_level;              /* ÈÕÖ¾µÈ¼¶ */
-    int          msd_log_size;               /* Ã¿¸öÈÕÖ¾ÎÄ¼þµÄ´óÐ¡(rotateãÐÖµ) */
-    int          msd_log_num;                /* ×î¶àÔÊÐíµÄÈÕÖ¾µÄ¸öÊý */
-    int          msd_log_multi;              /* ÊÇ·ñ½«²»Í¬µÈ¼¶µÄÈÕÖ¾£¬Ð´Èë²»Í¬µÄÎÄ¼þ(Ä¬ÈÏ:·ñ) */
-    msd_lock_t  *msd_log_rotate_lock;        /* ÈÕÖ¾roateËø */
-    s_msd_log_t  g_msd_log_files[MSD_LOG_LEVEL_DEBUG +1]; /* ¸÷¸öµÈ¼¶ÈÕÖ¾ÎÄ¼þ¾ä±ú£¬Èç¹ûmulti±ê¼ÇÎª·ñ(Ä¬ÈÏ)£¬ÔòÖ»ÓÃµ½Ë÷Òý0  */
+    int          msd_log_has_init;           /* æ˜¯å¦å·²ç»åˆå§‹åŒ– */
+    int          msd_log_level;              /* æ—¥å¿—ç­‰çº§ */
+    int          msd_log_size;               /* æ¯ä¸ªæ—¥å¿—æ–‡ä»¶çš„å¤§å°(rotateé˜ˆå€¼) */
+    int          msd_log_num;                /* æœ€å¤šå…è®¸çš„æ—¥å¿—çš„ä¸ªæ•° */
+    int          msd_log_multi;              /* æ˜¯å¦å°†ä¸åŒç­‰çº§çš„æ—¥å¿—ï¼Œå†™å…¥ä¸åŒçš„æ–‡ä»¶(é»˜è®¤:å¦) */
+    msd_lock_t  *msd_log_rotate_lock;        /* æ—¥å¿—roateé” */
+    s_msd_log_t  g_msd_log_files[MSD_LOG_LEVEL_DEBUG +1]; /* å„ä¸ªç­‰çº§æ—¥å¿—æ–‡ä»¶å¥æŸ„ï¼Œå¦‚æžœmultiæ ‡è®°ä¸ºå¦(é»˜è®¤)ï¼Œåˆ™åªç”¨åˆ°ç´¢å¼•0  */
 }msd_log_t;
 
 /*
  * isatty - test whether a file descriptor refers to a terminal, returns 1 if 
  * fd is an open file descriptor referring to a terminal; otherwise  0 is returned,
  * and errno is set to indicate the error.
- * Èç¹ûSTDOUT_FILENO¶¨ÏòÖÁÖÕ¶Ë£¬ÔòÒÔÓÐÉ«ÐÎÊ½É¾³ýok/failed£¬·ñÔòÒÔÆÕÍ¨ÐÎÊ½Êä³ö
+ * å¦‚æžœSTDOUT_FILENOå®šå‘è‡³ç»ˆç«¯ï¼Œåˆ™ä»¥æœ‰è‰²å½¢å¼åˆ é™¤ok/failedï¼Œå¦åˆ™ä»¥æ™®é€šå½¢å¼è¾“å‡º
  */
-/* print [OK] in green. EscapeÂë:ÂÌÉ« */
+/* print [OK] in green. Escapeç :ç»¿è‰² */
 #define MSD_OK_STATUS \
     (isatty(STDOUT_FILENO)? \
      ("\033[1m[\033[32m OK \033[37m]\033[m") : ("[ OK ]"))
      
-/* print [FAILED] in red. EscapeÂë:ºìÉ« */
+/* print [FAILED] in red. Escapeç :çº¢è‰² */
 #define MSD_FAILED_STATUS \
     (isatty(STDOUT_FILENO)? \
      ("\033[1m[\033[31m FAILED \033[37m]\033[m") :("[ FAILED ]"))
 
 /*
- * CµÄºêÖÐ:
- * #µÄ¹¦ÄÜÊÇ½«ÆäºóÃæµÄºê²ÎÊý½øÐÐ×Ö·û´®»¯²Ù×÷£¨Stringfication£©£¬
- * ¼òµ¥Ëµ¾ÍÊÇÔÚ¶ÔËüËùÒýÓÃµÄºê ±äÁ¿Í¨¹ýÌæ»»ºóÔÚÆä×óÓÒ¸÷¼ÓÉÏÒ»¸öË«ÒýºÅ¡£
+ * Cçš„å®ä¸­:
+ * #çš„åŠŸèƒ½æ˜¯å°†å…¶åŽé¢çš„å®å‚æ•°è¿›è¡Œå­—ç¬¦ä¸²åŒ–æ“ä½œï¼ˆStringficationï¼‰ï¼Œ
+ * ç®€å•è¯´å°±æ˜¯åœ¨å¯¹å®ƒæ‰€å¼•ç”¨çš„å® å˜é‡é€šè¿‡æ›¿æ¢åŽåœ¨å…¶å·¦å³å„åŠ ä¸Šä¸€ä¸ªåŒå¼•å·ã€‚
  *
- * ##±»³ÆÎªÁ¬½Ó·û£¨concatenator£©£¬ÓÃÀ´½«Á½¸öTokenÁ¬½ÓÎªÒ»¸öToken¡h£¬
- * »òÕß³äµ±µÄ×÷ÓÃ¾ÍÊÇµ±±ä²ÎÎª¿ÕµÄÊ±ºò£¬Ïû³ýÇ°ÃæµÄÄÇ¸ö¶ººÅ,¼´Variadic Macro£¬Ò²¾ÍÊÇ±ä²Îºê
- * ±ÈÈç£º
- * #define myprintf(templt,...) fprintf(stderr,templt,__VA_ARGS__) »òÕß 
+ * ##è¢«ç§°ä¸ºè¿žæŽ¥ç¬¦ï¼ˆconcatenatorï¼‰ï¼Œç”¨æ¥å°†ä¸¤ä¸ªTokenè¿žæŽ¥ä¸ºä¸€ä¸ªTokenî“®ï¼Œ
+ * æˆ–è€…å……å½“çš„ä½œç”¨å°±æ˜¯å½“å˜å‚ä¸ºç©ºçš„æ—¶å€™ï¼Œæ¶ˆé™¤å‰é¢çš„é‚£ä¸ªé€—å·,å³Variadic Macroï¼Œä¹Ÿå°±æ˜¯å˜å‚å®
+ * æ¯”å¦‚ï¼š
+ * #define myprintf(templt,...) fprintf(stderr,templt,__VA_ARGS__) æˆ–è€… 
  * #define myprintf(templt,args...) fprintf(stderr,templt,args)
- * µÚÒ»¸öºêÖÐÓÉÓÚÃ»ÓÐ¶Ô±ä²ÎÆðÃû£¬ÎÒÃÇÓÃÄ¬ÈÏµÄºê__VA_ARGS__À´Ìæ´úËü¡£µÚ¶þ¸öºêÖÐ£¬
- * ÎÒÃÇÏÔÊ½µØÃüÃû±ä²ÎÎªargs£¬ÄÇÃ´ÎÒÃÇÔÚºê¶¨ÒåÖÐ¾Í¿ÉÒÔÓÃargsÀ´´úÖ¸±ä²ÎÁË¡£ 
- * Í¬CÓïÑÔµÄstdcallÒ»Ñù£¬±ä²Î±ØÐë×÷Îª²ÎÊý±íµÄ×îºóÒ»Ïî³öÏÖ¡£
+ * ç¬¬ä¸€ä¸ªå®ä¸­ç”±äºŽæ²¡æœ‰å¯¹å˜å‚èµ·åï¼Œæˆ‘ä»¬ç”¨é»˜è®¤çš„å®__VA_ARGS__æ¥æ›¿ä»£å®ƒã€‚ç¬¬äºŒä¸ªå®ä¸­ï¼Œ
+ * æˆ‘ä»¬æ˜¾å¼åœ°å‘½åå˜å‚ä¸ºargsï¼Œé‚£ä¹ˆæˆ‘ä»¬åœ¨å®å®šä¹‰ä¸­å°±å¯ä»¥ç”¨argsæ¥ä»£æŒ‡å˜å‚äº†ã€‚ 
+ * åŒCè¯­è¨€çš„stdcallä¸€æ ·ï¼Œå˜å‚å¿…é¡»ä½œä¸ºå‚æ•°è¡¨çš„æœ€åŽä¸€é¡¹å‡ºçŽ°ã€‚
  *
- * Èô±ä²ÎÎª¿Õ£¬»áµ¼ÖÂ±àÒë´íÎó£¬´ËÊ±
+ * è‹¥å˜å‚ä¸ºç©ºï¼Œä¼šå¯¼è‡´ç¼–è¯‘é”™è¯¯ï¼Œæ­¤æ—¶
  * #define myprintf(templt, ...) fprintf(stderr,templt, ##__VAR_ARGS__)
- * ÕâÊ±£¬##Õâ¸öÁ¬½Ó·ûºÅ³äµ±µÄ×÷ÓÃ¾ÍÊÇµ±__VAR_ARGS__Îª¿ÕµÄÊ±ºò£¬Ïû³ýÇ°ÃæµÄÄÇ¸ö¶ººÅ¡£ÄÇÃ´´ËÊ±µÄ·­Òë¹ý³ÌÈçÏÂ£º
+ * è¿™æ—¶ï¼Œ##è¿™ä¸ªè¿žæŽ¥ç¬¦å·å……å½“çš„ä½œç”¨å°±æ˜¯å½“__VAR_ARGS__ä¸ºç©ºçš„æ—¶å€™ï¼Œæ¶ˆé™¤å‰é¢çš„é‚£ä¸ªé€—å·ã€‚é‚£ä¹ˆæ­¤æ—¶çš„ç¿»è¯‘è¿‡ç¨‹å¦‚ä¸‹ï¼š
  * myprintf(templt); ==> myprintf(stderr,templt);
  */
 #define MSD_BOOT_SUCCESS(fmt, args...) do{\

@@ -7,7 +7,7 @@
  *
  *    Filename :  Msd_thread.h 
  * 
- * Description :  Msd_thread, ¹¤×÷Ïß³ÌÏà¹ØÊµÏÖ.
+ * Description :  Msd_thread, å·¥ä½œçº¿ç¨‹ç›¸å…³å®ç°.
  * 
  *     Version :  1.0.0
  * 
@@ -52,27 +52,27 @@ typedef enum msd_worker_stat{
 }msd_worker_stat_t;
 
 struct thread_worker{
-    int                idx;             /* Î»ÓÚwokerÁĞ±íÖĞµÄÎ»ÖÃË÷Òı */
-    pthread_t          tid;             /* Ïß³Ìid */
-    int                notify_read_fd;  /* masterºÍwokerÏß³ÌÍ¨ĞÅ¹ÜµÀ¶ÁÈ¡¶Ë */
-    int                notify_write_fd; /* masterºÍwokerÏß³ÌÍ¨ĞÅ¹ÜµÀĞ´Èë¶Ë */  
-    msd_worker_stat_t  status;          /* workerµÄ×´Ì¬ */
+    int                idx;             /* ä½äºwokeråˆ—è¡¨ä¸­çš„ä½ç½®ç´¢å¼• */
+    pthread_t          tid;             /* çº¿ç¨‹id */
+    int                notify_read_fd;  /* masterå’Œwokerçº¿ç¨‹é€šä¿¡ç®¡é“è¯»å–ç«¯ */
+    int                notify_write_fd; /* masterå’Œwokerçº¿ç¨‹é€šä¿¡ç®¡é“å†™å…¥ç«¯ */  
+    msd_worker_stat_t  status;          /* workerçš„çŠ¶æ€ */
 
-    msd_ae_event_loop  *t_ael;          /* workerÏß³Ìae¾ä±ú£¬ÓÃÓÚ¼àÌı¹ÜµÀºÍËù¸ºÔğµÄclient fd */
-    msd_thread_pool_t  *pool;           /* ÒÀ¸½ÓÚµÄÏß³Ì³Ø¾ä±ú */
-    msd_dlist_t        *client_list;    /* ±¾Ïß³Ì¸ºÔğµÄclient£¬×é³ÉµÄ¶ÓÁĞ */
-    void               *priv_data;      /* worker×ÔÉíÊı¾İ£¬´ËÊı¾İµÄÉú³ÉºÍÊÍ·Å£¬ĞèÒª½»¸øsoº¯ÊıÈ¥Íê³É */
+    msd_ae_event_loop  *t_ael;          /* workerçº¿ç¨‹aeå¥æŸ„ï¼Œç”¨äºç›‘å¬ç®¡é“å’Œæ‰€è´Ÿè´£çš„client fd */
+    msd_thread_pool_t  *pool;           /* ä¾é™„äºçš„çº¿ç¨‹æ± å¥æŸ„ */
+    msd_dlist_t        *client_list;    /* æœ¬çº¿ç¨‹è´Ÿè´£çš„clientï¼Œç»„æˆçš„é˜Ÿåˆ— */
+    void               *priv_data;      /* workerè‡ªèº«æ•°æ®ï¼Œæ­¤æ•°æ®çš„ç”Ÿæˆå’Œé‡Šæ”¾ï¼Œéœ€è¦äº¤ç»™soå‡½æ•°å»å®Œæˆ */
 };
 
 struct thread_pool{
-    msd_lock_t            *thread_lock;           /* ¹¤×÷Ïß³ÌËø¡£¸÷¸öÆ½µÈµÄ¹¤×÷Ïß³ÌÖ®¼ä£¬ĞèÒªÍ¬²½µÄÊ±ºòÓÃ´ËËø */
-    msd_thread_worker_t   **thread_worker_array;  /* workerÏß³ÌÁĞ±í */
+    msd_lock_t            *thread_lock;           /* å·¥ä½œçº¿ç¨‹é”ã€‚å„ä¸ªå¹³ç­‰çš„å·¥ä½œçº¿ç¨‹ä¹‹é—´ï¼Œéœ€è¦åŒæ­¥çš„æ—¶å€™ç”¨æ­¤é” */
+    msd_thread_worker_t   **thread_worker_array;  /* workerçº¿ç¨‹åˆ—è¡¨ */
     
-    int                   thread_worker_num;      /* thread_worker_arrayÊı×é³¤¶È */
-    int                   thread_stack_size;      /* Ïß³ÌÕ»´óĞ¡ */
+    int                   thread_worker_num;      /* thread_worker_arrayæ•°ç»„é•¿åº¦ */
+    int                   thread_stack_size;      /* çº¿ç¨‹æ ˆå¤§å° */
     
-    int                   client_timeout;         /* client³¬Ê±Ê±¼ä */
-    int                   poll_interval;          /* workerÏß³ÌCronÆµÂÊ */
+    int                   client_timeout;         /* clientè¶…æ—¶æ—¶é—´ */
+    int                   poll_interval;          /* workerçº¿ç¨‹Croné¢‘ç‡ */
 };
  
 msd_thread_pool_t *msd_thread_pool_create(int worker_num, int stack_size , void* (*worker_task)(void *arg));
