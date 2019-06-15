@@ -7,7 +7,7 @@
  *
  *    Filename :  redis_saver.c
  * 
- * Description :  ½ÓÊÕÊı×é´æ´¢ÓÚRedis
+ * Description :  æ¥æ”¶æ•°ç»„å­˜å‚¨äºRedis
  * 
  *     Version :  1.0.0
  * 
@@ -23,9 +23,9 @@ static int redis_destroy(redisContext *c);
 
 
 /**
- * ¹¦ÄÜ: Á¬½Óredis
- * ²ÎÊı: @data:wokerË½ÓĞÊı¾İ
- * ·µ»Ø:³É¹¦:0, Ê§°Ü:-x
+ * åŠŸèƒ½: è¿æ¥redis
+ * å‚æ•°: @data:wokerç§æœ‰æ•°æ®
+ * è¿”å›:æˆåŠŸ:0, å¤±è´¥:-x
  **/
 int redis_connect(void *data, redisContext **c)
 {
@@ -38,8 +38,8 @@ int redis_connect(void *data, redisContext **c)
     port = atoi(worker_data->redis_port->buf);
     db   = atoi(worker_data->redis_db->buf);
     
-    //Á¬½ÓRedis·şÎñÆ÷£¬Í¬Ê±»ñÈ¡ÓëRedisÁ¬½ÓµÄÉÏÏÂÎÄ¶ÔÏó¡£    
-    //¸Ã¶ÔÏó½«ÓÃÓÚÆäºóËùÓĞÓëRedis²Ù×÷µÄº¯Êı¡£    
+    //è¿æ¥RedisæœåŠ¡å™¨ï¼ŒåŒæ—¶è·å–ä¸Redisè¿æ¥çš„ä¸Šä¸‹æ–‡å¯¹è±¡ã€‚    
+    //è¯¥å¯¹è±¡å°†ç”¨äºå…¶åæ‰€æœ‰ä¸Redisæ“ä½œçš„å‡½æ•°ã€‚    
     *c = redisConnect(worker_data->redis_ip->buf, port);    
     if ((*c)->err) {
         MSD_ERROR_LOG("Connect error: %s", (*c)->errstr);         
@@ -47,7 +47,7 @@ int redis_connect(void *data, redisContext **c)
         return MSD_FAILED;    
     }
 
-    //Ñ¡Ôñ¿â
+    //é€‰æ‹©åº“
     snprintf(cmd, 100, "select %d", db);    
     r = (redisReply*)redisCommand((*c), cmd);    
     if (r == NULL) {        
@@ -56,18 +56,18 @@ int redis_connect(void *data, redisContext **c)
         return MSD_FAILED;    
     }    
 
-    //ÓÉÓÚºóÃæÖØ¸´Ê¹ÓÃ¸Ã±äÁ¿£¬ËùÒÔĞèÒªÌáÇ°ÊÍ·Å£¬·ñÔòÄÚ´æĞ¹Â©¡£    
+    //ç”±äºåé¢é‡å¤ä½¿ç”¨è¯¥å˜é‡ï¼Œæ‰€ä»¥éœ€è¦æå‰é‡Šæ”¾ï¼Œå¦åˆ™å†…å­˜æ³„æ¼ã€‚    
     freeReplyObject(r);
 
     return MSD_OK;
 }
 
 /**
- * ¹¦ÄÜ: redisµÄ´æ´¢º¯Êı
- * ²ÎÊı: @conf
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: redisçš„å­˜å‚¨å‡½æ•°
+ * å‚æ•°: @conf
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 int redis_save(redisContext *c, const char* hostname, const char* item_id, const char* value)
 {
@@ -93,7 +93,7 @@ int redis_save(redisContext *c, const char* hostname, const char* item_id, const
         return MSD_FAILED;    
     }
     */
-    //ÓÉÓÚºóÃæÖØ¸´Ê¹ÓÃ¸Ã±äÁ¿£¬ËùÒÔĞèÒªÌáÇ°ÊÍ·Å£¬·ñÔòÄÚ´æĞ¹Â©¡£    
+    //ç”±äºåé¢é‡å¤ä½¿ç”¨è¯¥å˜é‡ï¼Œæ‰€ä»¥éœ€è¦æå‰é‡Šæ”¾ï¼Œå¦åˆ™å†…å­˜æ³„æ¼ã€‚    
     freeReplyObject(r);
     MSD_INFO_LOG("Success exec cmd: %s", cmd); 
 
@@ -108,11 +108,11 @@ int redis_destroy(redisContext *c)
 
 
 /**
- * ¹¦ÄÜ: ³õÊ¼»¯»Øµ÷£¬³õÊ¼»¯Back_end
- * ²ÎÊı: @conf
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: åˆå§‹åŒ–å›è°ƒï¼Œåˆå§‹åŒ–Back_end
+ * å‚æ•°: @conf
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 int msd_handle_init(void *conf) 
 {
@@ -121,11 +121,11 @@ int msd_handle_init(void *conf)
 }
 
 /**
- * ¹¦ÄÜ: µ¥¸öÏß³Ì³õÊ¼»¯»Øµ÷
- * ²ÎÊı: @worker
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: å•ä¸ªçº¿ç¨‹åˆå§‹åŒ–å›è°ƒ
+ * å‚æ•°: @worker
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 int msd_handle_worker_init(void *conf, void *arg)
 {
@@ -162,11 +162,11 @@ int msd_handle_worker_init(void *conf, void *arg)
 }
 
 /**
- * ¹¦ÄÜ: ¶¯Ì¬Ô¼¶¨mossadºÍclientÖ®¼äµÄÍ¨ĞÅĞ­Òé³¤¶È£¬¼´mossadÓ¦¸Ã¶ÁÈ¡¶àÉÙÊı¾İ£¬Ëã×÷Ò»´ÎÇëÇó
- * ²ÎÊı: @clientÖ¸Õë
- * ËµÃ÷: 
- *       1. ±ØÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:Ğ­Òé³¤¶È; Ê§°Ü:
+ * åŠŸèƒ½: åŠ¨æ€çº¦å®šmossadå’Œclientä¹‹é—´çš„é€šä¿¡åè®®é•¿åº¦ï¼Œå³mossadåº”è¯¥è¯»å–å¤šå°‘æ•°æ®ï¼Œç®—ä½œä¸€æ¬¡è¯·æ±‚
+ * å‚æ•°: @clientæŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. å¿…é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:åè®®é•¿åº¦; å¤±è´¥:
  **/
 int msd_handle_prot_len(msd_conn_client_t *client) 
 {
@@ -200,15 +200,15 @@ int msd_handle_prot_len(msd_conn_client_t *client)
 }
 
 /**
- * ¹¦ÄÜ: Ö÷ÒªµÄÓÃ»§Âß¼­
- * ²ÎÊı: @clientÖ¸Õë
- * ËµÃ÷: 
- *       1. ±ØÑ¡º¯Êı
- *       2. Ã¿´Î´ÓrecvbufÖĞÓ¦¸ÃÈ¡µÃrecv_prot_len³¤¶ÈµÄÊı¾İ£¬×÷ÎªÒ»¸öÍêÕûÇëÇó
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
- *       MSD_OK: ³É¹¦£¬²¢±£³ÖÁ¬½Ó¼ÌĞø
- *       MSD_END:³É¹¦£¬²»ÔÚ¼ÌĞø£¬mossad½«responseĞ´»Øclientºó£¬×Ô¶¯¹Ø±ÕÁ¬½Ó
- *       MSD_ERR:Ê§°Ü£¬mossad¹Ø±ÕÁ¬½Ó
+ * åŠŸèƒ½: ä¸»è¦çš„ç”¨æˆ·é€»è¾‘
+ * å‚æ•°: @clientæŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. å¿…é€‰å‡½æ•°
+ *       2. æ¯æ¬¡ä»recvbufä¸­åº”è¯¥å–å¾—recv_prot_lené•¿åº¦çš„æ•°æ®ï¼Œä½œä¸ºä¸€ä¸ªå®Œæ•´è¯·æ±‚
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
+ *       MSD_OK: æˆåŠŸï¼Œå¹¶ä¿æŒè¿æ¥ç»§ç»­
+ *       MSD_END:æˆåŠŸï¼Œä¸åœ¨ç»§ç»­ï¼Œmossadå°†responseå†™å›clientåï¼Œè‡ªåŠ¨å…³é—­è¿æ¥
+ *       MSD_ERR:å¤±è´¥ï¼Œmossadå…³é—­è¿æ¥
  **/
 int msd_handle_process(msd_conn_client_t *client) 
 {
@@ -238,7 +238,7 @@ int msd_handle_process(msd_conn_client_t *client)
     
     MSD_INFO_LOG("The Full Packet:%s.Len:%d", content_buff, client->recv_prot_len);
     
-    // ¿à±ÆµÄjson½âÎö£¬¾ÍÄ¿Ç°¿´£¬Ö»ÓĞcJSON_ParseµÄ·µ»Ø¶ÔÏóĞèÒªÊÍ·Å //
+    // è‹¦é€¼çš„jsonè§£æï¼Œå°±ç›®å‰çœ‹ï¼Œåªæœ‰cJSON_Parseçš„è¿”å›å¯¹è±¡éœ€è¦é‡Šæ”¾ //
     cJSON *p_root = cJSON_Parse(content_buff+10);
     if(!p_root) 
         goto json_null;
@@ -278,21 +278,21 @@ int msd_handle_process(msd_conn_client_t *client)
         //MSD_INFO_LOG("item_id:%s\n", p_item_id);
         //MSD_INFO_LOG("value:%s\n", p_value);
 
-        //´æ´¢
+        //å­˜å‚¨
         if(MSD_OK != redis_save(c, p_hostname, p_item_id, p_value)){
             goto json_null;
         }
     }   
     free(content_buff);
     
-    //´æ´¢ local_time
+    //å­˜å‚¨ local_time
     now_time = time(NULL);
     snprintf(now_time_str, 20, "%ld", now_time);
     if(MSD_OK != redis_save(c, p_hostname, "local_time", now_time_str)){
         goto json_null;
     }
 
-    //´æ´¢ agent_time
+    //å­˜å‚¨ agent_time
     if(MSD_OK != redis_save(c, p_hostname, "agent_time", p_time)){
         goto json_null;
     }    
@@ -300,17 +300,17 @@ int msd_handle_process(msd_conn_client_t *client)
     redis_destroy(c);
     cJSON_Delete(p_root);
 
-    // »ØÏÔĞÅÏ¢Ğ´Èësendbuf 
+    // å›æ˜¾ä¿¡æ¯å†™å…¥sendbuf 
     msd_str_cat_len(&(client->sendbuf), "ok", 2);
     return MSD_OK;
     
 json_null:
-    // »ØÏÔĞÅÏ¢Ğ´Èësendbuf 
+    // å›æ˜¾ä¿¡æ¯å†™å…¥sendbuf 
     msd_str_cat_len(&(client->sendbuf), "failed", 6);
     MSD_ERROR_LOG("Invalidate json:%s! Client:%s:%d", content_buff, client->remote_ip, client->remote_port);
     free(content_buff);
     redis_destroy(c);
     cJSON_Delete(p_root);
-    // ÈÔ¾É·µ»ØOK, ²»¹Ø±ÕÁ¬½Ó
+    // ä»æ—§è¿”å›OK, ä¸å…³é—­è¿æ¥
     return MSD_OK; 
 }

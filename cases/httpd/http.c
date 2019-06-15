@@ -7,8 +7,8 @@
  *
  *    Filename :  http.c
  * 
- * Description :  Mossad¿ò¼ÜHttp·şÎñÆ÷Ê¾Àı
- *                ÊµÏÖmsd_plugin.hÖĞµÄº¯Êı£¬¼´¿É½«ÓÃ»§Âß¼­Ç¶Èëmossad¿ò¼Ü
+ * Description :  Mossadæ¡†æ¶HttpæœåŠ¡å™¨ç¤ºä¾‹
+ *                å®ç°msd_plugin.hä¸­çš„å‡½æ•°ï¼Œå³å¯å°†ç”¨æˆ·é€»è¾‘åµŒå…¥mossadæ¡†æ¶
  * 
  *     Version :  1.0.0
  * 
@@ -28,11 +28,11 @@ static char *g_doc_root;
 static char *g_index_file;
 
 /**
- * ¹¦ÄÜ: ³õÊ¼»¯»Øµ÷
- * ²ÎÊı: @conf
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: åˆå§‹åŒ–å›è°ƒ
+ * å‚æ•°: @conf
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 int msd_handle_init(void *conf) 
 {
@@ -43,12 +43,12 @@ int msd_handle_init(void *conf)
 }
 
 /**
- * ¹¦ÄÜ: clientÁ¬½Ó±»acceptºó£¬´¥·¢´Ë»Øµ÷
- * ²ÎÊı: @clientÖ¸Õë
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- *       2. Ò»°ã¿ÉÒÔĞ´Ò»Ğ©»¶Ó­ĞÅÏ¢µ½clientÉÏÈ¥ 
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: clientè¿æ¥è¢«acceptåï¼Œè§¦å‘æ­¤å›è°ƒ
+ * å‚æ•°: @clientæŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ *       2. ä¸€èˆ¬å¯ä»¥å†™ä¸€äº›æ¬¢è¿ä¿¡æ¯åˆ°clientä¸Šå» 
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 /*
 int msd_handle_open(msd_conn_client_t *client) 
@@ -56,14 +56,14 @@ int msd_handle_open(msd_conn_client_t *client)
     int write_len;
     char buf[1024];
     sprintf(buf, "Hello, %s:%d, welcom to mossad!\n", client->remote_ip, client->remote_port);
-    //»¶Ó­ĞÅÏ¢Ğ´Èësendbuf
+    //æ¬¢è¿ä¿¡æ¯å†™å…¥sendbuf
     msd_str_cpy(&(client->sendbuf), buf);
     
     if((write_len = write(client->fd, client->sendbuf->buf, client->sendbuf->len))
         != client->sendbuf->len)
     {
         MSD_ERROR_LOG("Handle open error! IP:%s, Port:%d. Error:%s", client->remote_ip, client->remote_port, strerror(errno));
-        //TODO£¬½«write¼ÓÈëae_loop
+        //TODOï¼Œå°†writeåŠ å…¥ae_loop
         return MSD_ERR;
     }
     return MSD_OK;
@@ -71,12 +71,12 @@ int msd_handle_open(msd_conn_client_t *client)
 */
 
 /**
- * ¹¦ÄÜ: mossad¶Ï¿ªclientÁ¬½ÓµÄÊ±ºò£¬´¥·¢´Ë»Øµ÷
- * ²ÎÊı: @clientÖ¸Õë
- *       @info£¬·ÅÖÃ¹Ø±ÕÁ¬½ÓµÄÔ­Òò
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: mossadæ–­å¼€clientè¿æ¥çš„æ—¶å€™ï¼Œè§¦å‘æ­¤å›è°ƒ
+ * å‚æ•°: @clientæŒ‡é’ˆ
+ *       @infoï¼Œæ”¾ç½®å…³é—­è¿æ¥çš„åŸå› 
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 /*
 void msd_handle_close(msd_conn_client_t *client, const char *inf) 
@@ -86,18 +86,18 @@ void msd_handle_close(msd_conn_client_t *client, const char *inf)
 */
 
 /**
- * ¹¦ÄÜ: ¶¯Ì¬Ô¼¶¨mossadºÍclientÖ®¼äµÄÍ¨ĞÅĞ­Òé³¤¶È£¬¼´mossadÓ¦¸Ã¶ÁÈ¡¶àÉÙÊı¾İ£¬Ëã×÷Ò»´ÎÇëÇó
- * ²ÎÊı: @clientÖ¸Õë
- * ËµÃ÷: 
- *       1. ±ØÑ¡º¯Êı
- *       2. Èç¹ûÔİÊ±ÎŞ·¨È·¶¨Ğ­Òé³¤¶È£¬·µ»Ø0£¬mossad»á¼ÌĞø´Óclient¶ÁÈ¡Êı¾İ
- *       3. Èç¹û·µ»Ø-1£¬mossad»áÈÏÎª³öÏÖ´íÎó£¬¹Ø±Õ´ËÁ¬½Ó
- *       3. ×î¼òµ¥µÄHttpĞ­Òérequest°üÊ¾Àı:
+ * åŠŸèƒ½: åŠ¨æ€çº¦å®šmossadå’Œclientä¹‹é—´çš„é€šä¿¡åè®®é•¿åº¦ï¼Œå³mossadåº”è¯¥è¯»å–å¤šå°‘æ•°æ®ï¼Œç®—ä½œä¸€æ¬¡è¯·æ±‚
+ * å‚æ•°: @clientæŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. å¿…é€‰å‡½æ•°
+ *       2. å¦‚æœæš‚æ—¶æ— æ³•ç¡®å®šåè®®é•¿åº¦ï¼Œè¿”å›0ï¼Œmossadä¼šç»§ç»­ä»clientè¯»å–æ•°æ®
+ *       3. å¦‚æœè¿”å›-1ï¼Œmossadä¼šè®¤ä¸ºå‡ºç°é”™è¯¯ï¼Œå…³é—­æ­¤è¿æ¥
+ *       3. æœ€ç®€å•çš„Httpåè®®requeståŒ…ç¤ºä¾‹:
  *           GET /www/index.html HTTP/1.1 \r\n
  *           Host: www.w3.org \r\n
  *           \r\n
  *           request-body.....
- * ·µ»Ø:³É¹¦:Ğ­Òé³¤¶È; Ê§°Ü:
+ * è¿”å›:æˆåŠŸ:åè®®é•¿åº¦; å¤±è´¥:
  **/
 int msd_handle_prot_len(msd_conn_client_t *client) 
 {
@@ -106,17 +106,17 @@ int msd_handle_prot_len(msd_conn_client_t *client)
     char *ptr;
     char *header_end;
     
-    /* ÕÒµ½httpĞ­Òérequest°üHeaderµÄÄ©Î²"\r\n\r\n" */
+    /* æ‰¾åˆ°httpåè®®requeståŒ…Headerçš„æœ«å°¾"\r\n\r\n" */
     if (!(header_end = strstr(client->recvbuf->buf, "\r\n\r\n"))) 
     {
-        /* Ã»ÓĞÕÒµ½Ä©Î²£¬ÔòÈÏÎª´Ë°ü²»ÍêÕû£¬·µ»Ø0£¬mossad»á¼ÌĞø¶ÁÈ¡ */
+        /* æ²¡æœ‰æ‰¾åˆ°æœ«å°¾ï¼Œåˆ™è®¤ä¸ºæ­¤åŒ…ä¸å®Œæ•´ï¼Œè¿”å›0ï¼Œmossadä¼šç»§ç»­è¯»å– */
         return 0;
     }
     header_end += 4;
     
     /* find content-length header 
-	 * HttpÇëÇóÍ·Èç¹ûÃ»ÓĞcontent-length×Ö¶Î£¬Ôò³¤¶È¾ÍÊÇÇëÇóĞĞºÍÇëÇóÍ·ÒÔ¼°ºóÃæµÄÁ½¸ö»Ø³µ»»ĞĞµÄ³¤¶ÈÖ®ºó 
-	 * ·ñÔò¾ÍÔÙ¼ÓÉÏcontent-length×Ö¶Î
+	 * Httpè¯·æ±‚å¤´å¦‚æœæ²¡æœ‰content-lengthå­—æ®µï¼Œåˆ™é•¿åº¦å°±æ˜¯è¯·æ±‚è¡Œå’Œè¯·æ±‚å¤´ä»¥åŠåé¢çš„ä¸¤ä¸ªå›è½¦æ¢è¡Œçš„é•¿åº¦ä¹‹å 
+	 * å¦åˆ™å°±å†åŠ ä¸Šcontent-lengthå­—æ®µ
 	 */
     if ((ptr = strstr(client->recvbuf->buf, "Content-Length:"))) 
     {
@@ -135,22 +135,22 @@ int msd_handle_prot_len(msd_conn_client_t *client)
 }
 
 /**
- * ¹¦ÄÜ: Ö÷ÒªµÄÓÃ»§Âß¼­
- * ²ÎÊı: @clientÖ¸Õë
- * ËµÃ÷: 
- *       1. ±ØÑ¡º¯Êı
- *       2. Ã¿´Î´ÓrecvbufÖĞÓ¦¸ÃÈ¡µÃrecv_prot_len³¤¶ÈµÄÊı¾İ£¬×÷ÎªÒ»¸öÍêÕûÇëÇó
- *       3. ×î¼òµ¥µÄHttpĞ­Òéreponse°üÊ¾Àı:
+ * åŠŸèƒ½: ä¸»è¦çš„ç”¨æˆ·é€»è¾‘
+ * å‚æ•°: @clientæŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. å¿…é€‰å‡½æ•°
+ *       2. æ¯æ¬¡ä»recvbufä¸­åº”è¯¥å–å¾—recv_prot_lené•¿åº¦çš„æ•°æ®ï¼Œä½œä¸ºä¸€ä¸ªå®Œæ•´è¯·æ±‚
+ *       3. æœ€ç®€å•çš„Httpåè®®reponseåŒ…ç¤ºä¾‹:
  *              HTTP/1.1 200 OK \r\n
  *              Content-Type: text/html \r\n
  *              Content-Length: 158 \r\n
  *              Server: Apache-Coyote/1.1 \r\n
  *              \r\n
  *              response-body.....
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
- *       MSD_OK: ³É¹¦£¬²¢±£³ÖÁ¬½Ó¼ÌĞø
- *       MSD_END:³É¹¦£¬²»ÔÚ¼ÌĞø£¬mossad½«responseĞ´»Øclientºó£¬×Ô¶¯¹Ø±ÕÁ¬½Ó
- *       MSD_ERR:Ê§°Ü£¬mossad¹Ø±ÕÁ¬½Ó
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
+ *       MSD_OK: æˆåŠŸï¼Œå¹¶ä¿æŒè¿æ¥ç»§ç»­
+ *       MSD_END:æˆåŠŸï¼Œä¸åœ¨ç»§ç»­ï¼Œmossadå°†responseå†™å›clientåï¼Œè‡ªåŠ¨å…³é—­è¿æ¥
+ *       MSD_ERR:å¤±è´¥ï¼Œmossadå…³é—­è¿æ¥
  **/
 int msd_handle_process(msd_conn_client_t *client) 
 {
@@ -224,7 +224,7 @@ int msd_handle_process(msd_conn_client_t *client)
     }
     *ptr = '\0';
     
-    //Ö§³Ö¶ş½øÖÆÎÄ¼ş
+    //æ”¯æŒäºŒè¿›åˆ¶æ–‡ä»¶
     //msd_str_cat(&(client->sendbuf), buf);
     msd_str_cat_len(&(client->sendbuf), buf, file_size);
     free(buf);
@@ -234,10 +234,10 @@ int msd_handle_process(msd_conn_client_t *client)
 }
 
 /**
- * ¹¦ÄÜ: mossad¹Ø±ÕµÄÊ±ºò£¬´¥·¢´Ë»Øµ÷
- * ²ÎÊı: @cycle
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
+ * åŠŸèƒ½: mossadå…³é—­çš„æ—¶å€™ï¼Œè§¦å‘æ­¤å›è°ƒ
+ * å‚æ•°: @cycle
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
  **/
 /*
 void handle_fini(void *cycle) 

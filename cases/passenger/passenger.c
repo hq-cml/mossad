@@ -31,20 +31,20 @@ typedef struct pas_addr{
 }pas_addr_t;
 
 typedef struct pas_back_end{
-    int               fd;           /* Ö÷fd */
-    int               idx;          /* µ±Ç°fdµÄÔÚÁ´±íÖĞµÄË÷Òı */
+    int               fd;           /* ä¸»fd */
+    int               idx;          /* å½“å‰fdçš„åœ¨é“¾è¡¨ä¸­çš„ç´¢å¼• */
     back_stat_t       status;
     time_t            access_time;
     msd_str_t         *recvbuf;
     msd_str_t         *sendbuf;
-    msd_dlist_t       *address_list; /* pas_addr_tÁ´±í */
+    msd_dlist_t       *address_list; /* pas_addr_té“¾è¡¨ */
 }back_end_t; 
 
-/* workerË½ÓĞÊı¾İ */
+/* workerç§æœ‰æ•°æ® */
 typedef struct pas_worker_data{
-    msd_dlist_t         *back_end_list;           /* Ïòºó·¢ËÍ½á¹ûÊı¾İµÄµØÖ· */
-    int                  back_end_alive_interval; /* ºó¶Ë´æ»î×´Ì¬Ì½²âÆµÂÊ */
-    msd_thread_worker_t *worker;                  /* worker¾ä±ú */
+    msd_dlist_t         *back_end_list;           /* å‘åå‘é€ç»“æœæ•°æ®çš„åœ°å€ */
+    int                  back_end_alive_interval; /* åç«¯å­˜æ´»çŠ¶æ€æ¢æµ‹é¢‘ç‡ */
+    msd_thread_worker_t *worker;                  /* workerå¥æŸ„ */
 }pas_worker_data_t;
 
 static back_end_t* deal_one_back_line(msd_conf_t *conf, const char *back_end_name, msd_thread_worker_t *worker);
@@ -53,11 +53,11 @@ static int check_fd_cron(msd_ae_event_loop *el, long long id, void *privdate);
 static void send_to_back(msd_ae_event_loop *el, int fd, void *privdata, int mask);
 static void read_from_back(msd_ae_event_loop *el, int fd, void *privdata, int mask);
 /**
- * ¹¦ÄÜ: ³õÊ¼»¯»Øµ÷£¬³õÊ¼»¯Back_end
- * ²ÎÊı: @conf
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: åˆå§‹åŒ–å›è°ƒï¼Œåˆå§‹åŒ–Back_end
+ * å‚æ•°: @conf
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 int msd_handle_init(void *conf) 
 {
@@ -66,11 +66,11 @@ int msd_handle_init(void *conf)
 }
 
 /**
- * ¹¦ÄÜ: µ¥¸öÏß³Ì³õÊ¼»¯»Øµ÷
- * ²ÎÊı: @worker
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: å•ä¸ªçº¿ç¨‹åˆå§‹åŒ–å›è°ƒ
+ * å‚æ•°: @worker
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 int msd_handle_worker_init(void *conf, void *arg)
 {
@@ -100,7 +100,7 @@ int msd_handle_worker_init(void *conf, void *arg)
     }
     worker_data->back_end_list = dlist;
     
-    //Ñ­»·³õÊ¼»¯back_end_list
+    //å¾ªç¯åˆå§‹åŒ–back_end_list
     for (i=0; i<TOTAL_BACK_END_CNT; i++)
     {
         memset(back_end_name, 0, 20);
@@ -112,7 +112,7 @@ int msd_handle_worker_init(void *conf, void *arg)
         }
     }
 
-    /* ×¢²áÒ»·ÖÖÓÊ±¼äÊÂ¼ş£¬¼ì²éback_end_listµÄÓĞĞ§ĞÔ */
+    /* æ³¨å†Œä¸€åˆ†é’Ÿæ—¶é—´äº‹ä»¶ï¼Œæ£€æŸ¥back_end_listçš„æœ‰æ•ˆæ€§ */
     if(msd_ae_create_time_event(worker->t_ael, worker_data->back_end_alive_interval, 
             check_fd_cron, worker, NULL) == MSD_ERR)
     {
@@ -124,11 +124,11 @@ int msd_handle_worker_init(void *conf, void *arg)
 }
 
 /**
- * ¹¦ÄÜ: ¶¯Ì¬Ô¼¶¨mossadºÍclientÖ®¼äµÄÍ¨ĞÅĞ­Òé³¤¶È£¬¼´mossadÓ¦¸Ã¶ÁÈ¡¶àÉÙÊı¾İ£¬Ëã×÷Ò»´ÎÇëÇó
- * ²ÎÊı: @clientÖ¸Õë
- * ËµÃ÷: 
- *       1. ±ØÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:Ğ­Òé³¤¶È; Ê§°Ü:
+ * åŠŸèƒ½: åŠ¨æ€çº¦å®šmossadå’Œclientä¹‹é—´çš„é€šä¿¡åè®®é•¿åº¦ï¼Œå³mossadåº”è¯¥è¯»å–å¤šå°‘æ•°æ®ï¼Œç®—ä½œä¸€æ¬¡è¯·æ±‚
+ * å‚æ•°: @clientæŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. å¿…é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:åè®®é•¿åº¦; å¤±è´¥:
  **/
 int msd_handle_prot_len(msd_conn_client_t *client) 
 {
@@ -162,15 +162,15 @@ int msd_handle_prot_len(msd_conn_client_t *client)
 }
 
 /**
- * ¹¦ÄÜ: Ö÷ÒªµÄÓÃ»§Âß¼­
- * ²ÎÊı: @clientÖ¸Õë
- * ËµÃ÷: 
- *       1. ±ØÑ¡º¯Êı
- *       2. Ã¿´Î´ÓrecvbufÖĞÓ¦¸ÃÈ¡µÃrecv_prot_len³¤¶ÈµÄÊı¾İ£¬×÷ÎªÒ»¸öÍêÕûÇëÇó
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
- *       MSD_OK: ³É¹¦£¬²¢±£³ÖÁ¬½Ó¼ÌĞø
- *       MSD_END:³É¹¦£¬²»ÔÚ¼ÌĞø£¬mossad½«responseĞ´»Øclientºó£¬×Ô¶¯¹Ø±ÕÁ¬½Ó
- *       MSD_ERR:Ê§°Ü£¬mossad¹Ø±ÕÁ¬½Ó
+ * åŠŸèƒ½: ä¸»è¦çš„ç”¨æˆ·é€»è¾‘
+ * å‚æ•°: @clientæŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. å¿…é€‰å‡½æ•°
+ *       2. æ¯æ¬¡ä»recvbufä¸­åº”è¯¥å–å¾—recv_prot_lené•¿åº¦çš„æ•°æ®ï¼Œä½œä¸ºä¸€ä¸ªå®Œæ•´è¯·æ±‚
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
+ *       MSD_OK: æˆåŠŸï¼Œå¹¶ä¿æŒè¿æ¥ç»§ç»­
+ *       MSD_END:æˆåŠŸï¼Œä¸åœ¨ç»§ç»­ï¼Œmossadå°†responseå†™å›clientåï¼Œè‡ªåŠ¨å…³é—­è¿æ¥
+ *       MSD_ERR:å¤±è´¥ï¼Œmossadå…³é—­è¿æ¥
  **/
 int msd_handle_process(msd_conn_client_t *client) 
 {
@@ -180,10 +180,10 @@ int msd_handle_process(msd_conn_client_t *client)
     back_end_t *back_end;
     msd_dlist_t *dlist;
     
-    /* »ØÏÔĞÅÏ¢Ğ´Èësendbuf */
+    /* å›æ˜¾ä¿¡æ¯å†™å…¥sendbuf */
     msd_str_cat_len(&(client->sendbuf), "ok", 2);
     /*
-    // ×¢²á»ØĞ´ÊÂ¼ş -- ½»ÓÉMossad¿ò¼ÜÊµÏÖ
+    // æ³¨å†Œå›å†™äº‹ä»¶ -- äº¤ç”±Mossadæ¡†æ¶å®ç°
     if (msd_ae_create_file_event(worker->t_ael, client->fd, MSD_AE_WRITABLE,
                 msd_write_to_client, client) == MSD_ERR) 
     {
@@ -194,13 +194,13 @@ int msd_handle_process(msd_conn_client_t *client)
     */
     
     worker = msd_get_worker(client->worker_id);
-    /* ×¢²áºóĞ´ÊÂ¼ş */
+    /* æ³¨å†Œåå†™äº‹ä»¶ */
     dlist = ((pas_worker_data_t *)worker->priv_data)->back_end_list;
 	msd_dlist_rewind(dlist, &dlist_iter);
     while ((node = msd_dlist_next(&dlist_iter))) 
     {
         back_end = node->value;  
-        /* ĞÅÏ¢Ğ´Èësendbuf */
+        /* ä¿¡æ¯å†™å…¥sendbuf */
         msd_str_cat_len(&(back_end->sendbuf), client->recvbuf->buf, client->recv_prot_len);
         if (back_end->status!=B_BAD 
             && back_end->fd != -1 
@@ -216,7 +216,7 @@ int msd_handle_process(msd_conn_client_t *client)
 }
 
 /*
- *·µ»Ø: ³É¹¦£¬Ò»¸öºó¶Ë¾ä±ú;Ê§°Ü:NULL
+ *è¿”å›: æˆåŠŸï¼Œä¸€ä¸ªåç«¯å¥æŸ„;å¤±è´¥:NULL
  */
 static back_end_t* deal_one_back_line(msd_conf_t *conf, const char *back_end_name, msd_thread_worker_t *worker)
 {
@@ -311,18 +311,18 @@ deal_one_err:
 }
 
 /*
- * ÅĞ¶Ï·Ç×èÈûConnect³É¹¦µÄÒ»°ã²½Öè£º
+ * åˆ¤æ–­éé˜»å¡ConnectæˆåŠŸçš„ä¸€èˆ¬æ­¥éª¤ï¼š
  *
- * 1.½«´ò¿ªµÄsocketÉèÎª·Ç×èÈûµÄ,¿ÉÒÔÓÃfcntl(socket, F_SETFL, O_NDELAY)Íê³É(ÓĞµÄÏµÍ³ÓÃFNEDLAYÒ²¿É).
- * 2.·¢connectµ÷ÓÃ,ÕâÊ±·µ»Ø-1,µ«ÊÇerrno±»ÉèÎªEINPROGRESS,Òâ¼´connectÈÔ¾ÉÔÚ½øĞĞ»¹Ã»ÓĞÍê³É.
- * 3.½«´ò¿ªµÄsocketÉè½ø±»¼àÊÓµÄ¿ÉĞ´(×¢Òâ²»ÊÇ¿É¶Á)ÎÄ¼ş¼¯ºÏÓÃselect½øĞĞ¼àÊÓ,Èç¹û¿ÉĞ´,
- *   ÓÃgetsockopt(socket, SOL_SOCKET, SO_ERROR, &error, sizeof(int));À´µÃµ½errorµÄÖµ,Èç¹ûÎªÁã,Ôòconnect³É¹¦.
+ * 1.å°†æ‰“å¼€çš„socketè®¾ä¸ºéé˜»å¡çš„,å¯ä»¥ç”¨fcntl(socket, F_SETFL, O_NDELAY)å®Œæˆ(æœ‰çš„ç³»ç»Ÿç”¨FNEDLAYä¹Ÿå¯).
+ * 2.å‘connectè°ƒç”¨,è¿™æ—¶è¿”å›-1,ä½†æ˜¯errnoè¢«è®¾ä¸ºEINPROGRESS,æ„å³connectä»æ—§åœ¨è¿›è¡Œè¿˜æ²¡æœ‰å®Œæˆ.
+ * 3.å°†æ‰“å¼€çš„socketè®¾è¿›è¢«ç›‘è§†çš„å¯å†™(æ³¨æ„ä¸æ˜¯å¯è¯»)æ–‡ä»¶é›†åˆç”¨selectè¿›è¡Œç›‘è§†,å¦‚æœå¯å†™,
+ *   ç”¨getsockopt(socket, SOL_SOCKET, SO_ERROR, &error, sizeof(int));æ¥å¾—åˆ°errorçš„å€¼,å¦‚æœä¸ºé›¶,åˆ™connectæˆåŠŸ.
  *
- * added by huaqi 2015-8-12 ĞÂÔöÁËÒ»¸ö½âÊÍ£¬¹ØÓÚMSG_PEEKÕâ¶ÎµÄ±ØÒªĞÔ£º
- *   ÒòÎª×¢²áÁËread_from_back¶ÁÊÂ¼ş£¬ËùÒÔ¸Ğ¾õcose_one_avial_fdÖĞµÄMSG_PEEKÕâÒ»¿éÃ»Ê²Ã´Ì«´ó±ØÒª¡£
- *   ÆäÊµ£¬ÔÚÒ»ÖÖÌØÊâ³¡¾°ÏÂÃæ£¬»¹ÊÇÓĞÒ»¶¨±ØÒªĞÔµÄ¡£±ÈÈç£¬back_endÓÉÓÚÄ³ÖÖÔ­Òò²»¶ÁÈ¡£¬Ôò»á³öÏÖTCP×èÈû
- *   ´ËÊ±Èç¹û¶ÏÍø£¬²¢ÇÒbackendÖØÆô£¬È»ºóÍøÂç»Ö¸´¡£ÓÉÓÚTCP×èÈû£¬ËùÒÔÓÀÔ¶²»»á´¥·¢write£¬½ø¶øÓÀÔ¶ÊÕ²»µ½RST°ü
- *   Ò²ÓÀÔ¶²»»á´¥·¢read_from_back. ´ËÊ±¾ÍĞèÒªÒ»ÖÖÖ÷¶¯Ì½²âµÄÂß¼­
+ * added by huaqi 2015-8-12 æ–°å¢äº†ä¸€ä¸ªè§£é‡Šï¼Œå…³äºMSG_PEEKè¿™æ®µçš„å¿…è¦æ€§ï¼š
+ *   å› ä¸ºæ³¨å†Œäº†read_from_backè¯»äº‹ä»¶ï¼Œæ‰€ä»¥æ„Ÿè§‰cose_one_avial_fdä¸­çš„MSG_PEEKè¿™ä¸€å—æ²¡ä»€ä¹ˆå¤ªå¤§å¿…è¦ã€‚
+ *   å…¶å®ï¼Œåœ¨ä¸€ç§ç‰¹æ®Šåœºæ™¯ä¸‹é¢ï¼Œè¿˜æ˜¯æœ‰ä¸€å®šå¿…è¦æ€§çš„ã€‚æ¯”å¦‚ï¼Œback_endç”±äºæŸç§åŸå› ä¸è¯»å–ï¼Œåˆ™ä¼šå‡ºç°TCPé˜»å¡
+ *   æ­¤æ—¶å¦‚æœæ–­ç½‘ï¼Œå¹¶ä¸”backendé‡å¯ï¼Œç„¶åç½‘ç»œæ¢å¤ã€‚ç”±äºTCPé˜»å¡ï¼Œæ‰€ä»¥æ°¸è¿œä¸ä¼šè§¦å‘writeï¼Œè¿›è€Œæ°¸è¿œæ”¶ä¸åˆ°RSTåŒ…
+ *   ä¹Ÿæ°¸è¿œä¸ä¼šè§¦å‘read_from_back. æ­¤æ—¶å°±éœ€è¦ä¸€ç§ä¸»åŠ¨æ¢æµ‹çš„é€»è¾‘
  */
 static int chose_one_avail_fd(back_end_t *back_end, msd_thread_worker_t *worker)
 {
@@ -355,7 +355,7 @@ again:
         i = 0;
         FD_ZERO(&wset);  
         tval.tv_sec  = 0;  
-        tval.tv_usec = 50000; //50ºÁÃë
+        tval.tv_usec = 50000; //50æ¯«ç§’
         while ((node = msd_dlist_next(&dlist_iter))) 
         {
             addr = node->value;
@@ -383,8 +383,8 @@ again:
             {  
                 len = sizeof(error);  
                 code = getsockopt(fd_arr[i], SOL_SOCKET, SO_ERROR, &error, &len);  
-                /* Èç¹û·¢Éú´íÎó£¬SolarisÊµÏÖµÄgetsockopt·µ»Ø-1£¬°Ñpending errorÉèÖÃ¸øerrno. BerkeleyÊµÏÖµÄ 
-                 * getsockopt·µ»Ø0, pending error·µ»Ø¸øerror. ĞèÒª´¦ÀíÕâÁ½ÖÖÇé¿ö */  
+                /* å¦‚æœå‘ç”Ÿé”™è¯¯ï¼ŒSolariså®ç°çš„getsockoptè¿”å›-1ï¼ŒæŠŠpending errorè®¾ç½®ç»™errno. Berkeleyå®ç°çš„ 
+                 * getsockoptè¿”å›0, pending errorè¿”å›ç»™error. éœ€è¦å¤„ç†è¿™ä¸¤ç§æƒ…å†µ */  
                 if (code < 0 || error) 
                 {  
                     MSD_WARNING_LOG("Fd:%d not ok!", fd_arr[i]);
@@ -394,7 +394,7 @@ again:
                 }
                 else
                 {
-                    /* error==0, ·¢ÏÖ¿ÉÓÃÁ¬½Ó */
+                    /* error==0, å‘ç°å¯ç”¨è¿æ¥ */
                     find_flag        = 1;
                     back_end->idx    = i;
                     back_end->fd     = fd_arr[i];
@@ -420,7 +420,7 @@ again:
         }
         else
         {
-            //¹Ø±ÕÃ»ÓĞÑ¡ÖĞµÄÈ«²¿fd
+            //å…³é—­æ²¡æœ‰é€‰ä¸­çš„å…¨éƒ¨fd
             for(i=0; i<address_len; i++)
             {
                 if(back_end->fd != fd_arr[i]) 
@@ -430,7 +430,7 @@ again:
                 }
             }    
             
-            //×¢²á¶ÁÈ¡º¯Êı
+            //æ³¨å†Œè¯»å–å‡½æ•°
             if (msd_ae_create_file_event(worker->t_ael, back_end->fd, MSD_AE_READABLE,
                             read_from_back, worker) == MSD_ERR) 
             {
@@ -443,22 +443,22 @@ again:
     else
     {
         /*
-         * ÔÚUNIX/LINUXÏÂ£¬·Ç×èÈûÄ£Ê½SOCKET¿ÉÒÔ²ÉÓÃrecv+MSG_PEEKµÄ·½Ê½½øĞĞÅĞ¶Ï£¬ÆäÖĞMSG_PEEK±£Ö¤ÁË½ö½ö½øĞĞ×´Ì¬ÅĞ¶Ï£¬¶ø²»Ó°ÏìÊı¾İ½ÓÊÕ
-         * ¶ÔÓÚÖ÷¶¯¹Ø±ÕµÄSOCKET, recv·µ»Ø-1£¬¶øÇÒerrno±»ÖÃÎª9£¨#define EBADF   9  // Bad file number £©
-         * »ò104 £¨#define ECONNRESET 104 // Connection reset by peer £©
-         * ¶ÔÓÚ±»¶¯¹Ø±ÕµÄSOCKET,recv·µ»Ø0£¬¶øÇÒerrno±»ÖÃÎª11£¨#define EWOULDBLOCK EAGAIN // Operation would block £©
-         * ¶ÔÕı³£µÄSOCKET, Èç¹ûÓĞ½ÓÊÕÊı¾İ£¬Ôò·µ»Ø>0, ·ñÔò·µ»Ø-1£¬¶øÇÒerrno±»ÖÃÎª11£¨#define EWOULDBLOCK EAGAIN // Operation would block £©
-         * Òò´Ë¶ÔÓÚ¼òµ¥µÄ×´Ì¬ÅĞ¶Ï£¨²»¹ı¶à¿¼ÂÇÒì³£Çé¿ö£©£¬
-         * recv·µ»Ø>0£¬   Õı³£
-         * ·µ»Ø-1£¬¶øÇÒerrno±»ÖÃÎª11  Õı³£
-         * ÆäËüÇé¿ö    ¹Ø±Õ
+         * åœ¨UNIX/LINUXä¸‹ï¼Œéé˜»å¡æ¨¡å¼SOCKETå¯ä»¥é‡‡ç”¨recv+MSG_PEEKçš„æ–¹å¼è¿›è¡Œåˆ¤æ–­ï¼Œå…¶ä¸­MSG_PEEKä¿è¯äº†ä»…ä»…è¿›è¡ŒçŠ¶æ€åˆ¤æ–­ï¼Œè€Œä¸å½±å“æ•°æ®æ¥æ”¶
+         * å¯¹äºä¸»åŠ¨å…³é—­çš„SOCKET, recvè¿”å›-1ï¼Œè€Œä¸”errnoè¢«ç½®ä¸º9ï¼ˆ#define EBADF   9  // Bad file number ï¼‰
+         * æˆ–104 ï¼ˆ#define ECONNRESET 104 // Connection reset by peer ï¼‰
+         * å¯¹äºè¢«åŠ¨å…³é—­çš„SOCKET,recvè¿”å›0ï¼Œè€Œä¸”errnoè¢«ç½®ä¸º11ï¼ˆ#define EWOULDBLOCK EAGAIN // Operation would block ï¼‰
+         * å¯¹æ­£å¸¸çš„SOCKET, å¦‚æœæœ‰æ¥æ”¶æ•°æ®ï¼Œåˆ™è¿”å›>0, å¦åˆ™è¿”å›-1ï¼Œè€Œä¸”errnoè¢«ç½®ä¸º11ï¼ˆ#define EWOULDBLOCK EAGAIN // Operation would block ï¼‰
+         * å› æ­¤å¯¹äºç®€å•çš„çŠ¶æ€åˆ¤æ–­ï¼ˆä¸è¿‡å¤šè€ƒè™‘å¼‚å¸¸æƒ…å†µï¼‰ï¼Œ
+         * recvè¿”å›>0ï¼Œ   æ­£å¸¸
+         * è¿”å›-1ï¼Œè€Œä¸”errnoè¢«ç½®ä¸º11  æ­£å¸¸
+         * å…¶å®ƒæƒ…å†µ    å…³é—­
          */
-        //Ì½²âÏÖÓĞfd¿ÉÓÃĞÔ
+        //æ¢æµ‹ç°æœ‰fdå¯ç”¨æ€§
         memset(buf, 0, 2);
         ret = recv(back_end->fd, buf, 1, MSG_PEEK);
         if(ret == 0)
         {
-            //¶Ô·½¹Ø±ÕÁ¬½Ó£¬Æô¶¯ÌôÑ¡Á÷³Ì
+            //å¯¹æ–¹å…³é—­è¿æ¥ï¼Œå¯åŠ¨æŒ‘é€‰æµç¨‹
             node = msd_dlist_index(back_end->address_list, back_end->idx);
             addr = node->value; 
             MSD_WARNING_LOG("Peer close. Current fd:%d not ok, IP:%s, Port:%d, chose again!", back_end->fd, addr->back_ip, addr->back_port);
@@ -477,7 +477,7 @@ again:
             }
             else
             {
-                //Î´Öª´íÎó£¬Æô¶¯ÌôÑ¡Á÷³Ì
+                //æœªçŸ¥é”™è¯¯ï¼Œå¯åŠ¨æŒ‘é€‰æµç¨‹
                 node = msd_dlist_index(back_end->address_list, back_end->idx);
                 addr = node->value; 
                 MSD_WARNING_LOG("Unkonw error:%s. Current fd:%d not ok, Ip%s, Port:%d, chose again!",strerror(errno), back_end->fd, addr->back_ip, addr->back_port);
@@ -535,12 +535,12 @@ static void send_to_back(msd_ae_event_loop *el, int fd, void *privdata, int mask
     back_end->access_time = time(NULL);
     if (nwrite < 0) 
     {
-        if (errno == EAGAIN) /* ·Ç×èÈûfdĞ´Èë£¬¿ÉÄÜÔİ²»¿ÉÓÃ */
+        if (errno == EAGAIN) /* éé˜»å¡fdå†™å…¥ï¼Œå¯èƒ½æš‚ä¸å¯ç”¨ */
         {
             MSD_WARNING_LOG("Write to back temporarily unavailable! fd:%d. IP:%s, Port:%d", back_end->fd, addr->back_ip, addr->back_port);
             nwrite = 0;
         } 
-        else if(errno==EINTR)/* ÔâÓöÖĞ¶Ï */
+        else if(errno==EINTR)/* é­é‡ä¸­æ–­ */
         {  
             MSD_WARNING_LOG("Write to back was interupted! fd:%d. IP:%s, Port:%d", back_end->fd, addr->back_ip, addr->back_port);
             nwrite = 0; 
@@ -553,15 +553,15 @@ static void send_to_back(msd_ae_event_loop *el, int fd, void *privdata, int mask
     }
     MSD_INFO_LOG("Write to back! fd:%d. IP:%s, Port:%d. content:%s", back_end->fd, addr->back_ip, addr->back_port, back_end->sendbuf->buf);
 
-    /* ½«ÒÑ¾­Ğ´ÍêµÄÊı¾İ£¬´ÓsendbufÖĞ²Ã¼ôµô */
+    /* å°†å·²ç»å†™å®Œçš„æ•°æ®ï¼Œä»sendbufä¸­è£å‰ªæ‰ */
     if(MSD_OK != msd_str_range(back_end->sendbuf, nwrite, back_end->sendbuf->len-1))
     {
-        /* Èç¹ûÒÑ¾­Ğ´ÍêÁË,Ôòwrite_len == back_end->sendbuf->len¡£Ôòmsd_str_range·µ»ØNONEED */
+        /* å¦‚æœå·²ç»å†™å®Œäº†,åˆ™write_len == back_end->sendbuf->lenã€‚åˆ™msd_str_rangeè¿”å›NONEED */
         msd_str_clear(back_end->sendbuf);
     }
 
-     /* Ë®Æ½´¥·¢£¬Èç¹ûsendbufÒÑ¾­Îª¿Õ£¬ÔòÉ¾³ıĞ´ÊÂ¼ş£¬·ñÔò»á²»¶Ï´¥·¢
-       * ×¢²áĞ´ÊÂ¼şÓĞsoÖĞµÄhandle_processÈ¥Íê³É */
+     /* æ°´å¹³è§¦å‘ï¼Œå¦‚æœsendbufå·²ç»ä¸ºç©ºï¼Œåˆ™åˆ é™¤å†™äº‹ä»¶ï¼Œå¦åˆ™ä¼šä¸æ–­è§¦å‘
+       * æ³¨å†Œå†™äº‹ä»¶æœ‰soä¸­çš„handle_processå»å®Œæˆ */
     if(back_end->sendbuf->len == 0)
     {
         msd_ae_delete_file_event(el, back_end->fd, MSD_AE_WRITABLE);
@@ -597,7 +597,7 @@ static void read_from_back(msd_ae_event_loop *el, int fd, void *privdata, int ma
     back_end->access_time = time(NULL);
     if (nread == -1) 
     {
-        /* ·Ç×èÈûµÄfd£¬¶ÁÈ¡²»»á×èÈû£¬Èç¹ûÎŞÄÚÈİ¿É¶Á£¬Ôòerrno==EAGAIN */
+        /* éé˜»å¡çš„fdï¼Œè¯»å–ä¸ä¼šé˜»å¡ï¼Œå¦‚æœæ— å†…å®¹å¯è¯»ï¼Œåˆ™errno==EAGAIN */
         if (errno == EAGAIN) 
         {
             MSD_WARNING_LOG("Read back [%s:%d] eagain: %s",

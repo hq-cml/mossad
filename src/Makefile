@@ -45,10 +45,10 @@ msd_signal.o: msd_log.c msd_lock.c
 
 .PHONY :clean install
 install:
-	install $(TARGET) ../bin/echo/
-	install mossad.conf.default ../bin/echo/mossad.conf
-	#install $(TARGET) ../bin/httpd/
-	#install mossad.conf.default ../bin/httpd/mossad.conf
+	#install $(TARGET) ../bin/echo/
+	#install mossad.conf.default ../bin/echo/mossad.conf
+	install $(TARGET) ../bin/httpd/
+	install mossad.conf.default ../bin/httpd/mossad.conf
 
 clean:
 	rm -f *.o

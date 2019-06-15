@@ -7,7 +7,7 @@
  *
  *    Filename :  mongo_saver.c
  * 
- * Description :  ½ÓÊÕÊı×é´æ´¢ÓÚmongoDB
+ * Description :  æ¥æ”¶æ•°ç»„å­˜å‚¨äºmongoDB
  * 
  *     Version :  1.0.0
  * 
@@ -23,9 +23,9 @@ static int mongo_destroy(mongoc_client_t *cli, mongoc_collection_t *col);
 
 
 /**
- * ¹¦ÄÜ: Á¬½Ómongo£¬³õÊ¼»¯clientºÍcollection¾ä±ú
- * ²ÎÊı: @data:wokerË½ÓĞÊı¾İ
- * ·µ»Ø:³É¹¦:0, Ê§°Ü:-x
+ * åŠŸèƒ½: è¿æ¥mongoï¼Œåˆå§‹åŒ–clientå’Œcollectionå¥æŸ„
+ * å‚æ•°: @data:wokerç§æœ‰æ•°æ®
+ * è¿”å›:æˆåŠŸ:0, å¤±è´¥:-x
  **/
 int mongo_connect(void *data, mongoc_client_t **cli, mongoc_collection_t **col)
 {
@@ -35,8 +35,8 @@ int mongo_connect(void *data, mongoc_client_t **cli, mongoc_collection_t **col)
     mongoc_init ();    
     snprintf(address, 50, "mongodb://%s:%s/", worker_data->mongo_ip->buf, worker_data->mongo_port->buf);
 
-    //TODO Ê§°Ü´¦Àí£¬±ÈÈç³¬Ê±ÎÊÌâ
-    //TODO ¹Ù·½ÎÄµµÌá¼°mongoc_client_new²»¿ÉÖØÈë£¬ĞèÒª½øÒ»²½ĞŞ¸Ä³É¿ÉÖØÈë°æ±¾
+    //TODO å¤±è´¥å¤„ç†ï¼Œæ¯”å¦‚è¶…æ—¶é—®é¢˜
+    //TODO å®˜æ–¹æ–‡æ¡£æåŠmongoc_client_newä¸å¯é‡å…¥ï¼Œéœ€è¦è¿›ä¸€æ­¥ä¿®æ”¹æˆå¯é‡å…¥ç‰ˆæœ¬
     *cli = mongoc_client_new(address);
     *col = mongoc_client_get_collection(*cli, worker_data->mongo_db->buf, worker_data->mongo_table->buf);
     return MSD_OK;
@@ -44,11 +44,11 @@ int mongo_connect(void *data, mongoc_client_t **cli, mongoc_collection_t **col)
 }
 
 /**
- * ¹¦ÄÜ: mongoµÄ´æ´¢º¯Êı
- * ²ÎÊı: @conf
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: mongoçš„å­˜å‚¨å‡½æ•°
+ * å‚æ•°: @conf
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 int mongo_save(mongoc_collection_t *col, const char* hostname, const char* item_id, const char* stime, const char* value)
 {
@@ -104,8 +104,8 @@ void dump_item_black_list(msd_hash_t *item_black_list)
 }
 
 /**
- * ¹¦ÄÜ: dump³öhost_nodelist_hashµÄ½á¹¹µÄÒ»¸öentry
- * ËµÃ÷: Ò²¿ÉÒÔÓÃÓÚdump³öbaseitem_cluitem_hashµÄ½á¹¹µÄÒ»¸öentry£¬ÒòÎªÕâÁ½ÖÖhashµÄ½á¹¹ÏàÍ¬
+ * åŠŸèƒ½: dumpå‡ºhost_nodelist_hashçš„ç»“æ„çš„ä¸€ä¸ªentry
+ * è¯´æ˜: ä¹Ÿå¯ä»¥ç”¨äºdumpå‡ºbaseitem_cluitem_hashçš„ç»“æ„çš„ä¸€ä¸ªentryï¼Œå› ä¸ºè¿™ä¸¤ç§hashçš„ç»“æ„ç›¸åŒ
  **/
 int _item_black_hash_print_entry(const msd_hash_entry_t *he, void *userptr)
 {
@@ -114,11 +114,11 @@ int _item_black_hash_print_entry(const msd_hash_entry_t *he, void *userptr)
 }
 
 /**
- * ¹¦ÄÜ: ³õÊ¼»¯»Øµ÷£¬³õÊ¼»¯Back_end
- * ²ÎÊı: @conf
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: åˆå§‹åŒ–å›è°ƒï¼Œåˆå§‹åŒ–Back_end
+ * å‚æ•°: @conf
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 int msd_handle_init(void *conf) 
 {
@@ -127,11 +127,11 @@ int msd_handle_init(void *conf)
 }
 
 /**
- * ¹¦ÄÜ: µ¥¸öÏß³Ì³õÊ¼»¯»Øµ÷
- * ²ÎÊı: @worker
- * ËµÃ÷: 
- *       1. ¿ÉÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
+ * åŠŸèƒ½: å•ä¸ªçº¿ç¨‹åˆå§‹åŒ–å›è°ƒ
+ * å‚æ•°: @worker
+ * è¯´æ˜: 
+ *       1. å¯é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
  **/
 int msd_handle_worker_init(void *conf, void *arg)
 {
@@ -169,7 +169,7 @@ int msd_handle_worker_init(void *conf, void *arg)
     
     worker_data->worker = worker;
  
-    //³õÊ¼»¯ºÚÃûµ¥
+    //åˆå§‹åŒ–é»‘åå•
     if(!(worker_data->item_black_list = msd_hash_create(16)))
     {
         MSD_ERROR_LOG("Msd_hash_create Failed!");
@@ -189,11 +189,11 @@ int msd_handle_worker_init(void *conf, void *arg)
 }
 
 /**
- * ¹¦ÄÜ: ¶¯Ì¬Ô¼¶¨mossadºÍclientÖ®¼äµÄÍ¨ĞÅĞ­Òé³¤¶È£¬¼´mossadÓ¦¸Ã¶ÁÈ¡¶àÉÙÊı¾İ£¬Ëã×÷Ò»´ÎÇëÇó
- * ²ÎÊı: @clientÖ¸Õë
- * ËµÃ÷: 
- *       1. ±ØÑ¡º¯Êı
- * ·µ»Ø:³É¹¦:Ğ­Òé³¤¶È; Ê§°Ü:
+ * åŠŸèƒ½: åŠ¨æ€çº¦å®šmossadå’Œclientä¹‹é—´çš„é€šä¿¡åè®®é•¿åº¦ï¼Œå³mossadåº”è¯¥è¯»å–å¤šå°‘æ•°æ®ï¼Œç®—ä½œä¸€æ¬¡è¯·æ±‚
+ * å‚æ•°: @clientæŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. å¿…é€‰å‡½æ•°
+ * è¿”å›:æˆåŠŸ:åè®®é•¿åº¦; å¤±è´¥:
  **/
 int msd_handle_prot_len(msd_conn_client_t *client) 
 {
@@ -227,15 +227,15 @@ int msd_handle_prot_len(msd_conn_client_t *client)
 }
 
 /**
- * ¹¦ÄÜ: Ö÷ÒªµÄÓÃ»§Âß¼­
- * ²ÎÊı: @clientÖ¸Õë
- * ËµÃ÷: 
- *       1. ±ØÑ¡º¯Êı
- *       2. Ã¿´Î´ÓrecvbufÖĞÓ¦¸ÃÈ¡µÃrecv_prot_len³¤¶ÈµÄÊı¾İ£¬×÷ÎªÒ»¸öÍêÕûÇëÇó
- * ·µ»Ø:³É¹¦:0; Ê§°Ü:-x
- *       MSD_OK: ³É¹¦£¬²¢±£³ÖÁ¬½Ó¼ÌĞø
- *       MSD_END:³É¹¦£¬²»ÔÚ¼ÌĞø£¬mossad½«responseĞ´»Øclientºó£¬×Ô¶¯¹Ø±ÕÁ¬½Ó
- *       MSD_ERR:Ê§°Ü£¬mossad¹Ø±ÕÁ¬½Ó
+ * åŠŸèƒ½: ä¸»è¦çš„ç”¨æˆ·é€»è¾‘
+ * å‚æ•°: @clientæŒ‡é’ˆ
+ * è¯´æ˜: 
+ *       1. å¿…é€‰å‡½æ•°
+ *       2. æ¯æ¬¡ä»recvbufä¸­åº”è¯¥å–å¾—recv_prot_lené•¿åº¦çš„æ•°æ®ï¼Œä½œä¸ºä¸€ä¸ªå®Œæ•´è¯·æ±‚
+ * è¿”å›:æˆåŠŸ:0; å¤±è´¥:-x
+ *       MSD_OK: æˆåŠŸï¼Œå¹¶ä¿æŒè¿æ¥ç»§ç»­
+ *       MSD_END:æˆåŠŸï¼Œä¸åœ¨ç»§ç»­ï¼Œmossadå°†responseå†™å›clientåï¼Œè‡ªåŠ¨å…³é—­è¿æ¥
+ *       MSD_ERR:å¤±è´¥ï¼Œmossadå…³é—­è¿æ¥
  **/
 int msd_handle_process(msd_conn_client_t *client) 
 {
@@ -264,7 +264,7 @@ int msd_handle_process(msd_conn_client_t *client)
     
     //MSD_INFO_LOG("The Full Packet:%s.Len:%d", content_buff, client->recv_prot_len);
     
-    // ¿à±ÆµÄjson½âÎö£¬¾ÍÄ¿Ç°¿´£¬Ö»ÓĞcJSON_ParseµÄ·µ»Ø¶ÔÏóĞèÒªÊÍ·Å //
+    // è‹¦é€¼çš„jsonè§£æï¼Œå°±ç›®å‰çœ‹ï¼Œåªæœ‰cJSON_Parseçš„è¿”å›å¯¹è±¡éœ€è¦é‡Šæ”¾ //
     cJSON *p_root = cJSON_Parse(content_buff+10);
     if(!p_root) 
         goto json_null;
@@ -303,14 +303,14 @@ int msd_handle_process(msd_conn_client_t *client)
 
         //MSD_INFO_LOG("item_id:%s\n", p_item_id);
         //MSD_INFO_LOG("value:%s\n", p_value);
-        //ºÚÃûµ¥¼à¿ØÏî£¬Ö±½ÓºöÂÔÖ®
+        //é»‘åå•ç›‘æ§é¡¹ï¼Œç›´æ¥å¿½ç•¥ä¹‹
         if((msd_hash_get_val(((saver_worker_data_t *)worker->priv_data)->item_black_list, p_item_id)))
         {
             MSD_DEBUG_LOG("Black List Item! Host:%s, Item:%s, Value:%s", p_hostname, p_item_id, p_value);
             continue;
         }
         
-        //´æ´¢
+        //å­˜å‚¨
         if(MSD_OK != mongo_save(col, p_hostname, p_item_id, p_time, p_value)){
             goto json_null;
         }
@@ -319,7 +319,7 @@ int msd_handle_process(msd_conn_client_t *client)
     mongo_destroy(cli, col);
     cJSON_Delete(p_root);
 
-    // »ØÏÔĞÅÏ¢Ğ´Èësendbuf 
+    // å›æ˜¾ä¿¡æ¯å†™å…¥sendbuf 
     msd_str_cat_len(&(client->sendbuf), "ok", 2);
     return MSD_OK;
     
@@ -328,8 +328,8 @@ json_null:
     free(content_buff);
     mongo_destroy(cli, col);
     cJSON_Delete(p_root);
-    // »ØÏÔĞÅÏ¢Ğ´Èësendbuf 
+    // å›æ˜¾ä¿¡æ¯å†™å…¥sendbuf 
     msd_str_cat_len(&(client->sendbuf), "failed", 6);
-    // ÈÔ¾É·µ»ØOK, ²»¹Ø±ÕÁ¬½Ó
+    // ä»æ—§è¿”å›OK, ä¸å…³é—­è¿æ¥
     return MSD_OK; 
 }

@@ -25,15 +25,15 @@
 #include <bson.h>
 #include <mongoc.h>
   
-/* worker私有数据 */
+/* worker绉佹湁鏁版嵁 */
 typedef struct saver_worker_data{ 
     msd_str_t           *mongo_ip; 
     msd_str_t           *mongo_port;
     msd_str_t           *mongo_db; 
     msd_str_t           *mongo_table;
-    msd_thread_worker_t *worker;              /* worker_data所依附的worker句柄 */
+    msd_thread_worker_t *worker;              /* worker_data鎵�渚濋檮鐨剋orker鍙ユ焺 */
     
-    msd_hash_t          *item_black_list;     /* 监控项的黑名单，名单中的item_id自动忽略 */
+    msd_hash_t          *item_black_list;     /* 鐩戞帶椤圭殑榛戝悕鍗曪紝鍚嶅崟涓殑item_id鑷姩蹇界暐 */
 }saver_worker_data_t;
 
 #endif
